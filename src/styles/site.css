@@ -87,7 +87,9 @@
   text-align: center;
   color: #fff;
   overflow: hidden;
-  background: #1d2530;
+  /* Warm bronze rather than slate. This shows through wherever the photograph
+     does not reach, and is the whole backdrop until one is added. */
+  background: linear-gradient(158deg, #5c5340 0%, #3d382a 52%, #29251b 100%);
 }
 
 .hero__img {
@@ -102,12 +104,13 @@
 .hero__scrim {
   position: absolute;
   inset: 0;
+  /* Warm near-black, so darkening the photograph never cools it towards grey. */
   background: linear-gradient(
     180deg,
-    rgba(20, 26, 34, 0.5) 0%,
-    rgba(20, 26, 34, 0.18) 35%,
-    rgba(20, 26, 34, 0.42) 75%,
-    rgba(20, 26, 34, 0.72) 100%
+    rgba(38, 31, 21, 0.48) 0%,
+    rgba(38, 31, 21, 0.16) 35%,
+    rgba(38, 31, 21, 0.4) 75%,
+    rgba(38, 31, 21, 0.7) 100%
   );
 }
 
@@ -500,8 +503,10 @@
   min-height: 240px;
 }
 
-/* In the hero the label would sit right behind the names, so drop it to the
-   bottom corner and keep it quiet. It disappears entirely once the photo is in. */
+/* In the hero the pale stripes would sit under the scrim and read as flat grey,
+   so here the pattern is gold on the warm backdrop instead. The label drops to
+   the bottom corner rather than sitting behind the names. Both disappear
+   entirely once the photograph is in place. */
 .hero .placeholder {
   position: absolute;
   inset: 0;
@@ -509,6 +514,11 @@
   place-items: end start;
   text-align: left;
   padding: 1.25rem;
-  opacity: 0.6;
   font-size: 0.72rem;
+  color: rgba(255, 250, 240, 0.55);
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(201, 171, 104, 0.13) 0 14px,
+    rgba(201, 171, 104, 0.03) 14px 28px
+  );
 }

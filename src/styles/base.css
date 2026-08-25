@@ -373,13 +373,6 @@ a {
 
 /* --- Cards --------------------------------------------------------------- */
 
-.card {
-  background: var(--paper);
-  border: 1px solid var(--stone-deep);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-soft);
-}
-
 .spinner {
   width: 20px;
   height: 20px;

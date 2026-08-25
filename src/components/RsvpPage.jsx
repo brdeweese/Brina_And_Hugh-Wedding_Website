@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { WEDDING, MEAL_OPTIONS, DIETARY_OPTIONS, SONG_REQUEST } from '../config.js'
 import { lookupParty, submitRsvp } from '../api.js'
 import { rememberCode } from '../inviteCode.js'
+import Monogram from './Monogram.jsx'
+import OrdinalDate from './OrdinalDate.jsx'
 
 const homeHref = import.meta.env.BASE_URL
 const detailsHref = `${import.meta.env.BASE_URL}details.html`
@@ -26,17 +28,30 @@ function buildAnswers(people) {
   }))
 }
 
+/** Laid out to echo the save the date: title, names stacked, date, place, seal. */
 function Header() {
   return (
-    <div className="rsvp__head">
-      <h1 className="rsvp__names">
-        {WEDDING.brideName} &amp; {WEDDING.groomName}
+    <header className="card__head">
+      <p className="card__kicker">Kindly reply</p>
+      <p className="card__for">to the wedding of</p>
+
+      <h1 className="card__names">
+        <span className="card__name">{WEDDING.brideName}</span>
+        <span className="card__amp">and</span>
+        <span className="card__name">{WEDDING.groomName}</span>
       </h1>
-      <p className="rsvp__meta">{WEDDING.dateLong}</p>
-      <a className="rsvp__home" href={homeHref}>
-        &#8592; Back to the website
-      </a>
-    </div>
+
+      <p className="card__date">
+        <OrdinalDate>{WEDDING.dateLong}</OrdinalDate>
+      </p>
+      <p className="card__place">
+        {WEDDING.venueName},
+        <br />
+        {WEDDING.venueArea}, {WEDDING.venueCity}
+      </p>
+
+      <Monogram className="card__seal" />
+    </header>
   )
 }
 
@@ -97,7 +112,7 @@ function CodeForm({ onFound }) {
 /* Step 2: answer for each seat                                               */
 /* -------------------------------------------------------------------------- */
 
-function GuestBlock({ answer, index, onChange }) {
+function GuestBlock({ answer, index, onChange, hideName }) {
   const set = (patch) => onChange(index, { ...answer, ...patch })
 
   const toggleDietary = (item) => {
@@ -112,7 +127,14 @@ function GuestBlock({ answer, index, onChange }) {
   return (
     <div className="guest" data-answer={answer.attending || 'none'}>
       {answer.is_plus_one && <span className="guest__tag">Plus one</span>}
-      <h3 className="guest__name">{heading}</h3>
+      {/* Skipped when the invitation is addressed to this one person, where the
+          heading above already carries their name and repeating it looks like a
+          mistake on a card this spare. */}
+      {hideName ? (
+        <h3 className="sr-only">{heading}</h3>
+      ) : (
+        <h3 className="guest__name">{heading}</h3>
+      )}
 
       {answer.is_plus_one && (
         <p className="hint" style={{ margin: '0 0 1rem' }}>
@@ -251,6 +273,7 @@ function RsvpForm({ party, onDone }) {
   }
 
   const alreadyAnswered = party.status && party.status !== 'pending'
+  const partyName = party.party_name.trim().toLowerCase()
 
   return (
     <form className="panel" onSubmit={onSubmit}>
@@ -264,7 +287,13 @@ function RsvpForm({ party, onDone }) {
       {error && <div className="error-box">{error}</div>}
 
       {answers.map((a, i) => (
-        <GuestBlock key={a.person_id} answer={a} index={i} onChange={onChange} />
+        <GuestBlock
+          key={a.person_id}
+          answer={a}
+          index={i}
+          onChange={onChange}
+          hideName={!a.is_plus_one && a.name.trim().toLowerCase() === partyName}
+        />
       ))}
 
       <p className="divider-note">
@@ -332,6 +361,8 @@ function Confirmation({ payload, onEdit }) {
         {declined ? 'Your reply is in' : 'We cannot wait to see you'}
       </h2>
       <p className="panel__sub" style={{ marginBottom: 0 }}>
+        {/* Plain text on purpose: the raised ordinal is for the display line at
+            the top of the card, and looks like a typo in running prose. */}
         {declined
           ? 'We are sorry you cannot make it, and thank you for letting us know. You will be missed on the day.'
           : `See you at ${WEDDING.venueName} on ${WEDDING.dateLong}.`}
@@ -364,9 +395,6 @@ function Confirmation({ payload, onEdit }) {
         <button className="btn btn--quiet" type="button" onClick={onEdit}>
           Change our reply
         </button>
-        <a className="btn btn--ghost" href={homeHref}>
-          Back to the website
-        </a>
       </div>
     </div>
   )
@@ -438,8 +466,16 @@ export default function RsvpPage() {
 
   return (
     <main className="rsvp">
-      <Header />
-      {body}
+      <div className="card">
+        <Header />
+        {body}
+        <footer className="card__foot">
+          <span className="card__rule" aria-hidden="true" />
+          <a className="card__back" href={homeHref}>
+            Back to the website
+          </a>
+        </footer>
+      </div>
     </main>
   )
 }
