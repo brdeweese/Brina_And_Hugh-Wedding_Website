@@ -1,0 +1,420 @@
+/* ---------------------------------------------------------------------------
+   Brina & Hugh - shared foundation.
+   Palette and type are lifted from the save the date: ivory paper, gold
+   calligraphy, letter-spaced serif capitals, watercolour greens.
+   --------------------------------------------------------------------------- */
+
+:root {
+  --ivory: #fcfaf6;
+  --paper: #ffffff;
+  --stone: #efe9de;
+  --stone-deep: #e2d9c8;
+
+  --gold: #b08d3e;
+  --gold-light: #c9ab68;
+  --gold-wash: #f6f0e2;
+
+  --sage: #7d8a6a;
+  --sage-wash: #eef1e8;
+
+  --ink: #2b2b2b;
+  --ink-soft: #55524c;
+  --muted: #8a857c;
+
+  --rose: #b4767f;
+  --rose-wash: #f8eff0;
+
+  --font-display: 'Cormorant Garamond', 'Times New Roman', serif;
+  --font-script: 'Great Vibes', 'Snell Roundhand', cursive;
+  --font-ui: 'Jost', 'Helvetica Neue', Arial, sans-serif;
+
+  --shadow-soft: 0 1px 2px rgba(43, 43, 43, 0.04), 0 8px 30px rgba(43, 43, 43, 0.06);
+  --shadow-lift: 0 2px 4px rgba(43, 43, 43, 0.06), 0 16px 48px rgba(43, 43, 43, 0.1);
+
+  --radius: 2px;
+  --page: 1120px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--ivory);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-weight: 300;
+  font-size: 17px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: var(--gold);
+  text-underline-offset: 3px;
+}
+
+/* --- Type ---------------------------------------------------------------- */
+
+.script {
+  font-family: var(--font-script);
+  color: var(--gold);
+  font-weight: 400;
+  line-height: 1.1;
+}
+
+.eyebrow {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.34em;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--muted);
+  margin: 0;
+}
+
+.section-title {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  font-weight: 400;
+  font-size: clamp(1.5rem, 3.4vw, 2.1rem);
+  margin: 0.5rem 0 0;
+  color: var(--ink);
+}
+
+.lede {
+  font-family: var(--font-display);
+  font-size: clamp(1.1rem, 2.2vw, 1.35rem);
+  font-weight: 300;
+  line-height: 1.75;
+  color: var(--ink-soft);
+}
+
+/* --- Layout -------------------------------------------------------------- */
+
+.section {
+  padding: clamp(4rem, 9vw, 7rem) 1.5rem;
+}
+
+.section--tinted {
+  background: var(--gold-wash);
+}
+
+.section--stone {
+  background: var(--stone);
+}
+
+.wrap {
+  max-width: var(--page);
+  margin: 0 auto;
+}
+
+.wrap--narrow {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.center {
+  text-align: center;
+}
+
+/* A small gold sprig used as a divider, echoing the save the date monogram. */
+.rule {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9rem;
+  margin: 1.6rem auto 0;
+  max-width: 240px;
+  color: var(--gold-light);
+}
+
+.rule::before,
+.rule::after {
+  content: '';
+  height: 1px;
+  flex: 1;
+  background: currentColor;
+  opacity: 0.55;
+}
+
+.rule span {
+  font-size: 0.7rem;
+  letter-spacing: 0.3em;
+}
+
+/* --- Buttons ------------------------------------------------------------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 0.95rem 2rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--gold);
+  background: var(--gold);
+  color: #fff;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.btn:hover:not(:disabled) {
+  background: #9c7b33;
+  border-color: #9c7b33;
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn--ghost {
+  background: transparent;
+  color: var(--gold);
+}
+
+.btn--ghost:hover:not(:disabled) {
+  background: var(--gold);
+  color: #fff;
+}
+
+.btn--quiet {
+  background: transparent;
+  border-color: var(--stone-deep);
+  color: var(--ink-soft);
+}
+
+.btn--quiet:hover:not(:disabled) {
+  background: var(--stone);
+  border-color: var(--stone-deep);
+  color: var(--ink);
+}
+
+.btn--sm {
+  padding: 0.5rem 1rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+}
+
+/* --- Forms --------------------------------------------------------------- */
+
+.field {
+  display: block;
+  margin-bottom: 1.25rem;
+}
+
+.field > .label,
+.label {
+  display: block;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: var(--ink-soft);
+  margin-bottom: 0.45rem;
+}
+
+.input,
+.select,
+.textarea {
+  width: 100%;
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  font-weight: 300;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--stone-deep);
+  border-radius: var(--radius);
+  padding: 0.75rem 0.9rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.input:focus,
+.select:focus,
+.textarea:focus {
+  outline: none;
+  border-color: var(--gold-light);
+  box-shadow: 0 0 0 3px rgba(201, 171, 104, 0.18);
+}
+
+.textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.hint {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin: 0.4rem 0 0;
+}
+
+.error-box {
+  background: var(--rose-wash);
+  border: 1px solid #e6cdd0;
+  border-left: 3px solid var(--rose);
+  color: #8a4a53;
+  padding: 0.9rem 1.1rem;
+  border-radius: var(--radius);
+  font-size: 0.95rem;
+  margin: 0 0 1.25rem;
+}
+
+/* Segmented yes/no control used for each guest. */
+.choice {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+}
+
+.choice__opt {
+  position: relative;
+}
+
+/* Hidden visually but kept 1px and unclipped from the accessibility tree, so
+   the control is still focusable and announced. A 0x0 element gets pruned. */
+.choice__opt input,
+.pill input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.choice__opt span {
+  display: block;
+  text-align: center;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.82rem;
+  padding: 0.8rem 0.6rem;
+  border: 1px solid var(--stone-deep);
+  border-radius: var(--radius);
+  background: var(--paper);
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.choice__opt input:checked + span {
+  border-color: var(--gold);
+  background: var(--gold);
+  color: #fff;
+}
+
+.choice__opt input:focus-visible + span {
+  box-shadow: 0 0 0 3px rgba(201, 171, 104, 0.35);
+}
+
+/* Dietary checkboxes as pill toggles. */
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.pill {
+  position: relative;
+  display: inline-block;
+}
+
+.pill span {
+  display: inline-block;
+  font-size: 0.85rem;
+  padding: 0.4rem 0.85rem;
+  border: 1px solid var(--stone-deep);
+  border-radius: 999px;
+  background: var(--paper);
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.pill input:checked + span {
+  border-color: var(--sage);
+  background: var(--sage-wash);
+  color: #4d5940;
+}
+
+.pill input:focus-visible + span {
+  box-shadow: 0 0 0 3px rgba(125, 138, 106, 0.3);
+}
+
+/* --- Cards --------------------------------------------------------------- */
+
+.card {
+  background: var(--paper);
+  border: 1px solid var(--stone-deep);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(176, 141, 62, 0.25);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
