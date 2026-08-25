@@ -11,11 +11,12 @@ Anglers Rest, Strawberry Beds, Dublin.
 
 Three pages, one Google Sheet behind them.
 
-| Page         | For       | What it is                                                                       |
-| ------------ | --------- | -------------------------------------------------------------------------------- |
-| `index.html` | Guests    | The website: story, schedule, venue, places to stay, questions                    |
-| `rsvp.html`  | Guests    | Personal RSVP form, opened by invite code                                         |
-| `admin.html` | Just you  | Guest list, live counts, invite sending, CSV exports. Passcode protected          |
+| Page            | For      | What it is                                                              |
+| --------------- | -------- | ----------------------------------------------------------------------- |
+| `index.html`    | Guests   | The website: story, schedule, venue, places to stay, questions          |
+| `rsvp.html`     | Guests   | Personal RSVP form, opened by invite code                               |
+| `details.html`  | Guests   | The full run of the day. Opens only once that guest has replied         |
+| `admin.html`    | Just you | Guest list, live counts, invite sending, CSV exports. Passcode protected |
 
 ### How an invitation works
 
@@ -38,6 +39,29 @@ listing the right people. A party can be:
 Nobody needs an account or a password. Anyone can decline as easily as accept,
 and everyone can come back and change their answer up to the day.
 
+Anyone who accepts is also asked for **songs that will get them dancing**. It is
+a free text box, one per line, kept against the invitation rather than the
+person. The dashboard collects every request into a **Playlist** export, one row
+per song with who asked for it, which is the list the band or DJ wants.
+
+### The details page
+
+`details.html` holds the full run of the day: timings with the longer
+explanation behind each one, dress code, getting there, gifts, children,
+accessibility, and where to stay. It is deliberately gated. A guest who has not
+replied is shown a short prompt to RSVP first, which is what makes replying
+worth doing rather than a chore. Someone who declined still gets in, with a note
+saying they are welcome to change their mind.
+
+The gate is a soft one: it needs a valid invitation code, not a password. Once a
+guest has used their link the code is remembered in their browser, so
+`details.html` on its own works on later visits.
+
+Almost all of the content is placeholder text marked `TO ADD`, sitting in
+`src/config.js` under `DAY_DETAILS` and `SCHEDULE`. Fill it in as decisions get
+made. The **Still to come** cards at the bottom are there so guests can see what
+is still being worked out; delete one once its real section exists.
+
 ### How invitations get sent
 
 The dashboard does not send anything by itself, on purpose. Each row has
@@ -56,11 +80,12 @@ Live at the top of the dashboard: invitations, people invited, invites sent,
 awaiting reply, coming, declined, plus a running tally of meal choices and how
 many people have dietary requirements.
 
-Two CSV exports:
+Three CSV exports:
 
 - **Export all**, one row per person, everything on file.
 - **Catering list**, only the people actually coming, with meal and dietary
   notes, sorted by name. This is the one the venue wants.
+- **Playlist**, one row per requested song with who asked for it.
 
 ---
 
@@ -86,6 +111,8 @@ memory, so you can click the whole thing through before setting anything up:
 
 - `http://localhost:5173/rsvp.html?mock=1&c=TR9XP2` — a single guest with a plus one
 - `http://localhost:5173/rsvp.html?mock=1&c=KQ4M7B` — a couple who already replied
+- `http://localhost:5173/details.html?mock=1&c=KQ4M7B` — the details page, unlocked
+- `http://localhost:5173/details.html?mock=1&c=GB3JV6` — the same page, still locked
 - `http://localhost:5173/admin.html?mock=1` — the dashboard, passcode `demo`
 
 Changes are forgotten on reload. The mock is dev only and is stripped out of

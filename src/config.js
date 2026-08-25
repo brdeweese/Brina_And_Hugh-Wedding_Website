@@ -38,6 +38,17 @@ export const MEAL_OPTIONS = [
   { value: 'vegan', label: 'Vegan' },
 ]
 
+// The song request box on the RSVP form. Set `enabled` to false to drop it.
+export const SONG_REQUEST = {
+  enabled: true,
+  label: 'Songs that will get you dancing',
+  hint: 'One or several, whatever it takes. We are handing this list straight to whoever is playing, so be honest rather than tasteful.',
+  placeholder: 'Artist and song, one per line',
+  // Shown to guests who are not coming, where asking for a dance floor song
+  // would read oddly.
+  declinedLabel: '',
+}
+
 // Common restrictions offered as quick checkboxes, plus a free-text box.
 export const DIETARY_OPTIONS = [
   'Gluten free',
@@ -48,14 +59,106 @@ export const DIETARY_OPTIONS = [
   'Kosher',
 ]
 
+// `note` is the one line shown on the public home page. `detail` is the longer
+// version, shown only on the details page once a guest has replied. Leave
+// `detail` empty and the section simply shows the note.
 export const SCHEDULE = [
-  { time: '1:30 pm', title: 'Guests arrive', note: 'Please be seated by 1:45 pm' },
-  { time: '2:00 pm', title: 'Ceremony', note: '' },
-  { time: '3:00 pm', title: 'Drinks reception', note: 'Along the river' },
-  { time: '5:00 pm', title: 'Dinner', note: '' },
-  { time: '8:00 pm', title: 'First dance and music', note: '' },
-  { time: 'Late', title: 'Carriages', note: '' },
+  {
+    time: '1:30 pm',
+    title: 'Guests arrive',
+    note: 'Please be seated by 1:45 pm',
+    detail:
+      'Come round to the riverside entrance and someone will point you the right way. Do give yourself a few extra minutes, the lane in is narrow and slow.',
+  },
+  {
+    time: '2:00 pm',
+    title: 'Ceremony',
+    note: '',
+    detail: 'About half an hour. TO ADD: who is officiating, readings, and any music.',
+  },
+  {
+    time: '3:00 pm',
+    title: 'Drinks reception',
+    note: 'Along the river',
+    detail:
+      'Drinks and something to eat on the terrace above the water. This is when the photographs happen, so please do not feel you need to stand still for any of it.',
+  },
+  {
+    time: '5:00 pm',
+    title: 'Dinner',
+    note: '',
+    detail:
+      'Everyone is called through and seated. TO ADD: the seating plan, the menu, and how long the speeches will run.',
+  },
+  {
+    time: '8:00 pm',
+    title: 'First dance and music',
+    note: '',
+    detail:
+      'Tables are cleared back and the floor opens. TO ADD: the band or DJ. Your song requests go straight to whoever is playing.',
+  },
+  {
+    time: 'Late',
+    title: 'Carriages',
+    note: '',
+    detail: 'TO ADD: the exact finish time and how taxis are being organised.',
+  },
 ]
+
+// ---------------------------------------------------------------------------
+// The details page, which only opens once a guest has replied.
+// Everything below is a foundation. Fill it in as decisions get made.
+// ---------------------------------------------------------------------------
+
+export const DAY_DETAILS = {
+  intro:
+    'Thank you for letting us know. Here is everything we have settled so far. We will keep adding to this page as the day takes shape, so do come back to it closer to the time.',
+
+  dressCode: {
+    title: 'Formal, with comfortable shoes',
+    body: 'Think garden party rather than black tie. Suits and jackets, dresses and good separates, all very welcome.',
+    notes: [
+      'The drinks reception is outdoors on grass and gravel, so flats or block heels will serve you far better than a stiletto.',
+      'Irish evenings turn cool the moment the sun goes, even in July. Bring a layer you are happy to be photographed in.',
+      'No dress code on colour, with the usual exception of white.',
+    ],
+  },
+
+  sections: [
+    {
+      id: 'getting-there',
+      eyebrow: 'Practicalities',
+      title: 'Getting there and home',
+      body: "Wright's Anglers Rest sits on a narrow lane along the Strawberry Beds, above the Liffey. It is roughly twenty minutes from the centre of Dublin and ten from the Phoenix Park.",
+      items: [
+        { label: 'Parking', value: 'TO ADD: how many spaces the venue can hold, and whether cars can be left overnight.' },
+        { label: 'Taxis', value: 'TO ADD: a local firm worth booking in advance, particularly for the journey home.' },
+        { label: 'Buses', value: 'TO ADD: nearest stop and the walk from it, if there is a sensible one.' },
+      ],
+    },
+    {
+      id: 'on-the-day',
+      eyebrow: 'Good to know',
+      title: 'A few small things',
+      body: '',
+      items: [
+        { label: 'Children', value: 'We would love to see the little ones named on your invitation.' },
+        { label: 'Photographs', value: 'TO ADD: whether phones are welcome during the ceremony, and where the gallery will go afterwards.' },
+        { label: 'Gifts', value: 'Your presence really is the present. There will be a card box on the day for anyone who wants one.' },
+        { label: 'Accessibility', value: 'TO ADD: step-free routes, accessible facilities, and anyone to ask on the day.' },
+      ],
+    },
+  ],
+
+  // Cards shown as deliberately unfinished, so guests know more is coming and
+  // you know where to put it. Delete one once its real section exists above.
+  comingSoon: [
+    { title: 'The menu', note: 'Once tasting is done and the courses are chosen.' },
+    { title: 'Seating plan', note: 'Closer to the day, once numbers are final.' },
+    { title: 'The wedding party', note: 'Who is standing with us, and who to find if you need anything.' },
+    { title: 'The playlist', note: 'Built from the songs you are all sending us.' },
+  ],
+}
 
 export const FAQS = [
   {

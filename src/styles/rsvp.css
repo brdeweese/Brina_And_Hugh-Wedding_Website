@@ -172,6 +172,25 @@
   text-align: right;
 }
 
+.done__unlocked {
+  margin: 1.75rem 0 0;
+  padding: 1.1rem 1.25rem;
+  background: var(--gold-wash);
+  border: 1px solid #e3d3ac;
+  border-radius: var(--radius);
+  font-size: 0.94rem;
+  color: #7a5f22;
+  text-align: center;
+}
+
+.done__actions {
+  margin-top: 1.75rem;
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
 .loading-state {
   display: flex;
   flex-direction: column;

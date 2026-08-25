@@ -239,6 +239,18 @@
   box-shadow: var(--shadow-lift);
 }
 
+/* A painting rather than a photograph: show it whole, no crop and no frame.
+   The watercolour is painted on white with a deckled edge, so multiply drops
+   that white into the tinted paper of the section and the ragged edge reads as
+   part of the page instead of as a pasted-on rectangle. */
+.story__figure .artwork {
+  aspect-ratio: auto;
+  object-fit: contain;
+  border-radius: 0;
+  box-shadow: none;
+  mix-blend-mode: multiply;
+}
+
 .story__caption {
   font-family: var(--font-display);
   font-style: italic;

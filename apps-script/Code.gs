@@ -23,6 +23,7 @@ var PARTY_HEADERS = [
   'invite_sent_at',
   'status',
   'responded_at',
+  'songs',
   'message',
   'notes',
 ];
@@ -213,6 +214,7 @@ function getParty(code) {
     allow_plus_one: truthy(match.allow_plus_one),
     status: clean(match.status).toLowerCase() || 'pending',
     responded_at: serialize(match.responded_at),
+    songs: clean(match.songs),
     message: clean(match.message),
     people: people,
   };
@@ -279,10 +281,14 @@ function submitRsvp(body) {
     setPartyCells(parties, partyRow._rowNumber, {
       status: status,
       responded_at: stamp,
+      songs: clean(body.songs),
       message: clean(body.message),
     });
 
-    notifyCouple(wanted, clean(partyRow.party_name), status, attendingCount, clean(body.message));
+    notifyCouple(wanted, clean(partyRow.party_name), status, attendingCount, {
+      message: clean(body.message),
+      songs: clean(body.songs),
+    });
 
     return { status: status, attending: attendingCount, seats: seats.length, responded_at: stamp };
   } finally {
@@ -294,7 +300,7 @@ function submitRsvp(body) {
  * Optional. Set a NOTIFY_EMAIL script property to get a note whenever someone
  * responds. A failure here must never break a guest's RSVP, hence the catch.
  */
-function notifyCouple(code, partyName, status, attendingCount, message) {
+function notifyCouple(code, partyName, status, attendingCount, extras) {
   try {
     var to = PropertiesService.getScriptProperties().getProperty('NOTIFY_EMAIL');
     if (!to) return;
@@ -304,7 +310,8 @@ function notifyCouple(code, partyName, status, attendingCount, message) {
       'Status: ' + status,
       'Attending: ' + attendingCount,
     ];
-    if (message) lines.push('', 'Their message:', message);
+    if (extras && extras.songs) lines.push('', 'Songs to dance to:', extras.songs);
+    if (extras && extras.message) lines.push('', 'Their message:', extras.message);
     MailApp.sendEmail(to, 'RSVP: ' + partyName + ' - ' + status, lines.join('\n'));
   } catch (err) {
     // Ignored on purpose.
@@ -347,6 +354,7 @@ function adminList() {
       invite_sent_at: serialize(r.invite_sent_at),
       status: clean(r.status).toLowerCase() || 'pending',
       responded_at: serialize(r.responded_at),
+      songs: clean(r.songs),
       message: clean(r.message),
       notes: clean(r.notes),
       people: byCode[c] || [],
@@ -413,6 +421,7 @@ function adminAddParty(party) {
       invite_sent_at: '',
       status: 'pending',
       responded_at: '',
+      songs: '',
       message: '',
       notes: clean(party.notes),
     };
@@ -464,8 +473,14 @@ function newCode(taken) {
 // One-off setup. Run this from the Apps Script editor, once.
 // ---------------------------------------------------------------------------
 
+/**
+ * Safe to run again at any time. It creates whatever is missing and leaves
+ * everything else alone, so if a new column is ever added to this script you
+ * just re-run this rather than rebuilding the sheet.
+ */
 function setupSheet() {
   var book = ss();
+  var added = [];
 
   var parties = book.getSheetByName(TAB_PARTIES) || book.insertSheet(TAB_PARTIES);
   if (parties.getLastRow() === 0) {
@@ -482,10 +497,13 @@ function setupSheet() {
       'pending',
       '',
       '',
+      '',
       'Example row. Delete it once you are happy everything works.',
     ]);
+  } else {
+    added = added.concat(ensureHeaders(parties, PARTY_HEADERS, TAB_PARTIES));
   }
-  parties.getRange(1, 1, 1, PARTY_HEADERS.length).setFontWeight('bold');
+  parties.getRange(1, 1, 1, parties.getLastColumn()).setFontWeight('bold');
   parties.setFrozenRows(1);
 
   var people = book.getSheetByName(TAB_PEOPLE) || book.insertSheet(TAB_PEOPLE);
@@ -493,11 +511,31 @@ function setupSheet() {
     people.appendRow(PEOPLE_HEADERS);
     people.appendRow(['DEMO01', 'p1', 'Aoife Murphy', 'FALSE', '', '', '', '']);
     people.appendRow(['DEMO01', 'p2', 'Cian Murphy', 'FALSE', '', '', '', '']);
+  } else {
+    added = added.concat(ensureHeaders(people, PEOPLE_HEADERS, TAB_PEOPLE));
   }
-  people.getRange(1, 1, 1, PEOPLE_HEADERS.length).setFontWeight('bold');
+  people.getRange(1, 1, 1, people.getLastColumn()).setFontWeight('bold');
   people.setFrozenRows(1);
 
   SpreadsheetApp.getUi().alert(
-    'Tabs are ready.\n\nNext: Project Settings, Script Properties, add ADMIN_TOKEN with a passcode of your choosing. Optionally add NOTIFY_EMAIL to get an email on every RSVP.'
+    added.length
+      ? 'Added missing columns: ' + added.join(', ') + '.\n\nYour existing rows are untouched.'
+      : 'Tabs are ready.\n\nNext: Project Settings, Script Properties, add ADMIN_TOKEN with a passcode of your choosing. Optionally add NOTIFY_EMAIL to get an email on every RSVP.'
   );
+}
+
+/** Appends any expected header this tab does not already have. */
+function ensureHeaders(s, expected, tabName) {
+  var have = s.getRange(1, 1, 1, s.getLastColumn()).getValues()[0].map(function (h) {
+    return String(h).trim();
+  });
+  var missing = expected.filter(function (h) {
+    return have.indexOf(h) === -1;
+  });
+  missing.forEach(function (h, i) {
+    s.getRange(1, have.length + i + 1).setValue(h);
+  });
+  return missing.map(function (h) {
+    return tabName + '.' + h;
+  });
 }

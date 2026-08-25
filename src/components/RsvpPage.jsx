@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
-import { WEDDING, MEAL_OPTIONS, DIETARY_OPTIONS } from '../config.js'
+import { WEDDING, MEAL_OPTIONS, DIETARY_OPTIONS, SONG_REQUEST } from '../config.js'
 import { lookupParty, submitRsvp } from '../api.js'
+import { rememberCode } from '../inviteCode.js'
 
 const homeHref = import.meta.env.BASE_URL
+const detailsHref = `${import.meta.env.BASE_URL}details.html`
 
 /** Dietary picks live in the sheet as one comma separated string. */
 const splitDietary = (s) =>
@@ -208,6 +210,7 @@ function GuestBlock({ answer, index, onChange }) {
 
 function RsvpForm({ party, onDone }) {
   const [answers, setAnswers] = useState(() => buildAnswers(party.people))
+  const [songs, setSongs] = useState(party.songs || '')
   const [message, setMessage] = useState(party.message || '')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
@@ -229,6 +232,7 @@ function RsvpForm({ party, onDone }) {
     try {
       const result = await submitRsvp({
         code: party.code,
+        songs: songs.trim(),
         message: message.trim(),
         people: answers.map((a) => ({
           person_id: a.person_id,
@@ -239,7 +243,7 @@ function RsvpForm({ party, onDone }) {
           dietary_notes: a.dietary_notes.trim(),
         })),
       })
-      onDone({ result, answers, message: message.trim() })
+      onDone({ result, answers, code: party.code, songs: songs.trim(), message: message.trim() })
     } catch (err) {
       setError(err.message)
       setBusy(false)
@@ -269,13 +273,28 @@ function RsvpForm({ party, onDone }) {
           : 'Anything else you would like to tell us?'}
       </p>
 
+      {/* Only worth asking of people who will actually be on the dance floor. */}
+      {SONG_REQUEST.enabled && attending.length > 0 && (
+        <label className="field">
+          <span className="label">{SONG_REQUEST.label}</span>
+          <textarea
+            className="textarea"
+            value={songs}
+            onChange={(e) => setSongs(e.target.value)}
+            placeholder={SONG_REQUEST.placeholder}
+            rows={4}
+          />
+          <p className="hint">{SONG_REQUEST.hint}</p>
+        </label>
+      )}
+
       <label className="field">
         <span className="label">A message for us</span>
         <textarea
           className="textarea"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          placeholder="Optional. Song requests very much encouraged."
+          placeholder="Optional"
         />
       </label>
 
@@ -301,9 +320,10 @@ function RsvpForm({ party, onDone }) {
 /* -------------------------------------------------------------------------- */
 
 function Confirmation({ payload, onEdit }) {
-  const { result, answers } = payload
+  const { result, answers, code } = payload
   const attending = answers.filter((a) => a.attending === 'yes')
   const declined = result.status === 'declined'
+  const detailsUrl = `${detailsHref}?c=${encodeURIComponent(code)}`
 
   return (
     <div className="panel done">
@@ -332,7 +352,15 @@ function Confirmation({ payload, onEdit }) {
         </ul>
       )}
 
-      <div style={{ marginTop: '2rem', display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+      <p className="done__unlocked">
+        Replying has opened up the rest of the day for you: timings, dress code and
+        everything else we have settled so far.
+      </p>
+
+      <div className="done__actions">
+        <a className="btn" href={detailsUrl}>
+          See all the details
+        </a>
         <button className="btn btn--quiet" type="button" onClick={onEdit}>
           Change our reply
         </button>
@@ -352,6 +380,13 @@ export default function RsvpPage() {
   const [autoLoading, setAutoLoading] = useState(false)
   const [autoError, setAutoError] = useState('')
 
+  // Hold on to the code as soon as we have a valid one, so the details page
+  // opens later without the guest hunting for their original message.
+  const keep = (found) => {
+    rememberCode(found.code)
+    setParty(found)
+  }
+
   // A personal invite link looks like /rsvp.html?c=ABC123 so most guests never
   // have to type the code at all.
   useEffect(() => {
@@ -359,9 +394,10 @@ export default function RsvpPage() {
     if (!code) return
     setAutoLoading(true)
     lookupParty(code)
-      .then(setParty)
+      .then(keep)
       .catch((err) => setAutoError(err.message))
       .finally(() => setAutoLoading(false))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   let body
@@ -395,7 +431,7 @@ export default function RsvpPage() {
             <div className="error-box" style={{ marginBottom: 0 }}>{autoError}</div>
           </div>
         )}
-        <CodeForm onFound={setParty} />
+        <CodeForm onFound={keep} />
       </>
     )
   }

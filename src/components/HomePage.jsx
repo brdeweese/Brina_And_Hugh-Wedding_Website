@@ -72,9 +72,10 @@ function Story() {
         <div className="story">
           <div className="story__figure">
             <SmartImage
-              src="images/story-glendalough.jpg"
-              alt="Brina and Hugh embracing on the shore of the Upper Lake at Glendalough"
-              placeholderLabel="Engagement photo"
+              src="images/proposal-watercolour.png"
+              alt="A watercolour of Hugh proposing to Brina on the shore of the Upper Lake at Glendalough, the sun rising over the ridge behind them"
+              className="artwork"
+              placeholderLabel="Watercolour of the proposal"
             />
             <p className="story__caption">The Upper Lake, Glendalough</p>
           </div>
@@ -265,6 +266,13 @@ function ClosingCta() {
             RSVP now
           </a>
         </div>
+        <p className="hint" style={{ marginTop: '1.5rem' }}>
+          Already replied?{' '}
+          <a href={`${import.meta.env.BASE_URL}details.html`}>
+            See the full details of the day
+          </a>
+          .
+        </p>
       </div>
     </section>
   )

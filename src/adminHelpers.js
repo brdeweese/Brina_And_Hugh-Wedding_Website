@@ -92,6 +92,23 @@ export function mealTotals(parties) {
   return Object.entries(counts).sort((a, b) => b[1] - a[1])
 }
 
+/**
+ * Every song anyone asked for, one per line, with who asked. Guests type these
+ * freehand, so the most we can do is split on newlines and commas-with-newlines
+ * and tidy up numbering people add themselves.
+ */
+export function songList(parties) {
+  const out = []
+  parties.forEach((p) => {
+    String(p.songs || '')
+      .split('\n')
+      .map((line) => line.replace(/^\s*[-•*\d.)]+\s*/, '').trim())
+      .filter(Boolean)
+      .forEach((song) => out.push({ song, party: p.party_name, code: p.code }))
+  })
+  return out
+}
+
 export function dietaryList(parties) {
   const out = []
   parties.forEach((p) =>
@@ -148,6 +165,7 @@ export function guestCsv(parties) {
         p.invite_sent_at ? 'sent' : 'not sent',
         p.invite_sent_at,
         p.responded_at,
+        p.songs,
         p.message,
         p.notes,
       ])
@@ -170,11 +188,18 @@ export function guestCsv(parties) {
       'invite',
       'invite_sent_at',
       'responded_at',
+      'songs',
       'message',
       'notes',
     ],
     rows
   )
+}
+
+/** One row per requested song. This is the list the band or DJ wants. */
+export function playlistCsv(parties) {
+  const rows = songList(parties).map((s) => [s.song, s.party, s.code])
+  return toCsv(['song', 'requested_by', 'code'], rows)
 }
 
 export function cateringCsv(parties) {

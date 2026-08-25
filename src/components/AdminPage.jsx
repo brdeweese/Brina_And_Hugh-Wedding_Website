@@ -11,9 +11,11 @@ import {
   summarise,
   mealTotals,
   dietaryList,
+  songList,
   downloadCsv,
   guestCsv,
   cateringCsv,
+  playlistCsv,
 } from '../adminHelpers.js'
 
 const TOKEN_KEY = 'bh_admin_token'
@@ -231,6 +233,12 @@ function PartyRow({ party, template, token, onChanged, toast }) {
             <div className="link-line">{link}</div>
           </div>
           <div style={{ display: 'grid', gap: '0.6rem', alignContent: 'start' }}>
+            {party.songs && (
+              <div className="note-box">
+                <h4>Songs to dance to</h4>
+                <p style={{ whiteSpace: 'pre-wrap' }}>{party.songs}</p>
+              </div>
+            )}
             {party.message && (
               <div className="note-box">
                 <h4>Their message</h4>
@@ -478,6 +486,7 @@ export default function AdminPage() {
   const stats = useMemo(() => (parties ? summarise(parties) : null), [parties])
   const meals = useMemo(() => (parties ? mealTotals(parties) : []), [parties])
   const diets = useMemo(() => (parties ? dietaryList(parties) : []), [parties])
+  const songs = useMemo(() => (parties ? songList(parties) : []), [parties])
 
   const visible = useMemo(() => {
     if (!parties) return []
@@ -524,6 +533,14 @@ export default function AdminPage() {
               disabled={!parties}
             >
               Catering list
+            </button>
+            <button
+              className="btn btn--quiet btn--sm"
+              onClick={() => downloadCsv('playlist.csv', playlistCsv(parties || []))}
+              disabled={!songs.length}
+              title={songs.length ? 'Every song your guests have asked for' : 'No song requests yet'}
+            >
+              Playlist
             </button>
             <button className="btn btn--quiet btn--sm" onClick={() => load()} disabled={loading}>
               {loading ? 'Refreshing...' : 'Refresh'}
@@ -575,6 +592,11 @@ export default function AdminPage() {
                 {diets.length > 0 && (
                   <span className="meal-total">
                     <b>{diets.length}</b> with dietary notes
+                  </span>
+                )}
+                {songs.length > 0 && (
+                  <span className="meal-total">
+                    <b>{songs.length}</b> songs requested
                   </span>
                 )}
               </div>

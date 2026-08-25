@@ -21,6 +21,7 @@ let parties = [
     invite_sent_at: '2026-09-01',
     status: 'attending',
     responded_at: '2026-09-03T19:04:00+01:00',
+    songs: 'Fleetwood Mac, Everywhere\nThe Saw Doctors, N17\nWhitney Houston, I Wanna Dance With Somebody',
     message: 'Cannot wait. Please play something we can actually dance to.',
     notes: '',
     people: [
@@ -39,6 +40,7 @@ let parties = [
     invite_sent_at: '2026-09-01',
     status: 'pending',
     responded_at: '',
+    songs: '',
     message: '',
     notes: 'Works with Brina.',
     people: [
@@ -57,6 +59,7 @@ let parties = [
     invite_sent_at: '2026-09-02',
     status: 'declined',
     responded_at: '2026-09-05T09:12:00+01:00',
+    songs: '',
     message: 'Away that whole week, gutted. Have a wonderful day.',
     notes: '',
     people: [
@@ -74,6 +77,7 @@ let parties = [
     invite_sent_at: '',
     status: 'pending',
     responded_at: '',
+    songs: '',
     message: '',
     notes: 'Hugh’s aunt and uncle.',
     people: [
@@ -123,6 +127,7 @@ export async function mockCall(action, payload) {
     })
     p.status = attending === 0 ? 'declined' : attending === p.people.length ? 'attending' : 'partial'
     p.responded_at = new Date().toISOString()
+    p.songs = payload.songs || ''
     p.message = payload.message || ''
     return { status: p.status, attending, seats: p.people.length, responded_at: p.responded_at }
   }
@@ -165,6 +170,7 @@ export async function mockCall(action, payload) {
       invite_sent_at: '',
       status: 'pending',
       responded_at: '',
+      songs: '',
       message: '',
       notes: party.notes || '',
       people,

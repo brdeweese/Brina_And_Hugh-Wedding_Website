@@ -64,14 +64,18 @@ that one file.
 
 Drop these into `public/images/`, using exactly these filenames:
 
-| Filename                  | What it is                                             |
-| ------------------------- | ------------------------------------------------------ |
-| `hero-proposal.jpg`       | The proposal shot at Glendalough, used full screen     |
-| `story-glendalough.jpg`   | The two of you embracing by the lake                   |
-| `venue-illustration.png`  | The watercolour pub illustration from the save the date |
+| Filename                    | Where it appears                                          |
+| --------------------------- | --------------------------------------------------------- |
+| `proposal-watercolour.png`  | Our story. The watercolour of the proposal at Glendalough |
+| `hero-proposal.jpg`         | The photograph behind the names, full screen              |
+| `venue-illustration.png`    | The venue. The pub illustration from the save the date    |
 
-Until they are there the site shows a labelled placeholder rather than a broken
+Until a file is there the site shows a labelled placeholder rather than a broken
 image, so nothing looks wrong while you gather them.
+
+The watercolour is displayed whole rather than cropped, and is blended into the
+page so its white paper edge disappears into the background. Save it with the
+white border intact and do not trim it to a rectangle.
 
 ## 7. Turn on GitHub Pages
 
@@ -91,6 +95,11 @@ image, so nothing looks wrong while you gather them.
 
 ---
 
+## If this script ever gains a new column
+
+Re-run **setupSheet** exactly as in step 2. It only adds what is missing and
+leaves your existing rows alone, so it is safe to run at any point.
+
 ## Re-deploying the script after an edit
 
 If you ever change `Code.gs`, you must click **Deploy > Manage deployments >**
@@ -102,6 +111,8 @@ not update the live web app. The URL stays the same.
 | Thing                           | Where                                   |
 | ------------------------------- | --------------------------------------- |
 | Wedding details, FAQ, meals     | `src/config.js`                         |
+| The details page content        | `src/config.js`, `DAY_DETAILS`          |
+| The song request wording        | `src/config.js`, `SONG_REQUEST`         |
 | Colours and fonts               | `src/styles/base.css`                   |
 | The story text                  | `src/components/HomePage.jsx`           |
 | Backend and sheet columns       | `apps-script/Code.gs`                   |

@@ -415,6 +415,8 @@ a {
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    /* Without this, an infinite loop still runs, just imperceptibly fast. */
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
 }

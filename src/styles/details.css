@@ -1,0 +1,304 @@
+/* The details page, which only opens once a guest has replied. */
+
+.details {
+  min-height: 100svh;
+  padding: clamp(2rem, 6vw, 4rem) 1.25rem clamp(3rem, 8vw, 5rem);
+}
+
+.details__wrap {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.details__head {
+  text-align: center;
+  margin-bottom: clamp(2.5rem, 6vw, 4rem);
+}
+
+.details__names {
+  font-family: var(--font-script);
+  font-size: clamp(2.6rem, 9vw, 4rem);
+  color: var(--gold);
+  line-height: 1;
+  margin: 0.5rem 0 0;
+}
+
+.details__meta {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  font-size: 0.76rem;
+  color: var(--muted);
+  margin: 1rem 0 0;
+}
+
+.details__greeting {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.1rem;
+  color: var(--ink-soft);
+  margin: 1rem 0 0;
+}
+
+.details__back {
+  display: inline-block;
+  margin-top: 1.25rem;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.details__back:hover {
+  color: var(--gold);
+}
+
+.details__intro {
+  text-align: center;
+  margin: 0 auto clamp(2rem, 5vw, 3rem);
+  max-width: 60ch;
+}
+
+.details__declined {
+  margin-bottom: 2rem;
+  background: var(--gold-wash);
+  border-color: #e3d3ac;
+}
+
+.details__section {
+  margin-bottom: clamp(2.5rem, 6vw, 4rem);
+}
+
+.details__section .eyebrow,
+.details__section .section-title {
+  text-align: center;
+}
+
+.details__body {
+  text-align: center;
+  margin: 1.5rem auto 0;
+  max-width: 58ch;
+}
+
+/* --- Run of the day ------------------------------------------------------- */
+
+.runsheet {
+  margin-top: 2rem;
+  border-top: 1px solid var(--stone-deep);
+}
+
+.runsheet__row {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 1.5rem;
+  padding: 1.5rem 0;
+  border-bottom: 1px solid var(--stone-deep);
+}
+
+.runsheet__time {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 0.86rem;
+  color: var(--gold);
+  font-weight: 500;
+  padding-top: 0.3rem;
+}
+
+.runsheet__title {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 400;
+  margin: 0;
+}
+
+.runsheet__detail {
+  margin: 0.4rem 0 0;
+  color: var(--ink-soft);
+  font-size: 0.96rem;
+}
+
+@media (max-width: 560px) {
+  .runsheet__row {
+    grid-template-columns: 1fr;
+    gap: 0.35rem;
+  }
+  .runsheet__time {
+    padding-top: 0;
+  }
+}
+
+/* --- Dress code ----------------------------------------------------------- */
+
+.dress {
+  margin-top: 2rem;
+  background: var(--paper);
+  border: 1px solid var(--stone-deep);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
+  padding: clamp(1.5rem, 4vw, 2.25rem);
+}
+
+.dress__headline {
+  font-family: var(--font-display);
+  font-size: clamp(1.3rem, 3.4vw, 1.6rem);
+  color: var(--gold);
+  margin: 0 0 0.75rem;
+}
+
+.dress__body {
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+.dress__notes {
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0 0;
+}
+
+.dress__notes li {
+  position: relative;
+  padding-left: 1.6rem;
+  margin-bottom: 0.85rem;
+  color: var(--ink-soft);
+  font-size: 0.96rem;
+}
+
+.dress__notes li:last-child {
+  margin-bottom: 0;
+}
+
+.dress__notes li::before {
+  content: '\275E';
+  position: absolute;
+  left: 0;
+  top: 0.1rem;
+  color: var(--gold-light);
+  font-size: 0.8rem;
+}
+
+/* --- Fact list ------------------------------------------------------------ */
+
+.factlist {
+  margin: 2rem 0 0;
+  border-top: 1px solid var(--stone-deep);
+}
+
+.factlist__row {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 1.5rem;
+  padding: 1.1rem 0;
+  border-bottom: 1px solid var(--stone-deep);
+}
+
+.factlist dt {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.74rem;
+  color: var(--muted);
+  font-weight: 500;
+  padding-top: 0.2rem;
+}
+
+.factlist dd {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.96rem;
+}
+
+@media (max-width: 560px) {
+  .factlist__row {
+    grid-template-columns: 1fr;
+    gap: 0.3rem;
+  }
+  .factlist dt {
+    padding-top: 0;
+  }
+}
+
+/* --- Still to come -------------------------------------------------------- */
+
+.soon {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 0.85rem;
+  margin-top: 2rem;
+}
+
+.soon__card {
+  border: 1px dashed var(--stone-deep);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  background: transparent;
+}
+
+.soon__card h3 {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin: 0 0 0.3rem;
+  color: var(--ink-soft);
+}
+
+.soon__card p {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+/* --- Foot ----------------------------------------------------------------- */
+
+.details__foot {
+  text-align: center;
+  padding-top: clamp(1.5rem, 4vw, 2.5rem);
+  border-top: 1px solid var(--stone-deep);
+}
+
+.details__foot .cta__script {
+  font-family: var(--font-script);
+  font-size: clamp(2rem, 6vw, 2.8rem);
+  color: var(--gold);
+  margin: 0 0 1.5rem;
+}
+
+/* Shared with the home page, needed here too. */
+.stays {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.stay {
+  background: var(--paper);
+  border: 1px solid var(--stone-deep);
+  border-radius: var(--radius);
+  padding: 1.4rem;
+}
+
+.stay h3 {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 500;
+  margin: 0 0 0.35rem;
+}
+
+.stay p {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--ink-soft);
+}
+
+.stay__distance {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 0.7rem;
+  color: var(--gold);
+  margin-bottom: 0.45rem;
+}
