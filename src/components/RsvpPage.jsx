@@ -281,7 +281,9 @@ function RsvpForm({ party, onDone }) {
       <p className="panel__sub">
         {alreadyAnswered
           ? 'You have already replied. Change anything you like and send it again.'
-          : `We would be delighted to see you. Please reply by ${WEDDING.rsvpByLong}.`}
+          : WEDDING.rsvpByLong
+            ? `We would be delighted to see you. Please reply by ${WEDDING.rsvpByLong}.`
+            : 'We would be delighted to see you.'}
       </p>
 
       {error && <div className="error-box">{error}</div>}
@@ -384,8 +386,8 @@ function Confirmation({ payload, onEdit }) {
       )}
 
       <p className="done__unlocked">
-        Replying has opened up the rest of the day for you: timings, dress code and
-        everything else we have settled so far.
+        Replying has opened up the details page, where we will add the rest of the day as
+        it gets decided.
       </p>
 
       <div className="done__actions">

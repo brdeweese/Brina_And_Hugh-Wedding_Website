@@ -17,6 +17,13 @@ Your invitation code is {code} if you are ever asked for it. Please let us know 
 {bride} and {groom} x`
 
 export function fillTemplate(template, party) {
+  // No deadline set yet, so drop the sentence rather than sending "by ." to a
+  // hundred people. Delete this once WEDDING.rsvpByLong has a date in it.
+  let text = template
+  if (!WEDDING.rsvpByLong) {
+    text = text.replace(/\s*Please let us know by \{rsvpBy\}\./g, '')
+  }
+
   const map = {
     '{names}': party.party_name,
     '{code}': party.code,
@@ -29,7 +36,7 @@ export function fillTemplate(template, party) {
     '{city}': WEDDING.venueCity,
     '{rsvpBy}': WEDDING.rsvpByLong,
   }
-  return Object.keys(map).reduce((out, key) => out.split(key).join(map[key]), template)
+  return Object.keys(map).reduce((out, key) => out.split(key).join(map[key]), text)
 }
 
 /** WhatsApp wants the number as digits only, including the country code. */

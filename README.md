@@ -57,10 +57,18 @@ The gate is a soft one: it needs a valid invitation code, not a password. Once a
 guest has used their link the code is remembered in their browser, so
 `details.html` on its own works on later visits.
 
-Almost all of the content is placeholder text marked `TO ADD`, sitting in
-`src/config.js` under `DAY_DETAILS` and `SCHEDULE`. Fill it in as decisions get
-made. The **Still to come** cards at the bottom are there so guests can see what
-is still being worked out; delete one once its real section exists.
+## Nothing here is made up
+
+The site only states things you have actually decided. Times read `TBC`, and any
+section without real content is **hidden rather than filled with placeholder
+prose** — currently that means Travel and stay, Questions, and the dress code.
+Add real entries to `STAYS`, `FAQS` or `DAY_DETAILS.dressCode` in
+[src/config.js](src/config.js) and the section appears on its own, nav link
+included.
+
+The **Still to come** cards on the details page are the one deliberate
+exception: they tell guests what is not settled yet. Delete one once its real
+section exists.
 
 ### How invitations get sent
 

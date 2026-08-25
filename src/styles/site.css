@@ -479,3 +479,9 @@
   min-height: 240px;
 }
 
+
+/* The picture stands alone, with no column of text beside it. */
+.story__figure--solo {
+  max-width: 620px;
+  margin: 3rem auto 0;
+}

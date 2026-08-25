@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react'
-import { WEDDING } from '../config.js'
+import { WEDDING, STAYS, FAQS } from '../config.js'
 
+// Only link to sections that actually render, so the bar never points at a
+// section the page has hidden for want of content.
 const LINKS = [
-  { href: '#story', label: 'Our story' },
   { href: '#day', label: 'The day' },
   { href: '#venue', label: 'Venue' },
-  { href: '#stay', label: 'Travel & stay' },
-  { href: '#faq', label: 'Questions' },
-]
+  { href: '#stay', label: 'Travel & stay', when: () => STAYS.length > 0 },
+  { href: '#faq', label: 'Questions', when: () => FAQS.length > 0 },
+].filter((l) => !l.when || l.when())
 
 export default function Nav() {
   const [solid, setSolid] = useState(false)

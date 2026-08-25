@@ -18,7 +18,7 @@ function Header({ party }) {
       <p className="details__meta">
         {WEDDING.dateLong} · {WEDDING.venueName}
       </p>
-      {party && <p className="details__greeting">Everything you need, {party.party_name}.</p>}
+      {party && <p className="details__greeting">For {party.party_name}</p>}
       <a className="details__back" href={homeHref}>
         &#8592; Back to the website
       </a>
@@ -79,8 +79,8 @@ function NeedsRsvp({ party }) {
     <div className="panel center">
       <h2 className="panel__title">Almost there</h2>
       <p className="panel__sub">
-        We open the full run of the day once we know whether you can come. It takes about a
-        minute, and you can change your answer any time afterwards.
+        These details open once we know whether you can come. It takes about a minute, and
+        you can change your answer any time afterwards.
       </p>
       <a className="btn" href={`${rsvpHref}?c=${encodeURIComponent(party.code)}`}>
         Reply to your invitation
@@ -94,8 +94,8 @@ function NeedsRsvp({ party }) {
 function RunOfDay() {
   return (
     <section className="details__section">
-      <p className="eyebrow">From arrival to the last song</p>
       <h2 className="section-title">The run of the day</h2>
+      <p className="details__note">Times to be confirmed.</p>
       <div className="runsheet">
         {SCHEDULE.map((item) => (
           <div className="runsheet__row" key={item.time + item.title}>
@@ -117,18 +117,23 @@ function RunOfDay() {
 
 function DressCode() {
   const { dressCode } = DAY_DETAILS
+  // Hidden until one is decided, rather than guessed at.
+  if (!dressCode.title) return null
+
   return (
     <section className="details__section">
       <p className="eyebrow">What to wear</p>
       <h2 className="section-title">Dress code</h2>
       <div className="dress">
         <p className="dress__headline">{dressCode.title}</p>
-        <p className="dress__body">{dressCode.body}</p>
-        <ul className="dress__notes">
-          {dressCode.notes.map((n) => (
-            <li key={n}>{n}</li>
-          ))}
-        </ul>
+        {dressCode.body && <p className="dress__body">{dressCode.body}</p>}
+        {dressCode.notes.length > 0 && (
+          <ul className="dress__notes">
+            {dressCode.notes.map((n) => (
+              <li key={n}>{n}</li>
+            ))}
+          </ul>
+        )}
       </div>
     </section>
   )
@@ -155,6 +160,8 @@ function DetailSection({ section }) {
 }
 
 function Staying() {
+  if (!STAYS.length) return null
+
   return (
     <section className="details__section">
       <p className="eyebrow">Somewhere to sleep</p>
@@ -190,7 +197,7 @@ function ComingSoon() {
         {DAY_DETAILS.comingSoon.map((c) => (
           <div className="soon__card" key={c.title}>
             <h3>{c.title}</h3>
-            <p>{c.note}</p>
+            {c.note && <p>{c.note}</p>}
           </div>
         ))}
       </div>
@@ -214,7 +221,7 @@ function Unlocked({ party }) {
         </div>
       )}
 
-      <p className="lede details__intro">{DAY_DETAILS.intro}</p>
+      {DAY_DETAILS.intro && <p className="lede details__intro">{DAY_DETAILS.intro}</p>}
 
       <RunOfDay />
       <DressCode />
