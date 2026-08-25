@@ -59,7 +59,7 @@ export function smsHref(phone, message) {
 
 export function mailtoHref(email, message) {
   if (!email) return ''
-  const subject = `${WEDDING.brideName} & ${WEDDING.groomName} — ${WEDDING.dateLong}`
+  const subject = `${WEDDING.brideName} & ${WEDDING.groomName}, ${WEDDING.dateLong}`
   return `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(
     subject
   )}&body=${encodeURIComponent(message)}`
