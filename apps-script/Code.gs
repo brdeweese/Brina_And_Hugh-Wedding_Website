@@ -517,11 +517,20 @@ function setupSheet() {
   people.getRange(1, 1, 1, people.getLastColumn()).setFontWeight('bold');
   people.setFrozenRows(1);
 
-  SpreadsheetApp.getUi().alert(
-    added.length
-      ? 'Added missing columns: ' + added.join(', ') + '.\n\nYour existing rows are untouched.'
-      : 'Tabs are ready.\n\nNext: Project Settings, Script Properties, add ADMIN_TOKEN with a passcode of your choosing. Optionally add NOTIFY_EMAIL to get an email on every RSVP.'
-  );
+  var summary = added.length
+    ? 'Added missing columns: ' + added.join(', ') + '. Your existing rows are untouched.'
+    : 'Tabs are ready. Next: Project Settings, Script Properties, add ADMIN_TOKEN with a passcode of your choosing. Optionally add NOTIFY_EMAIL to get an email on every RSVP.';
+
+  Logger.log(summary);
+
+  // Run from the Apps Script editor there is no spreadsheet UI attached and
+  // getUi() throws. The work above is already done by this point, so a failed
+  // popup must not surface as a failed run. The execution log has the summary.
+  try {
+    SpreadsheetApp.getUi().alert(summary);
+  } catch (err) {
+    // No UI available. Nothing to do.
+  }
 }
 
 /** Appends any expected header this tab does not already have. */
