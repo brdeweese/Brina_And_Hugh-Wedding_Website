@@ -8,7 +8,8 @@
 
 // Paste the Apps Script Web App URL here after step 4 of SETUP.md.
 // It looks like: https://script.google.com/macros/s/AKfy..../exec
-export const APPS_SCRIPT_URL = ''
+export const APPS_SCRIPT_URL =
+  'https://script.google.com/macros/s/AKfycbwH0DTx9tkKjecpJ8vLxGs_JtAsmVGkQ6Q4RGGq3z2j9bKoFkGAHxON_WHdKbip70Sh/exec'
 
 export const WEDDING = {
   brideName: 'Brina',
