@@ -3,6 +3,8 @@ import { WEDDING, SCHEDULE, FAQS, STAYS } from '../config.js'
 import Nav from './Nav.jsx'
 import Countdown from './Countdown.jsx'
 import SmartImage from './SmartImage.jsx'
+import Monogram from './Monogram.jsx'
+import OrdinalDate from './OrdinalDate.jsx'
 
 const rsvpHref = `${import.meta.env.BASE_URL}rsvp.html`
 
@@ -14,30 +16,30 @@ function Sprig() {
   )
 }
 
+/** Type only, set like the save the date. No photograph behind it. */
 function Hero() {
   return (
     <header className="hero" id="top">
-      <SmartImage
-        src="images/hero-proposal.jpg"
-        alt="Brina and Hugh at the moment of the proposal beside the lake at Glendalough"
-        className="hero__img"
-        placeholderLabel="Hero photo"
-        loading="eager"
-      />
-      <div className="hero__scrim" />
       <div className="hero__inner">
         <p className="hero__eyebrow">We are getting married</p>
+
         <h1 className="hero__names">
-          {WEDDING.brideName}
+          <span className="hero__name">{WEDDING.brideName}</span>
           <span className="hero__amp">and</span>
-          {WEDDING.groomName}
+          <span className="hero__name">{WEDDING.groomName}</span>
         </h1>
-        <div className="hero__meta">
-          <span>{WEDDING.dateShort}</span>
-          <span>
-            {WEDDING.venueName}, {WEDDING.venueArea}, {WEDDING.venueCity}
-          </span>
-        </div>
+
+        <p className="hero__date">
+          <OrdinalDate>{WEDDING.dateLong}</OrdinalDate>
+        </p>
+        <p className="hero__where">
+          {WEDDING.venueName}, {WEDDING.venueArea}
+          <br />
+          {WEDDING.venueCity}
+        </p>
+
+        <Monogram className="hero__seal" size={104} />
+
         <div className="hero__cta">
           <a className="btn" href={rsvpHref}>
             RSVP
@@ -51,9 +53,9 @@ function Hero() {
 function CountdownSection() {
   return (
     <section className="section center">
+      {/* The hero carries the date now, so repeating it here would be filler. */}
       <div className="wrap">
-        <p className="eyebrow">Save the date</p>
-        <h2 className="section-title">{WEDDING.dateLong}</h2>
+        <p className="eyebrow">Counting down</p>
         <Countdown />
       </div>
     </section>

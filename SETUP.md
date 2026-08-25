@@ -67,8 +67,10 @@ Drop these into `public/images/`, using exactly these filenames:
 | Filename                    | Where it appears                                          |
 | --------------------------- | --------------------------------------------------------- |
 | `proposal-watercolour.png`  | Our story. The watercolour of the proposal at Glendalough |
-| `hero-proposal.jpg`         | The photograph behind the names, full screen              |
 | `venue-illustration.png`    | The venue. The pub illustration from the save the date    |
+
+The opening screen is set type on cream paper, with no photograph behind it, so
+there is nothing to supply for it.
 
 Until a file is there the site shows a labelled placeholder rather than a broken
 image, so nothing looks wrong while you gather them.

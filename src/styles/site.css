@@ -15,8 +15,10 @@
   border-bottom: 1px solid transparent;
 }
 
+/* The hero is light, so the bar over it is dark on transparent. The only thing
+   that changes on scroll now is the backing, not the ink. */
 .nav--float {
-  color: #fff;
+  color: var(--ink);
 }
 
 .nav--solid {
@@ -61,16 +63,6 @@
   opacity: 1;
 }
 
-.nav--float .btn {
-  border-color: rgba(255, 255, 255, 0.8);
-  background: transparent;
-}
-
-.nav--float .btn:hover {
-  background: #fff;
-  color: var(--ink);
-}
-
 @media (max-width: 860px) {
   .nav__links a:not(.btn) {
     display: none;
@@ -79,108 +71,92 @@
 
 /* --- Hero ---------------------------------------------------------------- */
 
+/* Type only, set like the save the date. The warmth comes from the paper, not
+   from a photograph, so it sits in the same register as every other section. */
 .hero {
   position: relative;
   min-height: 100svh;
   display: grid;
   place-items: center;
   text-align: center;
-  color: #fff;
+  color: var(--ink);
   overflow: hidden;
-  /* Warm bronze rather than slate. This shows through wherever the photograph
-     does not reach, and is the whole backdrop until one is added. */
-  background: linear-gradient(158deg, #5c5340 0%, #3d382a 52%, #29251b 100%);
-}
-
-.hero__img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center 45%;
-}
-
-.hero__scrim {
-  position: absolute;
-  inset: 0;
-  /* Warm near-black, so darkening the photograph never cools it towards grey. */
+  /* Warms through the middle and resolves back to the page colour at the foot,
+     so there is no seam where the next section begins. */
   background: linear-gradient(
-    180deg,
-    rgba(38, 31, 21, 0.48) 0%,
-    rgba(38, 31, 21, 0.16) 35%,
-    rgba(38, 31, 21, 0.4) 75%,
-    rgba(38, 31, 21, 0.7) 100%
+    172deg,
+    var(--paper) 0%,
+    var(--gold-wash) 48%,
+    var(--ivory) 100%
   );
 }
 
 .hero__inner {
   position: relative;
-  padding: 7rem 1.5rem 5rem;
-  max-width: 820px;
+  padding: 7rem 1.5rem 4rem;
+  max-width: 720px;
 }
 
 .hero__eyebrow {
   font-family: var(--font-display);
   text-transform: uppercase;
   letter-spacing: 0.4em;
+  text-indent: 0.4em;
   font-size: clamp(0.7rem, 1.6vw, 0.85rem);
-  margin: 0 0 1.5rem;
-  opacity: 0.9;
+  color: var(--muted);
+  margin: 0 0 1.75rem;
 }
 
 .hero__names {
-  font-family: var(--font-script);
-  font-size: clamp(3.6rem, 13vw, 7.5rem);
-  line-height: 0.95;
   margin: 0;
-  color: #fff;
-  text-shadow: 0 2px 30px rgba(0, 0, 0, 0.35);
+  font-weight: 400;
+}
+
+.hero__name {
+  display: block;
+  font-family: var(--font-script);
+  font-size: clamp(3.4rem, 12vw, 6rem);
+  line-height: 1.02;
+  color: var(--gold);
 }
 
 .hero__amp {
   display: block;
-  font-family: var(--font-display);
-  font-style: italic;
-  font-size: clamp(1.2rem, 3vw, 1.8rem);
-  letter-spacing: 0.1em;
-  margin: 0.4rem 0;
-  opacity: 0.9;
+  font-family: var(--font-script);
+  font-size: clamp(1.6rem, 5vw, 2.4rem);
+  line-height: 1;
+  color: var(--gold);
+  margin: 0.2rem 0;
 }
 
-.hero__meta {
+.hero__date {
   margin: 2rem 0 0;
   font-family: var(--font-display);
   text-transform: uppercase;
-  letter-spacing: 0.3em;
-  font-size: clamp(0.8rem, 1.8vw, 1rem);
-}
-
-.hero__meta span {
-  display: block;
-}
-
-.hero__meta span + span {
-  margin-top: 0.6rem;
-  letter-spacing: 0.16em;
-  text-transform: none;
-  font-style: italic;
-  opacity: 0.9;
-}
-
-.hero__cta {
-  margin-top: 2.5rem;
-}
-
-.hero__cta .btn {
-  background: rgba(255, 255, 255, 0.95);
-  border-color: rgba(255, 255, 255, 0.95);
+  letter-spacing: 0.28em;
+  text-indent: 0.28em;
+  font-size: clamp(0.82rem, 2.2vw, 1rem);
+  font-weight: 500;
   color: var(--ink);
 }
 
-.hero__cta .btn:hover {
-  background: #fff;
-  border-color: #fff;
+.hero__where {
+  margin: 0.75rem 0 0;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: clamp(0.98rem, 2.4vw, 1.15rem);
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+
+.hero__seal {
+  display: block;
+  margin: 2rem auto 0;
+  color: var(--gold);
+}
+
+.hero__cta {
+  margin-top: 2.25rem;
 }
 
 /* --- Countdown ----------------------------------------------------------- */
@@ -503,22 +479,3 @@
   min-height: 240px;
 }
 
-/* In the hero the pale stripes would sit under the scrim and read as flat grey,
-   so here the pattern is gold on the warm backdrop instead. The label drops to
-   the bottom corner rather than sitting behind the names. Both disappear
-   entirely once the photograph is in place. */
-.hero .placeholder {
-  position: absolute;
-  inset: 0;
-  min-height: 0;
-  place-items: end start;
-  text-align: left;
-  padding: 1.25rem;
-  font-size: 0.72rem;
-  color: rgba(255, 250, 240, 0.55);
-  background: repeating-linear-gradient(
-    45deg,
-    rgba(201, 171, 104, 0.13) 0 14px,
-    rgba(201, 171, 104, 0.03) 14px 28px
-  );
-}

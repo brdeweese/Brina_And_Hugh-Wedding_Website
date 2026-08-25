@@ -95,6 +95,15 @@ a {
   color: var(--ink);
 }
 
+/* The raised "st" in "31st", as set on the save the date. Used on display
+   lines only; in running prose a raised ordinal reads as a typo. */
+.ordinal {
+  font-size: 0.62em;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  top: -0.55em;
+}
+
 .lede {
   font-family: var(--font-display);
   font-size: clamp(1.1rem, 2.2vw, 1.35rem);
