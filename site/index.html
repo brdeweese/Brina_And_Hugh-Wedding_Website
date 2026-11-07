@@ -163,6 +163,19 @@ p { margin: 0; }
 .arch { overflow: visible; width: min(760px, 96vw, 75svh); height: auto; margin-top: -.4rem; margin-bottom: -.6rem; transition: opacity .6s ease; }
 .arch text { font-family: var(--f-script); font-size: 96px; fill: var(--ivory); }
 .overlay.revealing .mail-from, .overlay.revealing .arch, .overlay.revealing .skip { opacity: 0; pointer-events: none; }
+/* the overlay covers only the part of the screen that is visible, so with a phone keyboard open it centres above the keyboard */
+.overlay { top: var(--vvt, 0px); bottom: auto; height: var(--vvh, 100%); box-sizing: border-box; grid-template-columns: minmax(0, 1fr); }
+/* on a computer these wrappers don't change the layout */
+.env-stage, .overlay-head { display: contents; }
+@media (max-width: 560px) {
+  /* on a phone the envelope itself sits in the middle of the screen, with the heading above it and the buttons below */
+  .env-stage { display: flex; flex-direction: column; align-items: center; position: relative; width: 100%; }
+  .overlay-head { display: flex; flex-direction: column; align-items: center; position: absolute; left: 0; right: 0; bottom: 100%; margin-bottom: .5rem; }
+  .overlay .envelope { width: min(100%, calc(var(--vvh, 100svh) * .78)); margin-top: 0; }
+  /* clear of the envelope once it has settled lower to show the card */
+  .invite-actions { position: absolute; left: 0; right: 0; top: 100%; margin-top: calc(10% + .6rem); }
+  .skip { position: absolute; top: 100%; left: 50%; translate: -50% 0; margin-top: .8rem; white-space: nowrap; }
+}
 
 .envelope {
   position: relative; display: block;
@@ -320,8 +333,8 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .hero-btn.primary { color: var(--brass-hi); background: rgba(201,168,108,.12); }
 @media (max-width: 560px) {
   .hero .inner { padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px)); }
-  /* on a phone the writing is smaller and sits near the top, just under the replay button, so the couple in the video stay in clear view */
-  .hero-text { top: 3.6rem; transform: none; }
+  /* on a phone the writing is smaller and sits near the top, so the couple in the video stay in clear view */
+  .hero-text { top: 1.6rem; transform: none; }
   .hero-invite { font-size: 1rem; }
   .hero h1 { font-size: clamp(2.3rem, 11vw, 2.7rem); line-height: 1.05; white-space: nowrap; }
 }
@@ -512,8 +525,12 @@ footer .foot-place { font-style: italic; font-size: clamp(1.1rem, 2.6vw, 1.3rem)
   :root { --nav-h: 94px; }
   .tabs-inner { flex-wrap: wrap; justify-content: center; gap: 0 .2rem; overflow-x: visible; padding-block: .2rem; }
   footer .foot-date { letter-spacing: .1em; }
-  /* on a phone the replay button tucks under the tabs, clear of the RSVP and Schedule buttons */
-  .replay { bottom: auto; top: calc(var(--nav-h) + 12px + env(safe-area-inset-top, 0px)); padding: .4rem .9rem; font-size: .8rem; letter-spacing: .14em; }
+  /* on a phone the replay button is small and sits in the bottom corner, below the RSVP and Schedule buttons */
+  .replay {
+    right: calc(10px + env(safe-area-inset-right, 0px)); bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+    min-height: 32px; padding: .2rem .7rem; gap: .35rem; font-size: .68rem; letter-spacing: .12em;
+  }
+  .replay svg { width: 12px; height: 12px; }
   .timeline::before { left: 5.6rem; }
   .timeline li { grid-template-columns: 4.6rem minmax(0, 1fr); gap: 2rem; }
   .timeline li::before { left: calc(5.6rem - 10px); width: 20px; height: 20px; }
@@ -719,11 +736,14 @@ footer .foot-place { font-style: italic; font-size: clamp(1.1rem, 2.6vw, 1.3rem)
   <div class="overlay-bg" aria-hidden="true"></div>
   <div class="fog" aria-hidden="true"></div>
   <div class="overlay-inner">
+    <div class="env-stage">
+    <div class="overlay-head">
     <p class="mail-from">You've got mail from</p>
     <svg class="arch" viewBox="0 0 760 170" aria-label="Brina and Hugh" role="img">
       <path id="archPath" d="M40 160 Q380 40 720 160" fill="none"/>
       <text text-anchor="middle"><textPath href="#archPath" startOffset="50%">Brina <tspan class="amp-alt">&amp;</tspan> Hugh</textPath></text>
     </svg>
+    </div>
     <div class="envelope" id="envelope" role="button" tabindex="0" aria-label="Open the envelope">
       <span class="env-back" aria-hidden="true"><img src="img/env-inside.jpg" alt="" width="896" height="648"></span>
       <div class="card" id="inviteCard">
@@ -744,6 +764,7 @@ footer .foot-place { font-style: italic; font-size: clamp(1.1rem, 2.6vw, 1.3rem)
       <button class="btn-ghost" id="enterBtn" type="button">Enter</button>
     </div>
     <button class="skip" id="skip" type="button" hidden>Skip to the website</button>
+    </div>
   </div>
   <div class="fog-thick" aria-hidden="true"></div>
 </div>
@@ -990,6 +1011,8 @@ footer .foot-place { font-style: italic; font-size: clamp(1.1rem, 2.6vw, 1.3rem)
 <script>
 (function () {
   var root = document.documentElement;
+  // don't let a reload drop the visitor halfway down the page
+  try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; } catch (e) {}
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var T = function (ms) { return reduce ? 0 : ms; };
 
@@ -1060,12 +1083,23 @@ footer .foot-place { font-style: italic; font-size: clamp(1.1rem, 2.6vw, 1.3rem)
       playFromStart();
       overlay.classList.add('gone');
       root.classList.remove('sealed');
+      // the site opens at the very top, on the video, whatever the keyboard or browser did to the scroll position
+      window.scrollTo(0, 0);
       replay.hidden = false;
       var h = document.getElementById('top');
       if (h && !h.closest('[hidden]')) h.focus({ preventScroll: true });
-      setTimeout(function () { overlay.hidden = true; }, T(1400));
+      setTimeout(function () { overlay.hidden = true; window.scrollTo(0, 0); }, T(1400));
     }, T(1000));
   }
+  var touchy = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+  // keep the envelope in the part of the screen that's visible, above a phone's keyboard
+  var vv = window.visualViewport;
+  function fitOverlay() {
+    if (!vv) return;
+    root.style.setProperty('--vvh', vv.height + 'px');
+    root.style.setProperty('--vvt', vv.offsetTop + 'px');
+  }
+  if (vv) { fitOverlay(); vv.addEventListener('resize', fitOverlay); vv.addEventListener('scroll', fitOverlay); }
   var pwForm = document.getElementById('pwForm');
   var pwInput = document.getElementById('pwInput');
   var pwMsg = document.getElementById('pwMsg');
@@ -1075,6 +1109,9 @@ footer .foot-place { font-style: italic; font-size: clamp(1.1rem, 2.6vw, 1.3rem)
     env.classList.add('opened');
     env.removeAttribute('tabindex'); env.removeAttribute('role'); env.removeAttribute('aria-label');
     env.classList.add('s1');
+    // Phones only open the keyboard for a box focused during the tap itself, so the password box takes focus now.
+    // Its cursor stays out of sight until the card has landed and asks for the password.
+    if (touchy) { pwInput.tabIndex = 0; pwInput.focus({ preventScroll: true }); }
     setTimeout(function () { env.classList.add('s2'); }, T(380));
     setTimeout(function () { env.classList.add('s3'); overlay.classList.add('revealing'); }, T(1250));
     setTimeout(function () { env.classList.add('s4'); overlay.classList.add('revealing'); }, T(2850));
@@ -1084,7 +1121,12 @@ footer .foot-place { font-style: italic; font-size: clamp(1.1rem, 2.6vw, 1.3rem)
       pwInput.focus({ preventScroll: true });
     }, T(4000));
   }
-  env.addEventListener('click', function (e) { if (!e.target.closest('.pw-form')) openEnvelope(); });
+  env.addEventListener('click', function (e) {
+    if (e.target.closest('.pw-form')) return;
+    // once the card is asking for the password, a tap anywhere on it brings the cursor and keyboard back
+    if (overlay.classList.contains('holding')) { pwInput.focus({ preventScroll: true }); return; }
+    openEnvelope();
+  });
   env.addEventListener('keydown', function (e) {
     if (env.classList.contains('opened')) return;
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openEnvelope(); }
