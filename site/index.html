@@ -226,7 +226,7 @@ p { margin: 0; }
   color: #4f5e3c; caret-color: #8f4a45;
 }
 .pw-form input::selection { background: rgba(143,74,69,.22); color: #4f5e3c; }
-.pw-msg { margin: 3.4cqw 0 0; min-height: 1.4em; text-align: center; font: italic 2.6cqw var(--f-body); color: #8f4a45; }
+.pw-msg { margin: 3.4cqw 0 0; min-height: 1.4em; text-align: center; font: italic max(12px, 2.6cqw) var(--f-body); color: #8f4a45; }
 .pw-form.wrong input { animation: pwShake .4s ease; }
 @keyframes pwShake { 0%,100% { translate: 0 } 25% { translate: -1.2cqw } 75% { translate: 1.2cqw } }
 
@@ -1109,17 +1109,18 @@ footer .foot-place { font-style: italic; font-size: clamp(1.1rem, 2.6vw, 1.3rem)
     env.classList.add('opened');
     env.removeAttribute('tabindex'); env.removeAttribute('role'); env.removeAttribute('aria-label');
     env.classList.add('s1');
-    // Phones only open the keyboard for a box focused during the tap itself, so the password box takes focus now.
-    // Its cursor stays out of sight until the card has landed and asks for the password.
-    if (touchy) { pwInput.tabIndex = 0; pwInput.focus({ preventScroll: true }); }
     setTimeout(function () { env.classList.add('s2'); }, T(380));
     setTimeout(function () { env.classList.add('s3'); overlay.classList.add('revealing'); }, T(1250));
     setTimeout(function () { env.classList.add('s4'); overlay.classList.add('revealing'); }, T(2850));
     setTimeout(function () {
+      // only now, with the card settled, does the password line take the cursor
       overlay.classList.add('holding');
       pwInput.tabIndex = 0;
       pwInput.focus({ preventScroll: true });
+      // iPhones open the keyboard only for a tap, so phones are asked to tap the card
+      if (touchy && !pwInput.value) pwMsg.textContent = 'Tap the line to type the password';
     }, T(4000));
+  pwInput.addEventListener('input', function () { if (pwMsg.textContent === 'Tap the line to type the password') pwMsg.textContent = ''; });
   }
   env.addEventListener('click', function (e) {
     if (e.target.closest('.pw-form')) return;
