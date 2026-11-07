@@ -8,10 +8,28 @@
 <link rel="icon" href="img/seal.webp" type="image/webp">
 <style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
 <title>Brina &amp; Hugh</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+SC:wght@400;500;600&amp;family=EB+Garamond:ital,wght@0,400;0,500;1,400&amp;family=Pinyon+Script&amp;display=swap">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Great+Vibes&amp;text=%26&amp;display=swap">
+<!-- the fonts live with the site and the ones on the first screen are fetched straight away -->
+<link rel="preload" href="fonts/PinyonScript-normal-400-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/GreatVibes-normal-400-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/EBGaramond-italic-400-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/CormorantSC-normal-500-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="fonts/fonts.css">
+<!-- keep the opening screen hidden until its fonts are ready, so it never shows a stand-in font first -->
+<script>
+document.documentElement.classList.add('fonts-wait');
+(function () {
+  function show() { document.documentElement.classList.remove('fonts-wait'); }
+  setTimeout(show, 2500);
+  if (document.fonts && document.fonts.load) {
+    Promise.all([
+      document.fonts.load('96px "Pinyon Script"', 'Brina Hugh'),
+      document.fonts.load('96px "Great Vibes"', '&'),
+      document.fonts.load('italic 400 20px "EB Garamond"', 'You'),
+      document.fonts.load('500 16px "Cormorant SC"', 'Enter')
+    ]).then(function () { return document.fonts.ready; }).then(show, show);
+  } else show();
+})();
+</script>
 <style>
 /* Layout: a cream envelope with an ornate wax seal opens onto a cream rose-lace invitation, which holds, then dissolves into fog over the proposal video. Tabs switch between Home, Schedule, Venue & Stay, and a lock-and-key RSVP. Single dark look by choice. */
 :root {
@@ -139,7 +157,8 @@ p { margin: 0; }
 .overlay .fog-thick { z-index: 5; }
 .overlay.washing .fog-thick { opacity: 1; }
 .overlay.gone { opacity: 0; visibility: hidden; }
-.overlay-inner { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 2px; width: 100%; }
+.overlay-inner { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 2px; width: 100%; transition: opacity .6s ease; }
+.fonts-wait .overlay-inner, .fonts-wait .page { opacity: 0; }
 .mail-from { font-style: italic; color: var(--blush); font-size: clamp(1.3rem, min(4vw, 3.6svh), 2rem); line-height: 1.2; transition: opacity .6s ease; }
 .arch { overflow: visible; width: min(760px, 96vw, 75svh); height: auto; margin-top: -.4rem; margin-bottom: -.6rem; transition: opacity .6s ease; }
 .arch text { font-family: var(--f-script); font-size: 96px; fill: var(--ivory); }
@@ -301,8 +320,10 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .hero-btn.primary { color: var(--brass-hi); background: rgba(201,168,108,.12); }
 @media (max-width: 560px) {
   .hero .inner { padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px)); }
-  /* on a phone the names start below the replay button, so a short screen never puts the two on top of each other */
-  .hero-text { top: max(3.8rem, calc(31svh - var(--nav-h) - 5rem)); transform: none; }
+  /* on a phone the writing is smaller and sits near the top, just under the replay button, so the couple in the video stay in clear view */
+  .hero-text { top: 3.6rem; transform: none; }
+  .hero-invite { font-size: 1rem; }
+  .hero h1 { font-size: clamp(2.3rem, 11vw, 2.7rem); line-height: 1.05; white-space: nowrap; }
 }
 
 /* Schedule */
@@ -508,14 +529,18 @@ footer .foot-place { font-style: italic; font-size: clamp(1.1rem, 2.6vw, 1.3rem)
 .rsvp-bg video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .rsvp-shade { position: absolute; inset: 0; background: rgba(9,15,11,.74); transition: background 1.8s ease; }
 .rsvp-bg.playing .rsvp-shade { background: rgba(9,15,11,.12); }
-.rsvp-bg.done .rsvp-shade { background: linear-gradient(180deg, rgba(9,15,11,.12), rgba(9,15,11,.3)); }
+/* once the walk is over the bottom of the lake darkens a little for the reply; a layer fades in, so nothing snaps */
+.rsvp-shade::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(9,15,11,0), rgba(9,15,11,.2)); opacity: 0; transition: opacity 1.8s ease; }
+.rsvp-bg.done .rsvp-shade { background: rgba(9,15,11,.12); }
+.rsvp-bg.done .rsvp-shade::after { opacity: 1; }
 .rsvp { background: transparent; }
 .rsvp-intro { display: flex; flex-direction: column; align-items: center; gap: 1.2rem; width: 100%; min-height: calc(100svh - var(--nav-h) - clamp(8rem, 20vw, 14rem)); justify-content: center; transition: opacity 1s ease, filter 1s ease; }
 .rsvp.playing .rsvp-intro { opacity: 0; filter: blur(6px); pointer-events: none; }
 .rsvp.playing .admin { opacity: 0; pointer-events: none; }
 .admin { transition: opacity .8s ease; }
-.rsvp-card.fade-in { animation: cardIn .6s ease-out both; }
-@keyframes cardIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+/* the reply fades in where it will stay, without sliding */
+.rsvp-card.fade-in { animation: cardIn .8s ease-out both; }
+@keyframes cardIn { from { opacity: 0; } to { opacity: 1; } }
 
 /* ---------- RSVP card, styled after the invitation ---------- */
 :root { --inv-red: #93554f; --inv-green: #55663f; --inv-paper: #f3ecdb; }
@@ -1012,6 +1037,9 @@ footer .foot-place { font-style: italic; font-size: clamp(1.1rem, 2.6vw, 1.3rem)
     if (p && p.catch) p.catch(function () {});
   }
   vid.addEventListener('ended', function () { replay.classList.add('ended'); });
+  // swap the poster picture for the video's own sharp first frame as soon as it has loaded
+  function showFirstFrame() { if (vid.paused && vid.currentTime === 0) { try { vid.currentTime = 0.001; } catch (e) {} } }
+  if (vid.readyState >= 2) showFirstFrame(); else vid.addEventListener('loadeddata', showFirstFrame, { once: true });
   replay.addEventListener('click', playFromStart);
 
   /* ---------- Envelope and invitation ---------- */
@@ -1028,12 +1056,14 @@ footer .foot-place { font-style: italic; font-size: clamp(1.1rem, 2.6vw, 1.3rem)
     clearTimeout(autoTimer);
     overlay.classList.add('washing');
     setTimeout(function () {
+      // the video starts moving as the fog lifts, so it never sits still behind the clearing mist
+      playFromStart();
       overlay.classList.add('gone');
       root.classList.remove('sealed');
       replay.hidden = false;
       var h = document.getElementById('top');
       if (h && !h.closest('[hidden]')) h.focus({ preventScroll: true });
-      setTimeout(function () { overlay.hidden = true; playFromStart(); }, T(1400));
+      setTimeout(function () { overlay.hidden = true; }, T(1400));
     }, T(1000));
   }
   var pwForm = document.getElementById('pwForm');
