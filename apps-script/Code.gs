@@ -5,546 +5,317 @@
  * spreadsheet, then follow SETUP.md. Run setupSheet() once to build the tabs.
  *
  * Two tabs are used:
- *   Parties - one row per invitation (a single person, a couple, a family).
- *   People  - one row per individual seat, linked to a party by its code.
+ *   Guests  - one row per invitation. Guests unlock the RSVP by typing the
+ *             name in `name` (or `partner`, for a couple) on the website.
+ *   Replies - one row per invitation that has replied. A reply sent again
+ *             overwrites the row, and the previous answers are kept in
+ *             `history_json`.
+ *
+ * Script properties (Project Settings > Script Properties):
+ *   ADMIN_TOKEN   required. The passcode that opens the guest list on the site.
+ *   NOTIFY_EMAIL  optional. You get an email every time somebody replies.
  */
 
-var TAB_PARTIES = 'Parties';
-var TAB_PEOPLE = 'People';
+var TAB_GUESTS = 'Guests';
+var TAB_REPLIES = 'Replies';
 
-var PARTY_HEADERS = [
-  'code',
-  'party_name',
-  'invite_type',
-  'email',
-  'phone',
-  'preferred_contact',
-  'allow_plus_one',
-  'invite_sent_at',
-  'status',
-  'responded_at',
+var GUEST_HEADERS = ['id', 'name', 'type', 'partner', 'added_at'];
+var REPLY_HEADERS = [
+  'invite_id',
+  'invited_as',
+  'summary',
+  'attending_count',
   'songs',
-  'message',
-  'notes',
+  'comments',
+  'created_at',
+  'updated_at',
+  'revisions',
+  'people_json',
+  'history_json',
 ];
 
-var PEOPLE_HEADERS = [
-  'code',
-  'person_id',
-  'name',
-  'is_plus_one',
-  'attending',
-  'meal',
-  'dietary',
-  'dietary_notes',
-];
+var TYPES = ['single', 'plus_one', 'couple'];
+var DIETS = ['No dietary requirements', 'Vegetarian', 'Vegan', 'Pescatarian', 'Gluten-free', 'Dairy-free', 'Nut allergy', 'Other'];
+
+// Replies can be sent and changed until the end of 1 June 2027, Irish time.
+var DEADLINE = new Date('2027-06-02T00:00:00+01:00');
 
 // ---------------------------------------------------------------------------
 // Web app entry points
 // ---------------------------------------------------------------------------
 
-function doGet(e) {
-  // A plain browser visit lands here. Useful for checking the deployment works.
-  return json({ ok: true, data: { service: 'brina-and-hugh-rsvp', ready: true } });
+function doGet() {
+  return json({ ok: true, data: 'Brina & Hugh RSVP backend is running.' });
 }
 
 function doPost(e) {
   try {
-    var body = {};
-    if (e && e.postData && e.postData.contents) {
-      body = JSON.parse(e.postData.contents);
-    }
+    var body = JSON.parse((e && e.postData && e.postData.contents) || '{}');
     var action = body.action;
 
-    if (action === 'getParty') return json({ ok: true, data: getParty(body.code) });
+    if (action === 'findGuest') return json({ ok: true, data: findGuest(body.name) });
     if (action === 'submitRsvp') return json({ ok: true, data: submitRsvp(body) });
 
-    // Everything below is admin only.
     if (action === 'adminList') {
       requireAdmin(body.token);
       return json({ ok: true, data: adminList() });
     }
-    if (action === 'adminUpdateParty') {
+    if (action === 'adminAddGuest') {
       requireAdmin(body.token);
-      return json({ ok: true, data: adminUpdateParty(body.code, body.fields || {}) });
+      return json({ ok: true, data: adminAddGuest(body) });
     }
-    if (action === 'adminAddParty') {
+    if (action === 'adminRemoveGuest') {
       requireAdmin(body.token);
-      return json({ ok: true, data: adminAddParty(body.party || {}) });
+      return json({ ok: true, data: adminRemoveGuest(body.id) });
     }
 
     return json({ ok: false, error: 'Unknown action.' });
   } catch (err) {
-    return json({ ok: false, error: String((err && err.message) || err) });
+    return json({ ok: false, error: err && err.userMessage ? err.userMessage : 'Something went wrong. Please try again.', code: err && err.code });
   }
 }
 
 function json(obj) {
-  return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(
-    ContentService.MimeType.JSON
-  );
+  return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
+}
+
+function fail(message, code) {
+  var e = new Error(message);
+  e.userMessage = message;
+  e.code = code || 'error';
+  throw e;
 }
 
 // ---------------------------------------------------------------------------
 // Sheet helpers
 // ---------------------------------------------------------------------------
 
-function ss() {
-  return SpreadsheetApp.getActiveSpreadsheet();
-}
-
 function sheet(name) {
-  var s = ss().getSheetByName(name);
-  if (!s) throw new Error('Missing tab "' + name + '". Run setupSheet() once.');
+  var s = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(name);
+  if (!s) fail('The guest list is not set up yet.', 'not_setup');
   return s;
 }
 
-/** Reads a whole tab into {headers, rows:[{col:value}], index:{col:n}}. */
+/** Reads a tab into { headers, rows } where each row has its 1-based sheet row number in `_row`. */
 function readTab(name) {
   var s = sheet(name);
   var values = s.getDataRange().getValues();
-  if (!values.length) return { headers: [], rows: [], index: {}, sheet: s };
-
-  var headers = values[0].map(function (h) {
-    return String(h).trim();
-  });
-  var index = {};
-  headers.forEach(function (h, i) {
-    index[h] = i;
-  });
-
+  var headers = values[0].map(function (h) { return String(h).trim(); });
   var rows = [];
-  for (var r = 1; r < values.length; r++) {
-    var raw = values[r];
-    // Skip fully blank rows so stray whitespace in the sheet is harmless.
-    var hasValue = raw.some(function (v) {
-      return String(v).trim() !== '';
-    });
-    if (!hasValue) continue;
-
-    var obj = { _rowNumber: r + 1 };
-    headers.forEach(function (h, i) {
-      obj[h] = raw[i];
-    });
-    rows.push(obj);
+  for (var i = 1; i < values.length; i++) {
+    var raw = values[i];
+    if (!raw.some(function (v) { return v !== '' && v !== null; })) continue;
+    var o = { _row: i + 1 };
+    headers.forEach(function (h, j) { o[h] = raw[j] instanceof Date ? raw[j].toISOString() : raw[j]; });
+    rows.push(o);
   }
-  return { headers: headers, rows: rows, index: index, sheet: s };
+  return { sheet: s, headers: headers, rows: rows };
 }
 
-function truthy(v) {
-  var s = String(v).trim().toLowerCase();
-  return s === 'true' || s === 'yes' || s === 'y' || s === '1';
+function writeRow(tab, rowNumber, record) {
+  var line = tab.headers.map(function (h) { return record[h] === undefined ? '' : record[h]; });
+  if (rowNumber) tab.sheet.getRange(rowNumber, 1, 1, line.length).setValues([line]);
+  else tab.sheet.appendRow(line);
 }
 
-function isoNow() {
-  return Utilities.formatDate(new Date(), 'Europe/Dublin', "yyyy-MM-dd'T'HH:mm:ssXXX");
+function clean(v, max) {
+  return String(v === undefined || v === null ? '' : v).trim().slice(0, max || 200);
 }
 
-function clean(v) {
-  return String(v == null ? '' : v).trim();
+/** Same matching rule as the website: accents, case and punctuation are ignored. */
+function norm(s) {
+  return String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
 }
 
-/** Dates come back from the sheet as Date objects; send strings to the browser. */
-function serialize(v) {
-  if (v instanceof Date) {
-    return Utilities.formatDate(v, 'Europe/Dublin', "yyyy-MM-dd'T'HH:mm:ssXXX");
-  }
-  return clean(v);
+function parseJson(s, fallback) {
+  try { return s ? JSON.parse(s) : fallback; } catch (e) { return fallback; }
 }
 
-function requireAdmin(token) {
-  var expected = PropertiesService.getScriptProperties().getProperty('ADMIN_TOKEN');
-  if (!expected) throw new Error('No ADMIN_TOKEN set on the script. See SETUP.md.');
-  if (clean(token) !== expected) throw new Error('Wrong passcode.');
+function guestOut(r) {
+  return { id: String(r.id), name: String(r.name), type: String(r.type || 'single'), partner: String(r.partner || '') };
 }
 
-function findPartyRow(parties, code) {
-  var wanted = clean(code).toUpperCase();
-  for (var i = 0; i < parties.rows.length; i++) {
-    if (clean(parties.rows[i].code).toUpperCase() === wanted) return parties.rows[i];
+function replyOut(r) {
+  return {
+    inviteId: String(r.invite_id),
+    invitedAs: String(r.invited_as),
+    people: parseJson(r.people_json, []),
+    songs: String(r.songs || ''),
+    comments: String(r.comments || ''),
+    createdAt: String(r.created_at || ''),
+    updatedAt: String(r.updated_at || ''),
+    revisions: Number(r.revisions) || 0,
+  };
+}
+
+function matchGuest(rows, name) {
+  var k = norm(name);
+  if (!k) return null;
+  for (var i = 0; i < rows.length; i++) {
+    var g = rows[i];
+    if (norm(g.name) === k) return { row: g, typedPartner: false };
+    if (String(g.type) === 'couple' && norm(g.partner) === k) return { row: g, typedPartner: true };
   }
   return null;
 }
 
-function setPartyCells(parties, rowNumber, fields) {
-  Object.keys(fields).forEach(function (col) {
-    if (col in parties.index) {
-      parties.sheet.getRange(rowNumber, parties.index[col] + 1).setValue(fields[col]);
-    }
-  });
+function requireAdmin(token) {
+  var real = PropertiesService.getScriptProperties().getProperty('ADMIN_TOKEN');
+  if (!real) fail('Set ADMIN_TOKEN in the Apps Script project settings first.', 'no_token');
+  if (String(token || '') !== real) fail('That passcode isn’t right.', 'bad_token');
 }
 
 // ---------------------------------------------------------------------------
-// Public actions
+// Guest actions
 // ---------------------------------------------------------------------------
 
-function getParty(code) {
-  var wanted = clean(code).toUpperCase();
-  if (!wanted) throw new Error('Please enter your invitation code.');
-
-  var parties = readTab(TAB_PARTIES);
-  var match = findPartyRow(parties, wanted);
-  if (!match) {
-    throw new Error(
-      'We could not find that invitation code. Check it against your message, or get in touch and we will sort it out.'
-    );
-  }
-
-  var people = readTab(TAB_PEOPLE)
-    .rows.filter(function (p) {
-      return clean(p.code).toUpperCase() === wanted;
-    })
-    .map(function (p) {
-      return {
-        person_id: clean(p.person_id),
-        name: clean(p.name),
-        is_plus_one: truthy(p.is_plus_one),
-        attending: clean(p.attending).toLowerCase(),
-        meal: clean(p.meal),
-        dietary: clean(p.dietary),
-        dietary_notes: clean(p.dietary_notes),
-      };
-    });
-
-  // Deliberately does not return email, phone or the private notes column.
-  return {
-    code: clean(match.code).toUpperCase(),
-    party_name: clean(match.party_name),
-    invite_type: clean(match.invite_type),
-    allow_plus_one: truthy(match.allow_plus_one),
-    status: clean(match.status).toLowerCase() || 'pending',
-    responded_at: serialize(match.responded_at),
-    songs: clean(match.songs),
-    message: clean(match.message),
-    people: people,
-  };
+/** A guest types their name. Returns their invitation and any earlier reply, or a not_found error. */
+function findGuest(name) {
+  var hit = matchGuest(readTab(TAB_GUESTS).rows, name);
+  if (!hit) fail('We couldn’t find that name on the guest list. Please type it as it appears on your invitation.', 'not_found');
+  var g = guestOut(hit.row);
+  var reply = null;
+  readTab(TAB_REPLIES).rows.forEach(function (r) { if (String(r.invite_id) === g.id) reply = replyOut(r); });
+  return { invite: g, typedPartner: hit.typedPartner, reply: reply };
 }
 
+/** Save or update a reply. The guest's typed name must still match the invitation. */
 function submitRsvp(body) {
+  if (Date.now() >= DEADLINE.getTime()) fail('Replies closed on 1 June 2027. Please contact Brina & Hugh directly.', 'closed');
+
+  var hit = matchGuest(readTab(TAB_GUESTS).rows, body.name);
+  if (!hit || String(hit.row.id) !== String(body.inviteId)) fail('We couldn’t match this reply to an invitation. Please type your name again.', 'not_found');
+  var g = guestOut(hit.row);
+
+  var seats = g.type === 'single' ? 1 : 2;
+  var people = (Array.isArray(body.people) ? body.people : []).slice(0, seats).map(function (p, i) {
+    var fixedName = i === 0 ? (hit.typedPartner ? g.partner : g.name) : (g.type === 'couple' ? (hit.typedPartner ? g.name : g.partner) : null);
+    var dietary = (Array.isArray(p.dietary) ? p.dietary : []).filter(function (d) { return DIETS.indexOf(d) >= 0; });
+    return {
+      name: fixedName || clean(p.name, 80) || ('Guest of ' + (hit.typedPartner ? g.partner : g.name)),
+      attending: p.attending === true,
+      dietary: dietary,
+      dietaryOther: dietary.indexOf('Other') >= 0 ? clean(p.dietaryOther, 200) : '',
+    };
+  });
+  if (!people.length) fail('Please answer for everyone on the invitation.', 'bad_request');
+
   var lock = LockService.getScriptLock();
   lock.waitLock(20000);
   try {
-    var wanted = clean(body.code).toUpperCase();
-    if (!wanted) throw new Error('Missing invitation code.');
+    var tab = readTab(TAB_REPLIES);
+    var prev = null;
+    tab.rows.forEach(function (r) { if (String(r.invite_id) === g.id) prev = r; });
+    var now = new Date().toISOString();
+    var history = prev ? parseJson(prev.history_json, []).slice(-4) : [];
+    if (prev) history.push({ people: parseJson(prev.people_json, []), songs: prev.songs, comments: prev.comments, savedAt: prev.updated_at });
 
-    var parties = readTab(TAB_PARTIES);
-    var partyRow = findPartyRow(parties, wanted);
-    if (!partyRow) throw new Error('We could not find that invitation code.');
-
-    var peopleTab = readTab(TAB_PEOPLE);
-    var seats = peopleTab.rows.filter(function (p) {
-      return clean(p.code).toUpperCase() === wanted;
-    });
-
-    var submitted = body.people || [];
-    var attendingCount = 0;
-
-    seats.forEach(function (target) {
-      var pid = clean(target.person_id);
-      var sub = null;
-      for (var i = 0; i < submitted.length; i++) {
-        if (clean(submitted[i].person_id) === pid) {
-          sub = submitted[i];
-          break;
-        }
-      }
-      // A seat the guest did not answer for counts as a no rather than being
-      // left ambiguous. Iterating over the sheet's seats, not the request's,
-      // means a guest cannot invent extra seats by editing the payload.
-      if (!sub) sub = { attending: 'no' };
-
-      var attending = clean(sub.attending).toLowerCase() === 'yes' ? 'yes' : 'no';
-      if (attending === 'yes') attendingCount++;
-
-      var values = {
-        attending: attending,
-        meal: attending === 'yes' ? clean(sub.meal) : '',
-        dietary: attending === 'yes' ? clean(sub.dietary) : '',
-        dietary_notes: attending === 'yes' ? clean(sub.dietary_notes) : '',
-      };
-      // A plus one supplies their own name; a named guest cannot rename themselves.
-      if (truthy(target.is_plus_one)) {
-        values.name = clean(sub.name);
-      }
-
-      Object.keys(values).forEach(function (col) {
-        if (col in peopleTab.index) {
-          peopleTab.sheet.getRange(target._rowNumber, peopleTab.index[col] + 1).setValue(values[col]);
-        }
-      });
-    });
-
-    var status =
-      attendingCount === 0 ? 'declined' : attendingCount === seats.length ? 'attending' : 'partial';
-    var stamp = isoNow();
-
-    setPartyCells(parties, partyRow._rowNumber, {
-      status: status,
-      responded_at: stamp,
-      songs: clean(body.songs),
-      message: clean(body.message),
-    });
-
-    notifyCouple(wanted, clean(partyRow.party_name), status, attendingCount, {
-      message: clean(body.message),
-      songs: clean(body.songs),
-    });
-
-    return { status: status, attending: attendingCount, seats: seats.length, responded_at: stamp };
+    var record = {
+      invite_id: g.id,
+      invited_as: g.name,
+      summary: people.map(summaryLine).join('\n'),
+      attending_count: people.filter(function (p) { return p.attending; }).length,
+      songs: clean(body.songs, 2000),
+      comments: clean(body.comments, 2000),
+      created_at: prev ? prev.created_at : now,
+      updated_at: now,
+      revisions: prev ? (Number(prev.revisions) || 0) + 1 : 0,
+      people_json: JSON.stringify(people),
+      history_json: JSON.stringify(history),
+    };
+    writeRow(tab, prev ? prev._row : null, record);
+    notify(record, !!prev);
+    return replyOut(record);
   } finally {
     lock.releaseLock();
   }
 }
 
-/**
- * Optional. Set a NOTIFY_EMAIL script property to get a note whenever someone
- * responds. A failure here must never break a guest's RSVP, hence the catch.
- */
-function notifyCouple(code, partyName, status, attendingCount, extras) {
+function summaryLine(p) {
+  if (!p.attending) return p.name + ': declines';
+  var d = p.dietary.filter(function (x) { return x !== 'Other'; });
+  if (p.dietaryOther) d.push(p.dietaryOther);
+  return p.name + ': attending' + (d.length ? ' (' + d.join(', ') + ')' : '');
+}
+
+function notify(record, changed) {
+  var to = PropertiesService.getScriptProperties().getProperty('NOTIFY_EMAIL');
+  if (!to) return;
   try {
-    var to = PropertiesService.getScriptProperties().getProperty('NOTIFY_EMAIL');
-    if (!to) return;
-    var verb = status === 'declined' ? 'sent their apologies' : 'responded';
-    var lines = [
-      partyName + ' (' + code + ') ' + verb + '.',
-      'Status: ' + status,
-      'Attending: ' + attendingCount,
-    ];
-    if (extras && extras.songs) lines.push('', 'Songs to dance to:', extras.songs);
-    if (extras && extras.message) lines.push('', 'Their message:', extras.message);
-    MailApp.sendEmail(to, 'RSVP: ' + partyName + ' - ' + status, lines.join('\n'));
-  } catch (err) {
-    // Ignored on purpose.
+    MailApp.sendEmail({
+      to: to,
+      subject: (changed ? 'RSVP changed: ' : 'New RSVP: ') + record.invited_as,
+      body: record.summary +
+        (record.songs ? '\n\nSongs:\n' + record.songs : '') +
+        (record.comments ? '\n\nNote:\n' + record.comments : ''),
+    });
+  } catch (e) {
+    // a failed email must never lose the reply itself
   }
 }
 
 // ---------------------------------------------------------------------------
-// Admin actions
+// Admin actions (need ADMIN_TOKEN)
 // ---------------------------------------------------------------------------
 
 function adminList() {
-  var parties = readTab(TAB_PARTIES);
-  var peopleRows = readTab(TAB_PEOPLE).rows;
-
-  var byCode = {};
-  peopleRows.forEach(function (p) {
-    var c = clean(p.code).toUpperCase();
-    if (!byCode[c]) byCode[c] = [];
-    byCode[c].push({
-      person_id: clean(p.person_id),
-      name: clean(p.name),
-      is_plus_one: truthy(p.is_plus_one),
-      attending: clean(p.attending).toLowerCase(),
-      meal: clean(p.meal),
-      dietary: clean(p.dietary),
-      dietary_notes: clean(p.dietary_notes),
-    });
-  });
-
-  var out = parties.rows.map(function (r) {
-    var c = clean(r.code).toUpperCase();
-    return {
-      code: c,
-      party_name: clean(r.party_name),
-      invite_type: clean(r.invite_type),
-      email: clean(r.email),
-      phone: clean(r.phone),
-      preferred_contact: clean(r.preferred_contact).toLowerCase(),
-      allow_plus_one: truthy(r.allow_plus_one),
-      invite_sent_at: serialize(r.invite_sent_at),
-      status: clean(r.status).toLowerCase() || 'pending',
-      responded_at: serialize(r.responded_at),
-      songs: clean(r.songs),
-      message: clean(r.message),
-      notes: clean(r.notes),
-      people: byCode[c] || [],
-    };
-  });
-
-  return { parties: out, generated_at: isoNow() };
+  return {
+    guests: readTab(TAB_GUESTS).rows.map(guestOut),
+    replies: readTab(TAB_REPLIES).rows.map(replyOut),
+  };
 }
 
-function adminUpdateParty(code, fields) {
+function adminAddGuest(body) {
+  var name = clean(body.name, 80);
+  var type = TYPES.indexOf(body.type) >= 0 ? body.type : 'single';
+  var partner = type === 'couple' ? clean(body.partner, 80) : '';
+  if (!name) fail('Enter the guest’s full name.', 'bad_request');
+  if (type === 'couple' && !partner) fail('Enter the partner’s full name for a couple’s invitation.', 'bad_request');
+
   var lock = LockService.getScriptLock();
   lock.waitLock(20000);
   try {
-    var parties = readTab(TAB_PARTIES);
-    var row = findPartyRow(parties, code);
-    if (!row) throw new Error('No party with code ' + clean(code).toUpperCase() + '.');
-
-    var allowed = ['invite_sent_at', 'notes', 'email', 'phone', 'preferred_contact', 'party_name'];
-    var patch = {};
-    allowed.forEach(function (k) {
-      if (k in fields) patch[k] = clean(fields[k]);
-    });
-    setPartyCells(parties, row._rowNumber, patch);
-    return { code: clean(row.code).toUpperCase(), updated: Object.keys(patch) };
+    var tab = readTab(TAB_GUESTS);
+    if (matchGuest(tab.rows, name) || (partner && matchGuest(tab.rows, partner))) fail('That name is already on the guest list.', 'duplicate');
+    var record = { id: Utilities.getUuid().replace(/-/g, '').slice(0, 12), name: name, type: type, partner: partner, added_at: new Date().toISOString() };
+    writeRow(tab, null, record);
+    return guestOut(record);
   } finally {
     lock.releaseLock();
   }
 }
 
-function adminAddParty(party) {
+function adminRemoveGuest(id) {
   var lock = LockService.getScriptLock();
   lock.waitLock(20000);
   try {
-    var parties = readTab(TAB_PARTIES);
-    var peopleTab = readTab(TAB_PEOPLE);
-
-    var taken = {};
-    parties.rows.forEach(function (r) {
-      taken[clean(r.code).toUpperCase()] = true;
-    });
-
-    var code = clean(party.code).toUpperCase() || newCode(taken);
-    if (taken[code]) throw new Error('The code ' + code + ' is already in use.');
-
-    var names = (party.names || []).map(clean).filter(function (n) {
-      return n !== '';
-    });
-    var allowPlusOne = !!party.allow_plus_one;
-    if (!names.length) throw new Error('Add at least one guest name.');
-
-    var partyName = clean(party.party_name) || names.join(' and ');
-    var inviteType =
-      clean(party.invite_type) ||
-      (allowPlusOne ? 'single_plus_one' : names.length > 1 ? 'couple' : 'single');
-
-    var partyRecord = {
-      code: code,
-      party_name: partyName,
-      invite_type: inviteType,
-      email: clean(party.email),
-      phone: clean(party.phone),
-      preferred_contact: clean(party.preferred_contact).toLowerCase(),
-      allow_plus_one: allowPlusOne ? 'TRUE' : 'FALSE',
-      invite_sent_at: '',
-      status: 'pending',
-      responded_at: '',
-      songs: '',
-      message: '',
-      notes: clean(party.notes),
-    };
-    parties.sheet.appendRow(
-      parties.headers.map(function (h) {
-        return h in partyRecord ? partyRecord[h] : '';
-      })
-    );
-
-    var peopleRecords = names.map(function (n, i) {
-      return { code: code, person_id: 'p' + (i + 1), name: n, is_plus_one: 'FALSE' };
-    });
-    if (allowPlusOne) {
-      peopleRecords.push({
-        code: code,
-        person_id: 'p' + (names.length + 1),
-        name: '',
-        is_plus_one: 'TRUE',
-      });
-    }
-    peopleRecords.forEach(function (rec) {
-      peopleTab.sheet.appendRow(
-        peopleTab.headers.map(function (h) {
-          return h in rec ? rec[h] : '';
-        })
-      );
-    });
-
-    return { code: code, seats: peopleRecords.length };
+    var tab = readTab(TAB_GUESTS);
+    var row = null;
+    tab.rows.forEach(function (r) { if (String(r.id) === String(id)) row = r; });
+    if (!row) fail('That guest is no longer on the list.', 'not_found');
+    tab.sheet.deleteRow(row._row);
+    return { removed: String(id) };
   } finally {
     lock.releaseLock();
   }
 }
 
-/** Six characters, no 0/O/1/I so codes survive being read aloud or retyped. */
-function newCode(taken) {
-  var alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  for (var attempt = 0; attempt < 200; attempt++) {
-    var code = '';
-    for (var i = 0; i < 6; i++) {
-      code += alphabet.charAt(Math.floor(Math.random() * alphabet.length));
-    }
-    if (!taken[code]) return code;
-  }
-  throw new Error('Could not generate a free invite code.');
-}
-
 // ---------------------------------------------------------------------------
-// One-off setup. Run this from the Apps Script editor, once.
+// One-off setup: run this from the Apps Script editor
 // ---------------------------------------------------------------------------
 
-/**
- * Safe to run again at any time. It creates whatever is missing and leaves
- * everything else alone, so if a new column is ever added to this script you
- * just re-run this rather than rebuilding the sheet.
- */
 function setupSheet() {
-  var book = ss();
-  var added = [];
-
-  var parties = book.getSheetByName(TAB_PARTIES) || book.insertSheet(TAB_PARTIES);
-  if (parties.getLastRow() === 0) {
-    parties.appendRow(PARTY_HEADERS);
-    parties.appendRow([
-      'DEMO01',
-      'Aoife and Cian Murphy',
-      'couple',
-      'example@example.com',
-      '+353871234567',
-      'whatsapp',
-      'FALSE',
-      '',
-      'pending',
-      '',
-      '',
-      '',
-      'Example row. Delete it once you are happy everything works.',
-    ]);
-  } else {
-    added = added.concat(ensureHeaders(parties, PARTY_HEADERS, TAB_PARTIES));
-  }
-  parties.getRange(1, 1, 1, parties.getLastColumn()).setFontWeight('bold');
-  parties.setFrozenRows(1);
-
-  var people = book.getSheetByName(TAB_PEOPLE) || book.insertSheet(TAB_PEOPLE);
-  if (people.getLastRow() === 0) {
-    people.appendRow(PEOPLE_HEADERS);
-    people.appendRow(['DEMO01', 'p1', 'Aoife Murphy', 'FALSE', '', '', '', '']);
-    people.appendRow(['DEMO01', 'p2', 'Cian Murphy', 'FALSE', '', '', '', '']);
-  } else {
-    added = added.concat(ensureHeaders(people, PEOPLE_HEADERS, TAB_PEOPLE));
-  }
-  people.getRange(1, 1, 1, people.getLastColumn()).setFontWeight('bold');
-  people.setFrozenRows(1);
-
-  var summary = added.length
-    ? 'Added missing columns: ' + added.join(', ') + '. Your existing rows are untouched.'
-    : 'Tabs are ready. Next: Project Settings, Script Properties, add ADMIN_TOKEN with a passcode of your choosing. Optionally add NOTIFY_EMAIL to get an email on every RSVP.';
-
-  Logger.log(summary);
-
-  // Run from the Apps Script editor there is no spreadsheet UI attached and
-  // getUi() throws. The work above is already done by this point, so a failed
-  // popup must not surface as a failed run. The execution log has the summary.
-  try {
-    SpreadsheetApp.getUi().alert(summary);
-  } catch (err) {
-    // No UI available. Nothing to do.
-  }
-}
-
-/** Appends any expected header this tab does not already have. */
-function ensureHeaders(s, expected, tabName) {
-  var have = s.getRange(1, 1, 1, s.getLastColumn()).getValues()[0].map(function (h) {
-    return String(h).trim();
+  var book = SpreadsheetApp.getActiveSpreadsheet();
+  [[TAB_GUESTS, GUEST_HEADERS], [TAB_REPLIES, REPLY_HEADERS]].forEach(function (t) {
+    var s = book.getSheetByName(t[0]) || book.insertSheet(t[0]);
+    var lastCol = s.getLastColumn();
+    var have = lastCol ? s.getRange(1, 1, 1, lastCol).getValues()[0].map(function (h) { return String(h).trim(); }) : [];
+    var missing = t[1].filter(function (h) { return have.indexOf(h) < 0; });
+    if (missing.length) s.getRange(1, have.filter(String).length + 1, 1, missing.length).setValues([missing]);
+    s.setFrozenRows(1);
+    s.getRange(1, 1, 1, s.getLastColumn()).setFontWeight('bold');
   });
-  var missing = expected.filter(function (h) {
-    return have.indexOf(h) === -1;
-  });
-  missing.forEach(function (h, i) {
-    s.getRange(1, have.length + i + 1).setValue(h);
-  });
-  return missing.map(function (h) {
-    return tabName + '.' + h;
-  });
+  var blank = book.getSheetByName('Sheet1');
+  if (blank && blank.getLastRow() === 0 && book.getSheets().length > 2) book.deleteSheet(blank);
+  Logger.log('Guests and Replies tabs are ready.');
 }

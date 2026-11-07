@@ -5,35 +5,30 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Allow GITHUB_TOKEN to deploy to Pages.
 permissions:
   contents: read
   pages: write
   id-token: write
 
+# Let a running deploy finish rather than cancelling it mid-publish.
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-      - run: npm ci
-      - name: Build
-        # Serving from https://<user>.github.io/<repo>/ needs the repo name as
-        # the base path. Delete this env block if you move to a custom domain.
-        env:
-          BASE_PATH: /${{ github.event.repository.name }}/
-        run: npm run build
+
+      # The site is plain HTML, so there is nothing to build: the site/ folder
+      # is published exactly as it is in the repo.
       - uses: actions/configure-pages@v5
+
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: site
 
   deploy:
     needs: build
