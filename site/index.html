@@ -189,7 +189,8 @@ p { margin: 0; }
 .pw-form input {
   display: block; width: 100%; box-sizing: border-box; height: 7.4cqw; padding: 0 1cqw;
   border: 0; background: transparent; outline: none; border-radius: 0;
-  font: 500 3.6cqw var(--f-caps); letter-spacing: .5em; text-indent: .5em; text-align: center;
+  /* never below 16px, or iPhones zoom the page in when the box is tapped */
+  font: 500 max(16px, 3.6cqw) var(--f-caps); letter-spacing: .5em; text-indent: .5em; text-align: center;
   color: #4f5e3c; caret-color: #8f4a45;
 }
 .pw-form input::selection { background: rgba(143,74,69,.22); color: #4f5e3c; }
@@ -298,7 +299,11 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 }
 .hero-btn:hover { background: rgba(47,74,53,.32); border-color: var(--brass-hi); color: var(--ivory); }
 .hero-btn.primary { color: var(--brass-hi); background: rgba(201,168,108,.12); }
-@media (max-width: 560px) { .hero .inner { padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px)); } }
+@media (max-width: 560px) {
+  .hero .inner { padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px)); }
+  /* on a phone the names start below the replay button, so a short screen never puts the two on top of each other */
+  .hero-text { top: max(3.8rem, calc(31svh - var(--nav-h) - 5rem)); transform: none; }
+}
 
 /* Schedule */
 .schedule { padding-block: clamp(3.5rem, 8vw, 6rem); position: relative; overflow: hidden; min-height: calc(100svh - var(--nav-h)); box-sizing: border-box; }
