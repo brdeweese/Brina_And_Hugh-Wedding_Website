@@ -519,11 +519,6 @@ footer .foot-place { font-style: italic; font-size: clamp(1.1rem, 2.6vw, 1.3rem)
   .row2 { grid-template-columns: minmax(0, 1fr); }
   .envelope { margin-top: .2rem; }
   .card-inner { gap: .1rem; }
-  .tab-mono { display: none; }
-  .tab { padding: .55rem .5rem; font-size: .8rem; letter-spacing: .08em; }
-  /* all four tabs stay on screen on a phone, wrapping onto a second line if needed */
-  :root { --nav-h: 94px; }
-  .tabs-inner { flex-wrap: wrap; justify-content: center; gap: 0 .2rem; overflow-x: visible; padding-block: .2rem; }
   footer .foot-date { letter-spacing: .1em; }
   /* on a phone the replay button is small and sits in the bottom corner, below the RSVP and Schedule buttons */
   .replay {
@@ -1027,6 +1022,64 @@ footer .foot-place { color: #d9b3af; }
   /* a small replay button in the bottom corner */
   .replay { min-height: 32px; padding: .2rem .7rem; gap: .35rem; font-size: .68rem; letter-spacing: .12em; }
   .replay svg { width: 12px; height: 12px; }
+  /* large enough to read, and to tap */
+  .hero-btn { min-height: 44px; font-size: .82rem; }
+}
+
+/* ---- the banner: on a computer every tab shows; on a phone, Home and a drop-down for the rest ---- */
+.tab-toggle { display: none; }
+.tab-menu { display: contents; }
+.tab-toggle svg { width: 12px; height: 12px; transition: transform .25s ease; }
+.map-scroll { overscroll-behavior-x: contain; }
+.map-hint { display: none; }
+@media (max-width: 640px) { .map-hint { display: inline; } }
+
+/* phones, held upright or sideways */
+@media (max-width: 560px), (orientation: landscape) and (max-height: 500px) {
+  :root { --nav-h: 52px; }
+  .tab-mono { display: none; }
+  .tabs { background: rgba(251,243,241,.97); backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .tabs-inner { justify-content: space-between; overflow: visible; }
+  .tab { min-height: var(--nav-h); padding: .4rem .6rem; font-size: .95rem; letter-spacing: .16em; }
+  .tab-toggle { display: inline-flex; gap: .5rem; background: none; border: 0; border-bottom: 2px solid transparent; cursor: pointer; }
+  .tabs.menu-open .tab-toggle svg { transform: rotate(180deg); }
+  .tabs-inner:has(.tab-menu [aria-current="page"]) .tab-toggle { color: var(--forest); border-bottom-color: var(--brass); }
+  .tab-menu {
+    display: none; position: absolute; left: 0; right: 0; top: 100%; flex-direction: column;
+    padding: 0 max(16px, env(safe-area-inset-right, 0px)) .4rem max(16px, env(safe-area-inset-left, 0px));
+    background: #fbf3f1; border-bottom: 1px solid rgba(185,132,129,.45); box-shadow: 0 14px 28px rgba(80,40,40,.16);
+  }
+  .tabs.menu-open .tab-menu { display: flex; }
+  .tab-menu .tab { justify-content: center; min-height: 50px; border-bottom: 1px solid rgba(185,132,129,.25); }
+  .tab-menu .tab:last-child { border-bottom: 0; }
+  .tab-menu .tab[aria-current="page"] { border-bottom-color: rgba(185,132,129,.25); font-weight: 600; }
+  .tab-menu .tab:last-child[aria-current="page"] { border-bottom: 0; }
+
+  /* the small replay button, with a full-size area to tap */
+  .replay {
+    right: calc(10px + env(safe-area-inset-right, 0px)); bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+    min-height: 32px; padding: .2rem .7rem; gap: .35rem; font-size: .68rem; letter-spacing: .12em;
+  }
+  .replay svg { width: 12px; height: 12px; }
+  .replay::after { content: ""; position: absolute; inset: -5px -4px -7px; }
+
+  /* links big enough for a thumb */
+  .links { gap: 0 1.2rem; }
+  .links a { display: inline-flex; align-items: center; min-height: 44px; }
+
+  /* blurring what's behind a moving video is slow on a phone, so these are simply a touch more solid */
+  body { background-attachment: scroll; }
+  .band, .hero-btn { backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .schedule .phases { background: rgba(251,230,226,.8); backdrop-filter: none; -webkit-backdrop-filter: none; }
+}
+
+/* a phone held sideways: the writing is small and at the top, clear of the couple */
+@media (orientation: landscape) and (max-height: 500px) {
+  .hero .inner { padding-bottom: calc(.9rem + env(safe-area-inset-bottom, 0px)); }
+  .hero-text { top: .5rem; transform: none; }
+  .hero-invite { font-size: 1rem; }
+  .hero h1 { font-size: 2.2rem; line-height: 1.05; white-space: nowrap; }
+  .hero-btn { min-height: 44px; }
 }
 </style>
 <script src="config.js"></script>
@@ -1041,12 +1094,12 @@ footer .foot-place { color: #d9b3af; }
 </div>
 <!-- RSVP background: the walk along the lake, played once a guest's name is found -->
 <div class="rsvp-bg" id="rsvpBg" aria-hidden="true">
-  <video id="rsvpVideo" src="img/rsvp.mp4" poster="img/rsvp-first.jpg" muted playsinline preload="auto"></video>
+  <video id="rsvpVideo" src="img/rsvp.mp4" poster="img/rsvp-first.jpg" muted playsinline preload="none"></video>
   <div class="rsvp-shade"></div>
 </div>
 <!-- Schedule background: the empty lake, looping gently -->
 <div class="sched-bg" id="schedBg" aria-hidden="true">
-  <video id="schedVideo" src="img/lake-loop.mp4" poster="img/lake-still.jpg" muted loop playsinline preload="auto"></video>
+  <video id="schedVideo" src="img/lake-loop.mp4" poster="img/lake-still.jpg" muted loop playsinline preload="none"></video>
 </div>
 <div class="viewas" id="viewAs" hidden role="group" aria-label="View the site as"><span>Viewing as</span><button type="button" data-mode="guest" aria-pressed="false">Guest</button><button type="button" data-mode="admin" aria-pressed="true">Admin</button></div>
 <button class="replay" id="replay" type="button" hidden>
@@ -1097,9 +1150,12 @@ footer .foot-place { color: #d9b3af; }
     <div class="tabs-inner">
       <a class="tab-mono" href="#home">Brina <span class="amp-alt">&amp;</span> Hugh</a>
       <a class="tab" href="#home" data-tab="home">Home</a>
-      <a class="tab" href="#schedule" data-tab="schedule">Schedule of the Day</a>
-      <a class="tab" href="#venue" data-tab="venue">Venue &amp; Where to Stay</a>
-      <a class="tab" href="#rsvp" data-tab="rsvp">RSVP</a>
+      <button class="tab tab-toggle" id="menuToggle" type="button" aria-expanded="false" aria-controls="tabMenu">Menu <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <div class="tab-menu" id="tabMenu">
+        <a class="tab" href="#schedule" data-tab="schedule">Schedule of the Day</a>
+        <a class="tab" href="#venue" data-tab="venue">Venue &amp; Where to Stay</a>
+        <a class="tab" href="#rsvp" data-tab="rsvp">RSVP</a>
+      </div>
     </div>
   </nav>
 
@@ -1172,7 +1228,7 @@ footer .foot-place { color: #d9b3af; }
         </div>
         <div class="day-grid">
           <figure class="arch-img">
-            <img src="img/venue-outside.jpg" alt="The yellow front of Wrights Anglers Rest, hung with flower baskets, against wooded hills" width="500" height="500">
+            <img src="img/venue-outside.jpg" loading="lazy" alt="The yellow front of Wrights Anglers Rest, hung with flower baskets, against wooded hills" width="500" height="500">
             <figcaption>The venue</figcaption>
           </figure>
           <div class="details">
@@ -1306,7 +1362,7 @@ footer .foot-place { color: #d9b3af; }
 <rect x="1" y="1" width="1004" height="557" fill="none" stroke="#d9b3af" stroke-width="2"/>
 </svg>
           </div>
-          <figcaption>Wrights Anglers Rest sits on the River Liffey at the western edge of Phoenix Park, about 35 minutes by taxi from Dublin city centre.</figcaption>
+          <figcaption>Wrights Anglers Rest sits on the River Liffey at the western edge of Phoenix Park, about 35 minutes by taxi from Dublin city centre. <span class="map-hint">Swipe the map to see the city centre.</span></figcaption>
         </figure>
 
         <div class="view-head">
@@ -1482,6 +1538,9 @@ footer .foot-place { color: #d9b3af; }
       if (v !== 'home') { if (!bv.paused && !bv.ended) { bv.pause(); bv.dataset.held = '1'; } }
       else if (bv.dataset.held) { delete bv.dataset.held; var pp = bv.play(); if (pp && pp.catch) pp.catch(function () {}); }
     }
+    // the lake walk is only fetched once someone opens the RSVP
+    var rvid = document.getElementById('rsvpVideo');
+    if (rvid && v === 'rsvp' && rvid.preload !== 'auto') { rvid.preload = 'auto'; rvid.load(); }
     var sv = document.getElementById('schedVideo');
     if (sv) {
       if (v === 'schedule' && !reduce) { var sp = sv.play(); if (sp && sp.catch) sp.catch(function () {}); }
@@ -1491,6 +1550,21 @@ footer .foot-place { color: #d9b3af; }
   }
   window.addEventListener('hashchange', showView);
   showView();
+
+  /* ---------- The drop-down menu on phones ---------- */
+  var tabsNav = document.querySelector('.tabs');
+  var menuToggle = document.getElementById('menuToggle');
+  function setMenu(open) {
+    tabsNav.classList.toggle('menu-open', open);
+    menuToggle.setAttribute('aria-expanded', String(open));
+  }
+  menuToggle.addEventListener('click', function () { setMenu(!tabsNav.classList.contains('menu-open')); });
+  document.getElementById('tabMenu').addEventListener('click', function (e) { if (e.target.closest('a')) setMenu(false); });
+  window.addEventListener('hashchange', function () { setMenu(false); });
+  document.addEventListener('pointerdown', function (e) { if (!tabsNav.contains(e.target)) setMenu(false); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && tabsNav.classList.contains('menu-open')) { setMenu(false); menuToggle.focus(); }
+  });
 
   /* ---------- Background video ---------- */
   var bg = document.getElementById('bg');
