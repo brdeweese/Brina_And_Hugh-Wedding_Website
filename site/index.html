@@ -3424,8 +3424,10 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
       var x = ST.x, cx = ST.cx, HALF = ST.HALF;
       var rule = ST.rule, caps = ST.caps, para = ST.para;
 
-      // below the top-left buttercup, above the lavender along the foot
-      var TOP = 545, FOOT = 1430;
+      // The band reaches as high and as low as the artwork allows: the first
+      // line is short enough for the narrow lane beside the top-left buttercup,
+      // and the last clears the campion along the foot.
+      var TOP = 480, FOOT = 1500;
 
       var ppl = Array.isArray(r.people) ? r.people : [];
       var DETAILS = [
@@ -3441,10 +3443,10 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
       function compose(draw, y0, k) {
         var z = function (n) { return Math.round(n * k); };
         var y = y0;
-        y += z(28); caps(draw, 'KINDLY REPLIED', z(27), SOFT, z(7), y, 'italic 500 {s}px "EB Garamond", Georgia, serif');
+        y += z(32); caps(draw, 'KINDLY REPLIED', z(27), SOFT, z(7), y, 'italic 500 {s}px "EB Garamond", Georgia, serif');
 
         ppl.forEach(function (person, i) {
-          y += z(i ? 46 : 40);
+          y += z(i ? 62 : 44);
           y += z(42); caps(draw, String(person.name).toUpperCase(), z(44), GREEN, z(5), y);
           y += z(40); caps(draw, person.attending ? 'JOYFULLY ACCEPTS' : 'REGRETFULLY DECLINES', z(27), INK, z(4), y,
             'italic 500 {s}px "EB Garamond", Georgia, serif');
@@ -3456,15 +3458,15 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
         });
 
         if (songLine) {
-          y += z(50); caps(draw, 'SONGS TO GET US DANCING', z(24), SOFT, z(5), y);
+          y += z(68); caps(draw, 'SONGS TO GET US DANCING', z(24), SOFT, z(5), y);
           y = para(draw, songLine, z(27), INK, y + z(3), true, 3);
         }
 
-        y += z(54); if (draw) rule(y, z(165));
-        y += z(52); caps(draw, 'THE DAY ITSELF', z(29), GREEN, z(8), y);
+        y += z(74); if (draw) rule(y, z(165));
+        y += z(62); caps(draw, 'THE DAY ITSELF', z(29), GREEN, z(8), y);
 
         DETAILS.forEach(function (d) {
-          y += z(43); caps(draw, d[0], z(21), SOFT, z(5), y);
+          y += z(52); caps(draw, d[0], z(21), SOFT, z(5), y);
           d[1].forEach(function (l) { y = para(draw, l, z(29), INK, y - z(3), false); });
         });
         return y - y0;
@@ -3484,7 +3486,7 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
       DETAILS.forEach(function (d) { d[1].forEach(function (l) { fits(l, 29, BODY); }); });
       fits(songLine, 27, BODYI);
       var band = FOOT - TOP;
-      var k = Math.max(0.74, Math.min(1.18, kWide, band / compose(false, 0, 1)));
+      var k = Math.max(0.74, Math.min(1.32, kWide, band / compose(false, 0, 1)));
       var h = compose(false, 0, k);
       compose(true, TOP + Math.max(0, (band - h) / 2), k);
       return ST.jpeg();
