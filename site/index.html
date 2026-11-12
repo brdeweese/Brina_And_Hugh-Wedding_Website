@@ -1641,9 +1641,11 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
      breaks out of the page's side padding to the full width of the screen, so
      the book can be placed freely across it rather than inside the page margins.
      Shut, the screen frames 55.8% of the book, from the spine's outer edge at
-     44.2% to the book's own right edge. 168.46% is the width that makes that 94%
-     of the screen, so background shows down either side. */
-  .book { --bw: min(168.46%, calc((100svh - var(--nav-h) - 5rem) * 1.5386)); aspect-ratio: 877 / 570; }
+     44.2% to the book's own right edge. 154.13% is the width that makes that 86%
+     of the screen, so a clear margin of background shows down either side: 25px
+     on a 360px screen, which is the narrowest phone in common use. At 94% the
+     margin came to 11px, which reads as edge to edge on a small phone. */
+  .book { --bw: min(154.13%, calc((100svh - var(--nav-h) - 5rem) * 1.5386)); aspect-ratio: 877 / 570; }
   .book-wrap { overflow: hidden; width: 100vw; margin-inline: calc(50% - 50vw); }
   .book::before { background-image: url("img/story-02.webp"); inset: 0; }
   /* while the book is shut the painted spread must stay hidden behind the cover.
@@ -2595,19 +2597,20 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
     // A phone frames two different parts of the book.
     //
     // Shut: the spine and the cover, from the spine's outer edge at 44.2% to the
-    // book's right edge, centred and taking 94% of the width, so background shows
-    // down either side. The frame has to start at 44.2% rather than anywhere
-    // further in: the spine is a separate element that begins there, so a frame
-    // starting later still has the spine running off the left of the screen.
+    // book's right edge, centred and taking 86% of the width, so a clear margin of
+    // background shows down either side. The frame has to start at 44.2% rather
+    // than anywhere further in: the spine is a separate element that begins there,
+    // so a frame starting later still has the spine running off the left edge.
     //
     // Open: the right-hand page, 50.4% to 100%, with the gutter on the screen's
-    // left edge. The left-hand page has gone off that side, while the book's outer
-    // edge stays on screen with background beyond it.
+    // left edge, taking 90% of the width. The left-hand page has gone off that
+    // side, while the book's outer edge stays on screen with background beyond it.
     //
-    // Open is the narrower slice, 49.6% against 55.8%, so the book grows by 1.1249
-    // as the cover swings. placeBook eases shift and scale together, so the
-    // reframing happens as part of the opening.
-    var PH_SHUT = -22.1, PH_OPEN = -30.13, PH_GROW = 1.1249;
+    // Open is the narrower slice of the book, 49.6% against 55.8%, and it is given
+    // more of the screen, so the book grows by 1.1773 as the cover swings.
+    // placeBook eases shift and scale together, so the reframing happens as part
+    // of the opening.
+    var PH_SHUT = -22.1, PH_OPEN = -32.91, PH_GROW = 1.1773;
     function placeBook(f) {
       if (per() === 1) { book.style.transform = 'none'; return; }
       if (!recto.matches) {
