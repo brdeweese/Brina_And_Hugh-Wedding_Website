@@ -3689,10 +3689,13 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
       var inv = el('button', { type: 'button', cls: 'rm', text: 'Invitation' });
       inv.addEventListener('click', function () {
         inv.disabled = true; inv.textContent = 'Making\u2026';
+        // Saves to this computer and files a copy in Drive. This is also how a
+        // guest added before any of it existed gets one.
         drawInviteCard(g)
           .then(function (blob) { saveBlob(blob, inviteFileName(g)); })
+          .then(function () { return saveInvite(g); })
           .then(function () { inv.disabled = false; inv.textContent = 'Invitation'; })
-          .catch(function () { inv.disabled = false; inv.textContent = 'Couldn\u2019t make it'; });
+          .catch(function () { inv.disabled = false; inv.textContent = 'Downloaded only'; });
       });
       tb.appendChild(el('tr', null, [el('td', { text: g.name }), el('td', { text: typeLabel(g) }), el('td', null, [inv, btn])]));
     });
