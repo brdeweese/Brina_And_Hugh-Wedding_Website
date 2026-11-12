@@ -1660,6 +1660,59 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
   .page-num { font-size: 4.2cqw; bottom: 9cqh; }
 }
 
+/* ---------- the passcode field, and the zoom it used to cause ---------- */
+@media (max-width: 700px) {
+  /* A phone zooms the whole page in when it focuses a field whose text is under
+     16px, and it does not zoom back out when the field is done with. The field
+     was 11.45px, so entering the passcode left the site magnified. It is set at
+     16px here, and given the width to hold a passcode at that size, so the zoom
+     never happens. */
+  .pw-form { left: 13%; right: 13%; }
+  .pw-form input { font-size: 16px; height: 2.2rem; letter-spacing: .32em; text-indent: .32em; }
+  .pw-msg { font-size: .82rem; }
+}
+
+/* ---------- the schedule on a single panel ---------- */
+/* The heading sat straight on the photograph and was outlined in a cream glow so
+   it could be read against it. One panel now carries the whole page, heading
+   included, so nothing needs outlining. */
+.schedule { --glow: none; }
+.schedule .inner { position: relative; z-index: 1; }
+.schedule .inner::before {
+  content: ""; position: absolute; z-index: -1;
+  inset: -1.9rem -1.4rem;
+  border-radius: 30px;
+  background: rgba(243,235,221,.74);
+  backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+  /* no border: the panel fades out instead, so it settles into the lake behind
+     it rather than being cut out of it */
+  -webkit-mask-image: radial-gradient(116% 110% at 50% 50%, #000 56%, rgba(0,0,0,0) 100%);
+  mask-image: radial-gradient(116% 110% at 50% 50%, #000 56%, rgba(0,0,0,0) 100%);
+}
+/* the panel moved up to .inner, so the inner box loses its own */
+.schedule .phases {
+  background: none; border: 0; box-shadow: none;
+  backdrop-filter: none; -webkit-backdrop-filter: none;
+}
+/* the flowers move from the corners of the old box to the middle of the panel's
+   two sides. They sit on their own layer so the panel's fade does not touch them. */
+.schedule .phases::before, .schedule .phases::after { display: none; }
+.schedule .inner::after {
+  content: ""; position: absolute; z-index: 2; pointer-events: none;
+  inset: 0 -2.6rem;
+  background:
+    url("img/story-11.webp") left center / auto 26% no-repeat,
+    url("img/story-12.webp") right center / auto 23% no-repeat;
+  filter: drop-shadow(0 2px 3px rgba(23,61,36,.12));
+}
+@media (max-width: 700px) {
+  .schedule .inner::before { inset: -1.1rem -.7rem; border-radius: 22px; }
+  .schedule .inner::after {
+    inset: 0 -1.1rem;
+    background-size: auto 13%, auto 11%;
+  }
+}
+
 </style>
 <script src="config.js"></script>
 </head>
