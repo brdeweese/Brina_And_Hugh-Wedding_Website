@@ -139,8 +139,15 @@ p { margin: 0; }
 
 /* ---------- Envelope overlay ---------- */
 .overlay {
+  /* the padding below has to come out of the width, not be added to it, or the
+     invitation is centred in a box wider than the screen and sits off to one side */
+  box-sizing: border-box;
   position: fixed; inset: 0; z-index: 50;
   display: grid; place-items: center; overflow: hidden auto;
+  /* one column, no wider than the padded area. Left to size itself the column
+     stretched to the arch illustration, overflowed the screen and carried the
+     invitation off centre with it. minmax(0, 1fr) also lets wide children shrink. */
+  grid-template-columns: minmax(0, 1fr);
   padding-top: calc(20px + env(safe-area-inset-top, 0px));
   padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
   padding-left: max(16px, env(safe-area-inset-left, 0px));
@@ -157,7 +164,8 @@ p { margin: 0; }
 .overlay .fog-thick { z-index: 5; }
 .overlay.washing .fog-thick { opacity: 1; }
 .overlay.gone { opacity: 0; visibility: hidden; }
-.overlay-inner { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 2px; width: 100%; }
+.overlay-inner > svg { max-width: 100%; height: auto; }
+.overlay-inner { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 2px; width: 100%; box-sizing: border-box; max-width: 100%; }
 .mail-from { font-style: italic; color: var(--blush); font-size: clamp(1.3rem, min(4vw, 3.6svh), 2rem); line-height: 1.2; transition: opacity .6s ease; }
 .arch { overflow: visible; width: min(760px, 96vw, 75svh); height: auto; margin-top: -.4rem; margin-bottom: -.6rem; transition: opacity .6s ease; }
 .arch text { font-family: var(--f-script); font-size: 96px; fill: var(--ivory); }
@@ -166,7 +174,7 @@ p { margin: 0; }
 .envelope {
   position: relative; display: block;
   /* fit the screen's height as well as its width, so it sits whole on a laptop */
-  width: min(700px, 94vw, calc((100svh - 215px) * 1.383)); max-width: 100%; aspect-ratio: 896 / 648;
+  width: min(700px, calc(100vw - 52px), calc((100svh - 215px) * 1.383)); max-width: 100%; aspect-ratio: 896 / 648;
   margin-top: .4rem;
   border: 0; padding: 0; background: none; cursor: pointer;
   perspective: 1600px; color: inherit; font: inherit;
@@ -1629,8 +1637,13 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
    wildflower border stay on screen. These rules sit last on purpose: they undo
    the single-page overrides scattered through the sections above. */
 @media (max-width: 700px) {
-  .book { --bw: min(96vw, calc((100svh - var(--nav-h) - 7rem) * 1.5386)); aspect-ratio: 877 / 570; }
+  .book { --bw: min(92vw, calc((100svh - var(--nav-h) - 7rem) * 1.5386)); aspect-ratio: 877 / 570; }
   .book::before { background-image: url("img/story-02.webp"); inset: 0; }
+  /* while the book is shut the painted spread must stay hidden behind the cover.
+     The design clips it to the right half for that; the old phone rule dropped the
+     clip because one-page mode had no left half to hide. Two-page mode does, and
+     without this the open book and the closed cover are drawn at the same time. */
+  .book.halfshow::before { clip-path: inset(0 0 0 50.4%); }
   .bpage.left:not(.face) { display: block; }
   #pgLeft { left: 11.86%; top: 2.98%; height: 87.19%; width: 38.54%; }
   #pgRight, #pgMeasure { left: 50.40%; top: 2.98%; height: 87.19%; width: 38.54%; }
@@ -1653,7 +1666,7 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
 <body>
 <!-- Background: proposal video, fades in through fog, then rests on its final frame -->
 <div class="bg" id="bg" aria-hidden="true">
-  <video id="bgVideo" src="img/proposal.mp4" poster="img/proposal-poster.jpg" muted playsinline preload="auto"></video>
+  <video id="bgVideo" src="img/proposal.mp4" poster="img/proposal-poster.jpg" autoplay muted playsinline preload="auto"></video>
   <div class="fog"></div>
   <div class="fog-thick"></div>
 </div>
@@ -2418,7 +2431,10 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
       spine.style.opacity = (1 - k).toFixed(3);
     }
     function closeBook() {
-      clearTimeout(openTimer); cancelAnimationFrame(coverRaf); closed = true; setSpine(0);
+      // this cancels whatever was mid-flight, so it has to release the lock that
+      // animation was holding. Otherwise a rebuild during the opening leaves busy
+      // set and openBook() returns at its guard for the rest of the session.
+      clearTimeout(openTimer); cancelAnimationFrame(coverRaf); busy = false; closed = true; setSpine(0);
       cover.hidden = false; setCover(0, per() === 1);
       book.classList.add('closed', 'halfshow'); placeBook(0);
     }
@@ -2483,8 +2499,20 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
       if (e.key === 'ArrowRight') { turn(1); schedule(); } else if (e.key === 'ArrowLeft') { turn(-1); schedule(); }
     });
     window.addEventListener('hashchange', function () { if (active()) { if (!built) build(); else schedule(); } else clearTimeout(timer); });
-    var rt = null;
-    window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(function () { if (active()) { view = 0; build(); } else built = false; }, 200); });
+    var rt = null, lastW = window.innerWidth, lastH = window.innerHeight;
+    window.addEventListener('resize', function () {
+      clearTimeout(rt);
+      rt = setTimeout(function () {
+        var w = window.innerWidth, h = window.innerHeight;
+        // A phone hides its address bar as you scroll, which fires resize with a
+        // changed height and nothing else. Rebuilding on that restarted the story
+        // from page one and could cut the opening short, so it is ignored.
+        var realChange = w !== lastW || Math.abs(h - lastH) > 160;
+        lastW = w; lastH = h;
+        if (!realChange) return;
+        if (active()) { view = 0; build(); } else built = false;
+      }, 200);
+    });
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { built = false; if (active()) build(); });
     if (active()) build();
   })();
@@ -2499,7 +2527,15 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
     try { vid.currentTime = 0; } catch (e) {}
     if (root.getAttribute('data-current') !== 'home') { vid.dataset.held = '1'; return; }
     var p = vid.play();
-    if (p && p.catch) p.catch(function () {});
+    if (p && p.catch) p.catch(function () {
+      // a phone can refuse this because the tap that led here has already ended;
+      // the next touch anywhere starts it instead
+      var once = function () {
+        document.removeEventListener('pointerdown', once);
+        var q = vid.play(); if (q && q.catch) q.catch(function () {});
+      };
+      document.addEventListener('pointerdown', once);
+    });
   }
   vid.addEventListener('ended', function () { replay.classList.add('ended'); heroSub.classList.add('show'); });
   // "are getting married" appears three seconds into the video
