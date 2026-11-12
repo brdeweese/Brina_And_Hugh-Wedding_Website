@@ -3357,16 +3357,24 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
       var TL = [0, 0, 440, 650];
       var BL = [0, 1330, 400, 590];
       var BR = [575, 1105, 505, 815];
-      // one broad patch of the stationery's bare paper, blown up to fill the
-      // card. Tiling a thin band instead left visible horizontal banding, and
-      // stretching a thin one streaked; enlarging a wide patch just softens the
-      // grain into a wash, with nothing to repeat and no seam to find.
+      // A flat ground. Every way of carrying the sheet grain across a card this
+      // size looked wrong: tiled it banded, stretched it streaked, and enlarged it
+      // turned cloudy. The tone is the average of the sheet's own bare paper,
+      // read by drawing that patch into a single pixel, so the pieces laid on it
+      // still sit on the colour they were cut from.
       var PAPER = [250, 450, 560, 300];
+      var tone = (function () {
+        var t = document.createElement('canvas'); t.width = 1; t.height = 1;
+        var tc = t.getContext('2d');
+        tc.drawImage(base, PAPER[0], PAPER[1], PAPER[2], PAPER[3], 0, 0, 1, 1);
+        var d = tc.getImageData(0, 0, 1, 1).data;
+        return 'rgb(' + d[0] + ',' + d[1] + ',' + d[2] + ')';
+      })();
 
       var c = document.createElement('canvas'); c.width = W; c.height = H;
       var x = c.getContext('2d');
       x.imageSmoothingQuality = 'high';
-      x.drawImage(base, PAPER[0], PAPER[1], PAPER[2], PAPER[3], 0, 0, W, H);
+      x.fillStyle = tone; x.fillRect(0, 0, W, H);
 
       // Each piece is cut as a rectangle, so its inner edges are faded out
       // before it is laid down. Otherwise the rectangle shows itself wherever
@@ -3391,7 +3399,9 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
       piece(BR, W - Math.round(BR[2] * S) + 40, H - Math.round(BR[3] * S) + 30, S, 'lt', 170);
       // the names, smaller than the sheet has them
       var NS = 0.72;
-      piece(NAMES, W - Math.round(NAMES[2] * NS) - 20, 10, NS, 'lb', 90);
+      // flush into the corner: inset by even 20px and its top and right edges,
+      // which are not faded, draw a visible rectangle against the flat ground
+      piece(NAMES, W - Math.round(NAMES[2] * NS), 0, NS, 'lb', 120);
 
       x.textAlign = 'center'; x.textBaseline = 'alphabetic';
 
@@ -3447,41 +3457,55 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
         ['DRESS CODE', ['Garden party semi-formal attire']]
       ];
 
-      function compose(draw, y0) {
+      // k scales every size and gap together, so the writing can be grown to fill
+      // the card instead of sitting in a band across its middle. A short reply
+      // gets more of it than a long one.
+      function compose(draw, y0, k) {
+        var z = function (n) { return Math.round(n * k); };
         var y = y0;
-        y += 40; caps(draw, 'KINDLY REPLIED', 38, SOFT, 10, y, 'italic 500 {s}px "EB Garamond", Georgia, serif');
+        y += z(40); caps(draw, 'KINDLY REPLIED', z(38), SOFT, z(10), y, 'italic 500 {s}px "EB Garamond", Georgia, serif');
 
         ppl.forEach(function (person, i) {
-          y += i ? 66 : 58;
-          y += 60; caps(draw, String(person.name).toUpperCase(), 62, GREEN, 7, y);
-          y += 56; caps(draw, person.attending ? 'JOYFULLY ACCEPTS' : 'REGRETFULLY DECLINES', 38, INK, 6, y,
+          y += z(i ? 66 : 58);
+          y += z(60); caps(draw, String(person.name).toUpperCase(), z(62), GREEN, z(7), y);
+          y += z(56); caps(draw, person.attending ? 'JOYFULLY ACCEPTS' : 'REGRETFULLY DECLINES', z(38), INK, z(6), y,
             'italic 500 {s}px "EB Garamond", Georgia, serif');
           if (person.attending) {
             var diet = (Array.isArray(person.dietary) ? person.dietary : []).filter(function (q) { return q !== 'Other'; });
             if (person.dietaryOther) diet.push(person.dietaryOther);
-            if (diet.length) y = para(draw, diet.join(', '), 38, INK, y + 6, true, 2);
+            if (diet.length) y = para(draw, diet.join(', '), z(38), INK, y + z(6), true, 2);
           }
         });
 
         if (r.songs) {
-          y += 70; caps(draw, 'SONGS TO GET US DANCING', 34, SOFT, 7, y);
+          y += z(70); caps(draw, 'SONGS TO GET US DANCING', z(34), SOFT, z(7), y);
           var songLine = String(r.songs).split(String.fromCharCode(10))
             .map(function (s) { return s.trim(); }).filter(Boolean).join(' · ');
-          y = para(draw, songLine, 38, INK, y + 4, true, 3);
+          y = para(draw, songLine, z(38), INK, y + z(4), true, 3);
         }
 
-        y += 76; if (draw) rule(y, 230);
-        y += 72; caps(draw, 'THE DAY ITSELF', 40, GREEN, 11, y);
+        y += z(76); if (draw) rule(y, z(230));
+        y += z(72); caps(draw, 'THE DAY ITSELF', z(40), GREEN, z(11), y);
 
         DETAILS.forEach(function (d) {
-          y += 60; caps(draw, d[0], 30, SOFT, 7, y);
-          d[1].forEach(function (l) { y = para(draw, l, 40, INK, y - 4, false); });
+          y += z(60); caps(draw, d[0], z(30), SOFT, z(7), y);
+          d[1].forEach(function (l) { y = para(draw, l, z(40), INK, y - z(4), false); });
         });
         return y - y0;
       }
 
-      var h = compose(false, 0);
-      compose(true, TOP + Math.max(0, (FOOT - TOP - h) / 2));
+      // the lane between the flowers caps k as well as the band does: a detail
+      // line one pixel too wide wraps and leaves an orphan word below it.
+      x.font = '40px "EB Garamond", Georgia, serif';
+      var widest = 0;
+      DETAILS.forEach(function (d) {
+        d[1].forEach(function (l) { widest = Math.max(widest, x.measureText(l).width); });
+      });
+      var kWide = widest ? (HALF * 2 - 8) / widest : 9;
+      var band = FOOT - TOP;
+      var k = Math.max(1, Math.min(1.45, kWide, band / compose(false, 0, 1)));
+      var h = compose(false, 0, k);
+      compose(true, TOP + Math.max(0, (band - h) / 2), k);
 
       // JPEG, not PNG: the base is a watercolour wash, so PNG spends megabytes
       // on texture a phone will never see.
