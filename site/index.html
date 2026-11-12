@@ -1792,6 +1792,25 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
   .replay.ended { box-shadow: 0 0 0 3px rgba(250,246,238,.22); }
 }
 
+/* ---------- the venue page on a phone ---------- */
+@media (max-width: 700px) {
+  /* The map was held at 600px inside a 358px window, so 242px of it sat off to
+     the right behind a sideways scroll, and the bee on the route happened to
+     land in that hidden strip. Letting it shrink to the width available shows
+     the whole thing at once, bee included. */
+  .venue-map svg { min-width: 0; }
+  .map-scroll { overflow-x: hidden; }
+  /* with the map no longer needing a scroll, it can use the full width */
+  .venue-map { max-width: none; }
+  /* Shrinking the map shrank the bee with it, to 17px, which is too small to
+     make out. Scaling the image inside the group leaves the group's own
+     translate alone, so the bee stays on its spot on the route and simply
+     returns to about the size it was before. */
+  .route-bee image { transform: scale(1.9); transform-origin: center; transform-box: fill-box; }
+  /* a little more of the photograph behind comes through */
+  .venue.band { background: rgba(243,235,221,.76); }
+}
+
 </style>
 <script src="config.js"></script>
 </head>
