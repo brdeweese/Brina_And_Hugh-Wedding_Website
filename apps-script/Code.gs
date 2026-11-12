@@ -138,7 +138,7 @@ function clean(v, max) {
 
 /** Same matching rule as the website: accents, case and punctuation are ignored. */
 function norm(s) {
-  return String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  return String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
 }
 
 function parseJson(s, fallback) {
@@ -176,7 +176,7 @@ function matchGuest(rows, name) {
 function requireAdmin(token) {
   var real = PropertiesService.getScriptProperties().getProperty('ADMIN_TOKEN');
   if (!real) fail('Set ADMIN_TOKEN in the Apps Script project settings first.', 'no_token');
-  if (String(token || '') !== real) fail('That passcode isn’t right.', 'bad_token');
+  if (String(token || '') !== real) fail('That passcode isn\u2019t right.', 'bad_token');
 }
 
 // ---------------------------------------------------------------------------
@@ -186,7 +186,7 @@ function requireAdmin(token) {
 /** A guest types their name. Returns their invitation and any earlier reply, or a not_found error. */
 function findGuest(name) {
   var hit = matchGuest(readTab(TAB_GUESTS).rows, name);
-  if (!hit) fail('We couldn’t find that name on the guest list. Please type it as it appears on your invitation.', 'not_found');
+  if (!hit) fail('We couldn\u2019t find that name on the guest list. Please type it as it appears on your invitation.', 'not_found');
   var g = guestOut(hit.row);
   var reply = null;
   readTab(TAB_REPLIES).rows.forEach(function (r) { if (String(r.invite_id) === g.id) reply = replyOut(r); });
@@ -198,7 +198,7 @@ function submitRsvp(body) {
   if (Date.now() >= DEADLINE.getTime()) fail('Replies closed on 1 June 2027. Please contact Brina & Hugh directly.', 'closed');
 
   var hit = matchGuest(readTab(TAB_GUESTS).rows, body.name);
-  if (!hit || String(hit.row.id) !== String(body.inviteId)) fail('We couldn’t match this reply to an invitation. Please type your name again.', 'not_found');
+  if (!hit || String(hit.row.id) !== String(body.inviteId)) fail('We couldn\u2019t match this reply to an invitation. Please type your name again.', 'not_found');
   var g = guestOut(hit.row);
 
   var seats = g.type === 'single' ? 1 : 2;
@@ -283,8 +283,8 @@ function adminAddGuest(body) {
   var name = clean(body.name, 80);
   var type = TYPES.indexOf(body.type) >= 0 ? body.type : 'single';
   var partner = type === 'couple' ? clean(body.partner, 80) : '';
-  if (!name) fail('Enter the guest’s full name.', 'bad_request');
-  if (type === 'couple' && !partner) fail('Enter the partner’s full name for a couple’s invitation.', 'bad_request');
+  if (!name) fail('Enter the guest\u2019s full name.', 'bad_request');
+  if (type === 'couple' && !partner) fail('Enter the partner\u2019s full name for a couple\u2019s invitation.', 'bad_request');
 
   var lock = LockService.getScriptLock();
   lock.waitLock(20000);
