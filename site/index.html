@@ -1622,6 +1622,31 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
 }
 
 
+/* ---------- phones: the whole book, made smaller to fit ---------- */
+/* The design turned the book into a single page below 700px, which left a bare
+   sheet of text with none of the painted board around it. The spread is kept at
+   every width instead and simply scaled down, so the boards, the spine and the
+   wildflower border stay on screen. These rules sit last on purpose: they undo
+   the single-page overrides scattered through the sections above. */
+@media (max-width: 700px) {
+  .book { --bw: min(96vw, calc((100svh - var(--nav-h) - 7rem) * 1.5386)); aspect-ratio: 877 / 570; }
+  .book::before { background-image: url("img/story-02.webp"); inset: 0; }
+  .bpage.left:not(.face) { display: block; }
+  #pgLeft { left: 11.86%; top: 2.98%; height: 87.19%; width: 38.54%; }
+  #pgRight, #pgMeasure { left: 50.40%; top: 2.98%; height: 87.19%; width: 38.54%; }
+  .leaf { left: 50.40%; top: 2.98%; height: 87.19%; width: 38.54%; }
+  .cover { left: 50.40%; top: 0; width: 49.14%; height: 100%; right: auto; bottom: auto; }
+  .spine { left: calc(50.40% - 6.2%); width: 6.6%; }
+  .page-block { left: 50.4%; width: 49.14%; }
+  .bk-shadow.r { left: 48%; width: 50%; }
+  .bk-shadow.l { display: block; left: 4%; width: 48%; }
+  .back-bee { display: block; }
+  /* the pages are half as wide here, so the type is set a little larger
+     relative to the page than it is on a desktop */
+  .page-body { inset: 8cqh 10cqw 14cqh 10cqw; font-size: 6.2cqw !important; line-height: 1.45 !important; }
+  .page-num { font-size: 4.2cqw; bottom: 9cqh; }
+}
+
 </style>
 <script src="config.js"></script>
 </head>
@@ -2174,7 +2199,10 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
     var pgL = document.getElementById('pgLeft'), pgR = document.getElementById('pgRight');
     var leaf = document.getElementById('leaf'), leafF = document.getElementById('leafFront'), leafB = document.getElementById('leafBack');
     var meas = document.getElementById('pgMeasure');
-    var single = window.matchMedia('(max-width: 700px)');
+    // The book keeps its two-page spread at every width now, scaled down to fit
+    // a phone, so the one-page-at-a-time mode never engages. A query that cannot
+    // match leaves the surrounding code and its listeners untouched.
+    var single = window.matchMedia('(max-width: 0px)');
     var pages = [], view = 0, busy = false, timer = null, built = false;
     var AUTO_MS = 16000, TURN_MS = 765;
 
