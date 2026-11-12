@@ -1801,7 +1801,11 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
      previously held at a 600px minimum and scrolled sideways, which left the
      bee in the hidden strip altogether. */
   .venue-map svg { min-width: 0; width: 153%; max-width: none; }
-  .map-scroll { overflow-x: hidden; }
+  /* The frame around the map is a rect drawn inside the SVG, stroked #899B83,
+     so cropping the right-hand side cuts its right edge away and leaves the
+     outline open on that side. This closes it in the same colour. The drawn
+     stroke is 2 user units, which comes to about 1.1px at this scale. */
+  .map-scroll { overflow-x: hidden; box-sizing: border-box; border-right: 1px solid #899B83; }
   .venue-map { max-width: none; }
   /* the bee is 44 units wide, so it lands at about 25px at this scale; this
      brings it back to roughly the size it has on a desktop */
