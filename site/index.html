@@ -1730,6 +1730,9 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
 .schedule .phases::before, .schedule .phases::after { display: none; }
 .schedule .inner::after {
   content: ""; position: absolute; z-index: 2; pointer-events: none;
+  /* off on a desktop, where there is room enough without them; a phone turns
+     them back on in its own block below */
+  display: none;
   inset: 0 -2.6rem;
   background:
     url("img/story-11.webp") left center / auto 15% no-repeat,
@@ -1760,6 +1763,7 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
      takes the border colour from .schedule .phase, like the others. */
   .schedule .phase:first-child { border-top-width: 1px; border-top-style: solid; padding-top: 2.2rem; }
   .schedule .inner::after {
+    display: block;
     inset: 0 -1.1rem;
     background-size: auto 7%, auto 6%;
   }
