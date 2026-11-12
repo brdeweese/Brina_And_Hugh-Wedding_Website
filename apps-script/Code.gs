@@ -136,9 +136,15 @@ function clean(v, max) {
   return String(v === undefined || v === null ? '' : v).trim().slice(0, max || 200);
 }
 
-/** Same matching rule as the website: accents, case and punctuation are ignored. */
+/**
+ * Same matching rule as the website: accents, case, spacing and punctuation are
+ * all ignored, so O'Connor, OConnor and o connor are one name. Separators are
+ * dropped rather than turned into spaces, which is what lets the apostrophe in
+ * an Irish name be optional. The rule only ever matches more than it used to,
+ * so no name that worked before stops working.
+ */
 function norm(s) {
-  return String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  return String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '');
 }
 
 function parseJson(s, fallback) {
