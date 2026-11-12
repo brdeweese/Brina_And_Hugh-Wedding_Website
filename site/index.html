@@ -2586,7 +2586,12 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
       // Turning past the last page shuts the book by running the opening
       // backwards. The pages are only reset once the cover is down over them, so
       // the story is never seen jumping back to its first page.
-      shutBook(function () { view = 0; show(); openSoon(); });
+      //
+      // It then stays shut. The book opens by itself only once, three seconds
+      // after the page is first opened, which is the openSoon() in build(). From
+      // here on it waits to be asked: tapping the cover, or the next arrow, opens
+      // it again.
+      shutBook(function () { view = 0; show(); });
     }
     /* the cover: the book waits closed, then the board swings open onto the first page */
     var cover = document.getElementById('bookCover'), closed = true, openTimer = null, coverRaf = null;
