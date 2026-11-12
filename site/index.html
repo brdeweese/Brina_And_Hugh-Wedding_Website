@@ -3338,86 +3338,45 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
     chars.forEach(function (c) { x.fillText(c, px, y); px += x.measureText(c).width + spacing; });
     x.textAlign = 'center';
   }
-  function drawRsvpCard(r) {
+  // The card is printed straight onto the stationery sheet. The sheet already
+  // carries its own frame and the couple's names in the top right, so unlike the
+  // earlier base nothing is cut out, feathered or re-laid: the writing simply
+  // goes in the lane the artwork leaves down the middle.
+  function cardStock() {
     var fonts = document.fonts ? Promise.all([
       document.fonts.load('500 60px "Cormorant SC"'),
       document.fonts.load('60px "EB Garamond"'),
       document.fonts.load('italic 500 60px "EB Garamond"')
     ]) : Promise.resolve();
-    return Promise.all([fonts, loadImg('img/card-base.webp')]).then(function (res) {
+    return Promise.all([fonts, loadImg('img/rsvp-base.webp')]).then(function (res) {
       var base = res[1];
-      // A card, not a phone screen: 5 by 7 at 300dpi. The stationery is far
-      // taller than that, so its pieces are lifted off and re-laid rather than
-      // the whole sheet being squashed to fit.
-      var W = 1500, H = 2100;
+      // the sheet's own size, so the watercolour is never scaled
+      var W = 1080, H = 1920;
       var GREEN = '#36482b', INK = '#4a4238', SOFT = '#78866a';
-
-      // regions of the stationery, in its own 1080 by 1920
-      var NAMES = [400, 18, 680, 560];
-      var TL = [0, 0, 440, 650];
-      var BL = [0, 1330, 400, 590];
-      var BR = [575, 1105, 505, 815];
-      // A flat ground. Every way of carrying the sheet grain across a card this
-      // size looked wrong: tiled it banded, stretched it streaked, and enlarged it
-      // turned cloudy. The tone is the average of the sheet's own bare paper,
-      // read by drawing that patch into a single pixel, so the pieces laid on it
-      // still sit on the colour they were cut from.
-      var PAPER = [250, 450, 560, 300];
-      var tone = (function () {
-        var t = document.createElement('canvas'); t.width = 1; t.height = 1;
-        var tc = t.getContext('2d');
-        tc.drawImage(base, PAPER[0], PAPER[1], PAPER[2], PAPER[3], 0, 0, 1, 1);
-        var d = tc.getImageData(0, 0, 1, 1).data;
-        return 'rgb(' + d[0] + ',' + d[1] + ',' + d[2] + ')';
-      })();
 
       var c = document.createElement('canvas'); c.width = W; c.height = H;
       var x = c.getContext('2d');
       x.imageSmoothingQuality = 'high';
-      x.fillStyle = tone; x.fillRect(0, 0, W, H);
-
-      // Each piece is cut as a rectangle, so its inner edges are faded out
-      // before it is laid down. Otherwise the rectangle shows itself wherever
-      // its paper does not quite match the ground.
-      function piece(rect, dx, dy, scale, fade, feather) {
-        var w = Math.round(rect[2] * scale), h = Math.round(rect[3] * scale), F = feather || 150;
-        var t = document.createElement('canvas'); t.width = w; t.height = h;
-        var tx = t.getContext('2d');
-        tx.imageSmoothingQuality = 'high';
-        tx.drawImage(base, rect[0], rect[1], rect[2], rect[3], 0, 0, w, h);
-        tx.globalCompositeOperation = 'destination-out';
-        var clear = 'rgba(0,0,0,0)', solid = 'rgba(0,0,0,1)', g;
-        if (fade.indexOf('r') >= 0) { g = tx.createLinearGradient(w - F, 0, w, 0); g.addColorStop(0, clear); g.addColorStop(1, solid); tx.fillStyle = g; tx.fillRect(w - F, 0, F, h); }
-        if (fade.indexOf('l') >= 0) { g = tx.createLinearGradient(F, 0, 0, 0); g.addColorStop(0, clear); g.addColorStop(1, solid); tx.fillStyle = g; tx.fillRect(0, 0, F, h); }
-        if (fade.indexOf('b') >= 0) { g = tx.createLinearGradient(0, h - F, 0, h); g.addColorStop(0, clear); g.addColorStop(1, solid); tx.fillStyle = g; tx.fillRect(0, h - F, w, F); }
-        if (fade.indexOf('t') >= 0) { g = tx.createLinearGradient(0, F, 0, 0); g.addColorStop(0, clear); g.addColorStop(1, solid); tx.fillStyle = g; tx.fillRect(0, 0, w, F); }
-        x.drawImage(t, dx, dy);
-      }
-      var S = 1.18;
-      piece(TL, -30, -40, S, 'rb', 170);
-      piece(BL, -20, H - Math.round(BL[3] * S) + 30, S, 'rt', 170);
-      piece(BR, W - Math.round(BR[2] * S) + 90, H - Math.round(BR[3] * S) + 30, S, 'lt', 170);
-      // the names, smaller than the sheet has them
-      var NS = 0.72;
-      // flush into the corner: inset by even 20px and its top and right edges,
-      // which are not faded, draw a visible rectangle against the flat ground
-      piece(NAMES, W - Math.round(NAMES[2] * NS), 0, NS, 'lb', 120);
+      x.drawImage(base, 0, 0, W, H);
 
       x.textAlign = 'center'; x.textBaseline = 'alphabetic';
 
-      // the writing lives in the lane the flowers leave down the middle
-      var cx = 750, HALF = 450, TOP = 380, FOOT = 1850;
+      // The printed frame runs x 100-979, y 108-1811, and the flowers reach
+      // inside it: a buttercup top left down to about y 520, cow parsley on the
+      // right from about y 850, lavender and campion along the foot from about
+      // y 1430. This lane is what is left clear of the strong colour.
+      var cx = 540, HALF = 320;
 
       function halo(on) {
         x.shadowColor = on ? 'rgba(255,252,244,0.96)' : 'transparent';
-        x.shadowBlur = on ? 14 : 0;
+        x.shadowBlur = on ? 11 : 0;
       }
       function rule(y, half) {
-        x.strokeStyle = SOFT; x.lineWidth = 2;
+        x.strokeStyle = SOFT; x.lineWidth = 1.5;
         x.beginPath(); x.moveTo(cx - half, y); x.lineTo(cx + half, y); x.stroke();
         [cx - half, cx + half].forEach(function (dx) {
           x.save(); x.translate(dx, y); x.rotate(Math.PI / 4);
-          x.fillStyle = SOFT; x.fillRect(-5, -5, 10, 10); x.restore();
+          x.fillStyle = SOFT; x.fillRect(-3.5, -3.5, 7, 7); x.restore();
         });
       }
       function caps(draw, text, size, color, spacing, y, face) {
@@ -3425,7 +3384,7 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
         for (;;) {
           x.font = f.replace('{s}', sz);
           var w = 0; String(text).split('').forEach(function (ch) { w += x.measureText(ch).width + spacing; });
-          if (w - spacing <= HALF * 2 || sz <= 16) break;
+          if (w - spacing <= HALF * 2 || sz <= 12) break;
           sz -= 1;
         }
         if (draw) {
@@ -3450,6 +3409,24 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
         return y;
       }
 
+      // JPEG, not PNG: the sheet is a watercolour wash, so PNG spends megabytes
+      // on texture a phone will never see.
+      function jpeg() { return new Promise(function (ok) { c.toBlob(ok, 'image/jpeg', 0.92); }); }
+
+      return { W: W, H: H, GREEN: GREEN, INK: INK, SOFT: SOFT, c: c, x: x,
+        cx: cx, HALF: HALF, halo: halo, rule: rule, caps: caps, para: para, jpeg: jpeg };
+    });
+  }
+
+  function drawRsvpCard(r) {
+    return cardStock().then(function (ST) {
+      var GREEN = ST.GREEN, INK = ST.INK, SOFT = ST.SOFT;
+      var x = ST.x, cx = ST.cx, HALF = ST.HALF;
+      var rule = ST.rule, caps = ST.caps, para = ST.para;
+
+      // below the top-left buttercup, above the lavender along the foot
+      var TOP = 545, FOOT = 1430;
+
       var ppl = Array.isArray(r.people) ? r.people : [];
       var DETAILS = [
         ['WHEN', ['Saturday 31 July 2027', 'Guests arrive 2:30 pm, ceremony at 3 pm']],
@@ -3459,46 +3436,43 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
       var songLine = r.songs ? String(r.songs).split(String.fromCharCode(10))
         .map(function (s) { return s.trim(); }).filter(Boolean).join(' · ') : '';
 
-      // k scales every size and gap together, so the writing can be grown to fill
-      // the card instead of sitting in a band across its middle. A short reply
-      // gets more of it than a long one.
+      // k scales every size and gap together, so a one-person reply and a family
+      // of three both fill the same lane.
       function compose(draw, y0, k) {
         var z = function (n) { return Math.round(n * k); };
         var y = y0;
-        y += z(40); caps(draw, 'KINDLY REPLIED', z(38), SOFT, z(10), y, 'italic 500 {s}px "EB Garamond", Georgia, serif');
+        y += z(28); caps(draw, 'KINDLY REPLIED', z(27), SOFT, z(7), y, 'italic 500 {s}px "EB Garamond", Georgia, serif');
 
         ppl.forEach(function (person, i) {
-          y += z(i ? 66 : 58);
-          y += z(60); caps(draw, String(person.name).toUpperCase(), z(62), GREEN, z(7), y);
-          y += z(56); caps(draw, person.attending ? 'JOYFULLY ACCEPTS' : 'REGRETFULLY DECLINES', z(38), INK, z(6), y,
+          y += z(i ? 46 : 40);
+          y += z(42); caps(draw, String(person.name).toUpperCase(), z(44), GREEN, z(5), y);
+          y += z(40); caps(draw, person.attending ? 'JOYFULLY ACCEPTS' : 'REGRETFULLY DECLINES', z(27), INK, z(4), y,
             'italic 500 {s}px "EB Garamond", Georgia, serif');
           if (person.attending) {
             var diet = (Array.isArray(person.dietary) ? person.dietary : []).filter(function (q) { return q !== 'Other'; });
             if (person.dietaryOther) diet.push(person.dietaryOther);
-            if (diet.length) y = para(draw, diet.join(', '), z(38), INK, y + z(6), true, 2);
+            if (diet.length) y = para(draw, diet.join(', '), z(27), INK, y + z(4), true, 2);
           }
         });
 
-        if (r.songs) {
-          y += z(70); caps(draw, 'SONGS TO GET US DANCING', z(34), SOFT, z(7), y);
-          y = para(draw, songLine, z(38), INK, y + z(4), true, 3);
+        if (songLine) {
+          y += z(50); caps(draw, 'SONGS TO GET US DANCING', z(24), SOFT, z(5), y);
+          y = para(draw, songLine, z(27), INK, y + z(3), true, 3);
         }
 
-        y += z(76); if (draw) rule(y, z(230));
-        y += z(72); caps(draw, 'THE DAY ITSELF', z(40), GREEN, z(11), y);
+        y += z(54); if (draw) rule(y, z(165));
+        y += z(52); caps(draw, 'THE DAY ITSELF', z(29), GREEN, z(8), y);
 
         DETAILS.forEach(function (d) {
-          y += z(60); caps(draw, d[0], z(30), SOFT, z(7), y);
-          d[1].forEach(function (l) { y = para(draw, l, z(40), INK, y - z(4), false); });
+          y += z(43); caps(draw, d[0], z(21), SOFT, z(5), y);
+          d[1].forEach(function (l) { y = para(draw, l, z(29), INK, y - z(3), false); });
         });
         return y - y0;
       }
 
-      // the lane between the flowers caps k as well as the band does: a line
-      // one pixel too wide wraps and leaves an orphan word stranded below it.
-      // The floor of 1 below means a genuinely long list still wraps rather
-      // than shrinking the whole card to keep itself on one line.
-      var LANE = HALF * 2 - 8, kWide = 9;
+      // The lane caps k as well as the band does: a line one pixel too wide wraps
+      // and leaves an orphan word stranded below it.
+      var LANE = HALF * 2 - 6, kWide = 9;
       var BODY = '{s}px "EB Garamond", Georgia, serif';
       var BODYI = 'italic {s}px "EB Garamond", Georgia, serif';
       function fits(text, size, font) {
@@ -3507,18 +3481,16 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
         var w = x.measureText(text).width;
         if (w) kWide = Math.min(kWide, LANE / w);
       }
-      DETAILS.forEach(function (d) { d[1].forEach(function (l) { fits(l, 40, BODY); }); });
-      fits(songLine, 38, BODYI);
+      DETAILS.forEach(function (d) { d[1].forEach(function (l) { fits(l, 29, BODY); }); });
+      fits(songLine, 27, BODYI);
       var band = FOOT - TOP;
-      var k = Math.max(1, Math.min(1.45, kWide, band / compose(false, 0, 1)));
+      var k = Math.max(0.74, Math.min(1.18, kWide, band / compose(false, 0, 1)));
       var h = compose(false, 0, k);
-      compose(true, TOP, k);
-
-      // JPEG, not PNG: the base is a watercolour wash, so PNG spends megabytes
-      // on texture a phone will never see.
-      return new Promise(function (ok) { c.toBlob(ok, 'image/jpeg', 0.92); });
+      compose(true, TOP + Math.max(0, (band - h) / 2), k);
+      return ST.jpeg();
     });
   }
+
   document.getElementById('dlRsvp').addEventListener('click', function () {
     var m = document.getElementById('dlRsvpMsg');
     if (!myReply) return;
