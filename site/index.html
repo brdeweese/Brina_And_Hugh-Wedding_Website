@@ -1729,13 +1729,24 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
      screen that narrow is a very long wash of cream. */
   .schedule .inner::before { display: none; }
   .schedule .view-head::before, .schedule .phase::before {
-    display: block; inset: -1.2rem -.7rem;
+    display: block;
+    /* the panel reaches exactly this far past its text on each side */
+    inset: -1.3rem -.8rem;
+    /* Fixed stops rather than percentages, so the fade occupies precisely that
+       margin and is fully solid by the time it reaches the first word. A
+       percentage fade is a share of the panel, so it always ate into the text,
+       and it needed a wide panel to look soft, which forced the panels apart. */
+    -webkit-mask-image:
+      linear-gradient(to bottom, rgba(0,0,0,0) 0, #000 1.3rem, #000 calc(100% - 1.3rem), rgba(0,0,0,0) 100%),
+      linear-gradient(to right, rgba(0,0,0,0) 0, #000 .8rem, #000 calc(100% - .8rem), rgba(0,0,0,0) 100%);
+    mask-image:
+      linear-gradient(to bottom, rgba(0,0,0,0) 0, #000 1.3rem, #000 calc(100% - 1.3rem), rgba(0,0,0,0) 100%),
+      linear-gradient(to right, rgba(0,0,0,0) 0, #000 .8rem, #000 calc(100% - .8rem), rgba(0,0,0,0) 100%);
   }
-  /* Room between them, or neighbouring fades meet and it is one box again.
-     Each panel fades over roughly 9% of its height at each end, so the clear
-     space has to beat that, not just be visible. */
-  .schedule .inner { gap: 4.6rem; }
-  .schedule .phases { row-gap: 6rem; }
+  /* With the fade pinned to the margin rather than a share of the panel, the
+     panels can sit close and still part cleanly. */
+  .schedule .inner { gap: 3.8rem; }
+  .schedule .phases { row-gap: 4.2rem; }
   .schedule .inner::after {
     inset: 0 -1.1rem;
     background-size: auto 7%, auto 6%;
