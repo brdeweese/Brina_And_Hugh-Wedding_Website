@@ -1670,6 +1670,12 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
   .pw-form { left: 13%; right: 13%; }
   .pw-form input { font-size: 16px; height: 2.2rem; letter-spacing: .32em; text-indent: .32em; }
   .pw-msg { font-size: .82rem; }
+  /* Once the card is drawn out, the whole invitation comes closer, so the
+     printed line and what you type on it are legible on a small screen. The
+     origin sits up where the card settles rather than at the envelope's
+     middle, and .envelope already transitions its transform, so this eases
+     in with the card rather than snapping. */
+  .envelope.s4 { transform: scale(1.15); transform-origin: 50% 26%; }
 }
 
 /* ---------- the schedule on a single panel ---------- */
@@ -1747,8 +1753,8 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
      panels can sit close and still part cleanly. The two gaps are equal so all
      four panels are spaced alike: each clears its neighbour by the gap less the
      two 1.3rem margins. */
-  .schedule .inner { gap: 3.6rem; }
-  .schedule .phases { row-gap: 3.6rem; }
+  .schedule .inner { gap: 3.1rem; }
+  .schedule .phases { row-gap: 3.1rem; }
   /* The columns kept the vertical padding of the panel they used to sit in,
      which pushed the afternoon further from the heading than the other three
      were from each other. */
@@ -2656,12 +2662,17 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
   // for the rest of the visit; it is behind the envelope at that point, so
   // nothing shows, and it is wound back for its proper start.
   var videoUnlocked = false;
+  // Set once the film is meant to be running. finish() calls playFromStart()
+  // just before it clears the sealed class, so an unlock whose play() promise
+  // settles in that window used to see sealed still set and pause the film a
+  // second after it had properly started.
+  var videoWanted = false;
   function unlockVideo() {
     if (videoUnlocked) return;
     videoUnlocked = true;
     var q = vid.play();
     if (q && q.then) q.then(function () {
-      if (root.classList.contains('sealed')) {
+      if (!videoWanted && root.classList.contains('sealed')) {
         vid.pause();
         try { vid.currentTime = 0; } catch (e) {}
       }
@@ -2670,8 +2681,12 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
   document.addEventListener('pointerdown', unlockVideo, { passive: true });
   document.addEventListener('keydown', unlockVideo, { passive: true });
   function playFromStart() {
+    videoWanted = true;
     replay.classList.remove('ended');
-    try { vid.currentTime = 0; } catch (e) {}
+    // Only seek when it is not already at the start. Seeking a video that is
+    // already wound back makes it re-buffer, which showed as a stall in the
+    // first tenth of a second every time the site opened.
+    if (vid.currentTime > .05) { try { vid.currentTime = 0; } catch (e) {} }
     if (root.getAttribute('data-current') !== 'home') { vid.dataset.held = '1'; return; }
     var p = vid.play();
     if (p && p.catch) p.catch(function () {
@@ -2707,6 +2722,14 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
     clearTimeout(autoTimer);
     overlay.classList.add('washing');
     setTimeout(function () {
+      // Whatever hash the link carried, the invitation opens onto the home page.
+      // Landing anywhere else left the guest mid-site, and playFromStart() below
+      // declines to run when the current view is not home, so the film would not
+      // have played at all.
+      if (location.hash && location.hash !== '#home') {
+        history.replaceState(null, '', location.pathname + location.search + '#home');
+      }
+      showView();
       // the video starts moving as the fog lifts, so it never sits still behind the clearing mist
       playFromStart();
       overlay.classList.add('gone');
