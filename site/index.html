@@ -2204,7 +2204,7 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
     // match leaves the surrounding code and its listeners untouched.
     var single = window.matchMedia('(max-width: 0px)');
     var pages = [], view = 0, busy = false, timer = null, built = false;
-    var AUTO_MS = 16000, TURN_MS = 765;
+    var AUTO_MS = 16000, TURN_MS = 950;
 
     function frame() { var f = document.createElement('div'); f.className = 'page-frame'; for (var i = 0; i < 4; i++) f.appendChild(document.createElement('i')); return f; }
     function el(tag, cls, text) { var n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; }
@@ -2355,7 +2355,7 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
     var turnEase = bez(.38, .02, .24, 1), openEase = bez(.42, .0, .2, 1);
     var W = []; (function () { var sum = 0, i; for (i = 1; i < 16; i++) { W[i] = Math.pow(i, 1.3); sum += W[i]; } for (i = 1; i < 16; i++) W[i] /= sum; })();
     function animateSheet(dir, strips, single, done) {
-      var T = reduce ? 1 : 765 * (window.__slow || 1), t0 = null, CURL = 58;
+      var T = reduce ? 1 : 950 * (window.__slow || 1), t0 = null, CURL = 58;
       function frame(ts) {
         if (t0 === null) t0 = ts;
         var q = Math.min(1, (ts - t0) / T), e = turnEase(q), pr = dir > 0 ? e : 1 - e;
