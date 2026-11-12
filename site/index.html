@@ -3340,41 +3340,46 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
   }
   function drawRsvpCard(r) {
     var fonts = document.fonts ? Promise.all([
-      document.fonts.load('500 40px "Cormorant SC"'),
-      document.fonts.load('40px "EB Garamond"'),
-      document.fonts.load('italic 500 40px "EB Garamond"')
+      document.fonts.load('500 60px "Cormorant SC"'),
+      document.fonts.load('60px "EB Garamond"'),
+      document.fonts.load('italic 500 60px "EB Garamond"')
     ]) : Promise.resolve();
     return Promise.all([fonts, loadImg('img/card-base.webp')]).then(function (res) {
       var base = res[1], W = base.naturalWidth, H = base.naturalHeight;
-      var GREEN = '#3f5133', INK = '#5d544b', SOFT = '#9aa487';
-      // The stationery already carries the names at the top right, flowers down
-      // the left and across the foot. Everything written here stays inside the
-      // clear column they leave, so nothing lands on the artwork.
-      var cx = 540, HALF = 292, TOP = 512, BOTTOM = 1398;
+      var GREEN = '#36482b', INK = '#4a4238', SOFT = '#78866a';
+      // The stationery carries the names at the top right and flowers down the
+      // left and across the foot. Writing stays inside the column they leave.
+      var cx = 540, HALF = 300, TOP = 470, FOOT = 1400;
+      // y780 to y860 is the quietest paper in the artwork, clear of the cow
+      // parsley above and below it, so the card grows by repeating that slice.
+      var BAND_Y = 770, BAND_H = 90;
 
-      var c = document.createElement('canvas'); c.width = W; c.height = H;
-      var x = c.getContext('2d');
-      x.drawImage(base, 0, 0, W, H);
-      x.textAlign = 'center'; x.textBaseline = 'alphabetic';
-
+      var x = null;
+      function halo(on) {
+        x.shadowColor = on ? 'rgba(255,252,244,0.96)' : 'transparent';
+        x.shadowBlur = on ? 14 : 0;
+      }
       function rule(y, half) {
         x.strokeStyle = SOFT; x.lineWidth = 2;
         x.beginPath(); x.moveTo(cx - half, y); x.lineTo(cx + half, y); x.stroke();
         [cx - half, cx + half].forEach(function (dx) {
           x.save(); x.translate(dx, y); x.rotate(Math.PI / 4);
-          x.fillStyle = SOFT; x.fillRect(-4, -4, 8, 8); x.restore();
+          x.fillStyle = SOFT; x.fillRect(-5, -5, 10, 10); x.restore();
         });
       }
-      // letterspaced small caps, shrunk if it would reach past the column
       function caps(draw, text, size, color, spacing, y, face) {
         var f = face || '500 {s}px "Cormorant SC", Georgia, serif', sz = size;
         for (;;) {
           x.font = f.replace('{s}', sz);
           var w = 0; String(text).split('').forEach(function (ch) { w += x.measureText(ch).width + spacing; });
-          if (w - spacing <= HALF * 2 || sz <= 14) break;
+          if (w - spacing <= HALF * 2 || sz <= 16) break;
           sz -= 1;
         }
-        if (draw) { x.fillStyle = color; spaced(x, text, cx, y, spacing); }
+        if (draw) {
+          x.fillStyle = color;
+          halo(true); spaced(x, text, cx, y, spacing); spaced(x, text, cx, y, spacing); halo(false);
+          spaced(x, text, cx, y, spacing);
+        }
       }
       function para(draw, text, size, color, y, italic, maxLines) {
         var f = (italic ? 'italic ' : '') + size + 'px "EB Garamond", Georgia, serif';
@@ -3382,59 +3387,85 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
         var ls = wrap(x, text, HALF * 2);
         if (maxLines) ls = ls.slice(0, maxLines);
         ls.forEach(function (l) {
-          y += Math.round(size * 1.3);
-          if (draw) { x.fillStyle = color; x.font = f; x.fillText(l, cx, y); }
+          y += Math.round(size * 1.24);
+          if (draw) {
+            x.fillStyle = color; x.font = f;
+            halo(true); x.fillText(l, cx, y); x.fillText(l, cx, y); halo(false);
+            x.fillText(l, cx, y);
+          }
         });
         return y;
       }
 
       var ppl = Array.isArray(r.people) ? r.people : [];
+      var DETAILS = [
+        ['WHEN', ['Saturday 31 July 2027', 'Guests arrive 2:30 pm', 'Ceremony at 3 pm']],
+        ['WHERE', ['Wrights Anglers Rest', 'Knockmaroon Hill,', 'Strawberry Beds, Chapelizod,', 'Dublin 20, D20 AH96']],
+        ['DRESS CODE', ['Garden party semi-formal attire']]
+      ];
 
-      // measured first with draw = false, so the whole block can be centred in
-      // the clear column rather than running off the bottom of the flowers
       function compose(draw, y0) {
         var y = y0;
-        y += 30; caps(draw, 'KINDLY REPLIED', 26, SOFT, 6, y, 'italic 500 {s}px "EB Garamond", Georgia, serif');
+        y += 40; caps(draw, 'KINDLY REPLIED', 36, SOFT, 9, y, 'italic 500 {s}px "EB Garamond", Georgia, serif');
 
         ppl.forEach(function (person, i) {
-          y += i ? 54 : 46;
-          y += 34; caps(draw, String(person.name).toUpperCase(), 34, GREEN, 5, y);
-          y += 36; caps(draw, person.attending ? 'JOYFULLY ACCEPTS' : 'REGRETFULLY DECLINES', 22, INK, 5, y,
+          y += i ? 62 : 56;
+          y += 56; caps(draw, String(person.name).toUpperCase(), 58, GREEN, 6, y);
+          y += 54; caps(draw, person.attending ? 'JOYFULLY ACCEPTS' : 'REGRETFULLY DECLINES', 36, INK, 6, y,
             'italic 500 {s}px "EB Garamond", Georgia, serif');
           if (person.attending) {
             var diet = (Array.isArray(person.dietary) ? person.dietary : []).filter(function (q) { return q !== 'Other'; });
             if (person.dietaryOther) diet.push(person.dietaryOther);
-            if (diet.length) y = para(draw, diet.join(', '), 26, INK, y + 4, true, 2);
+            if (diet.length) y = para(draw, diet.join(', '), 36, INK, y + 6, true, 2);
           }
         });
 
         if (r.songs) {
-          y += 52; caps(draw, 'SONGS TO GET US DANCING', 22, SOFT, 5, y);
+          y += 64; caps(draw, 'SONGS TO GET US DANCING', 32, SOFT, 6, y);
           var songLine = String(r.songs).split(String.fromCharCode(10))
             .map(function (s) { return s.trim(); }).filter(Boolean).join(' · ');
-          y = para(draw, songLine, 26, INK, y + 2, true, 3);
+          y = para(draw, songLine, 36, INK, y + 4, true, 3);
         }
 
-        y += 54; if (draw) rule(y, 150);
-        y += 50; caps(draw, 'THE DAY ITSELF', 24, GREEN, 7, y);
+        y += 70; if (draw) rule(y, 190);
+        y += 66; caps(draw, 'THE DAY ITSELF', 38, GREEN, 10, y);
 
-        // every one of these is taken from the site, not written for the card
-        [
-          ['WHEN', ['Saturday 31 July 2027', 'Guests arrive 2:30 pm, ceremony at 3 pm']],
-          ['WHERE', ['Wrights Anglers Rest', 'Knockmaroon Hill, Strawberry Beds,', 'Chapelizod, Dublin 20, D20 AH96']],
-          ['DRESS CODE', ['Garden party semi-formal attire']]
-        ].forEach(function (d) {
-          y += 42; caps(draw, d[0], 20, SOFT, 4, y);
-          d[1].forEach(function (l) { y = para(draw, l, 26, INK, y - 4, false, 1); });
+        DETAILS.forEach(function (d) {
+          y += 56; caps(draw, d[0], 28, SOFT, 6, y);
+          d[1].forEach(function (l) { y = para(draw, l, 38, INK, y - 4, false); });
         });
         return y - y0;
       }
 
+      // measured on a scratch context, so the card can be sized before it is drawn
+      var mc = document.createElement('canvas'); mc.width = W; mc.height = 10;
+      x = mc.getContext('2d');
       var h = compose(false, 0);
-      compose(true, TOP + Math.max(0, (BOTTOM - TOP - h) / 2));
 
-      // JPEG, not PNG: the base is a watercolour wash, so PNG spends 3 MB on
-      // texture a phone will never see. This lands near 400 KB.
+      var EXTRA = Math.max(0, Math.ceil(h + 70 - (FOOT - TOP)));
+      var c = document.createElement('canvas'); c.width = W; c.height = H + EXTRA;
+      x = c.getContext('2d');
+      x.drawImage(base, 0, 0, W, BAND_Y, 0, 0, W, BAND_Y);
+      // The bare band is repeated, not stretched: stretching 100px across 475
+      // smears the paper grain into streaks you can see. Every other tile is
+      // flipped, so the joins have no repeating edge to give themselves away.
+      var total = BAND_H + EXTRA, filled = 0, tile = 0;
+      while (filled < total) {
+        var take = Math.min(BAND_H, total - filled);
+        x.save();
+        x.translate(0, BAND_Y + filled);
+        if (tile % 2) { x.translate(0, take); x.scale(1, -1); }
+        x.drawImage(base, 0, BAND_Y, W, take, 0, 0, W, take);
+        x.restore();
+        filled += take; tile++;
+      }
+      x.drawImage(base, 0, BAND_Y + BAND_H, W, H - BAND_Y - BAND_H, 0, BAND_Y + total, W, H - BAND_Y - BAND_H);
+      x.textAlign = 'center'; x.textBaseline = 'alphabetic';
+
+      compose(true, TOP + Math.max(0, (FOOT + EXTRA - TOP - h) / 2));
+
+      // JPEG, not PNG: the base is a watercolour wash, so PNG spends megabytes
+      // on texture a phone will never see.
       return new Promise(function (ok) { c.toBlob(ok, 'image/jpeg', 0.92); });
     });
   }
