@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <g fill="#B9A57E">
+    <circle cx="10" cy="10" r="3.2"/><circle cx="110" cy="10" r="3.2"/><circle cx="10" cy="110" r="3.2"/><circle cx="110" cy="110" r="3.2"/>
+  </g>
+  <g fill="#DCC49F">
+    <circle cx="22" cy="10" r="2"/><circle cx="34" cy="10" r="2"/><circle cx="46" cy="10" r="2"/><circle cx="58" cy="10" r="2"/><circle cx="70" cy="10" r="2"/><circle cx="82" cy="10" r="2"/><circle cx="94" cy="10" r="2"/>
+    <circle cx="22" cy="110" r="2"/><circle cx="34" cy="110" r="2"/><circle cx="46" cy="110" r="2"/><circle cx="58" cy="110" r="2"/><circle cx="70" cy="110" r="2"/><circle cx="82" cy="110" r="2"/><circle cx="94" cy="110" r="2"/>
+    <circle cx="10" cy="22" r="2"/><circle cx="10" cy="34" r="2"/><circle cx="10" cy="46" r="2"/><circle cx="10" cy="58" r="2"/><circle cx="10" cy="70" r="2"/><circle cx="10" cy="82" r="2"/><circle cx="10" cy="94" r="2"/>
+    <circle cx="110" cy="22" r="2"/><circle cx="110" cy="34" r="2"/><circle cx="110" cy="46" r="2"/><circle cx="110" cy="58" r="2"/><circle cx="110" cy="70" r="2"/><circle cx="110" cy="82" r="2"/><circle cx="110" cy="94" r="2"/>
+  </g>
+  <!-- leafy scrolls either side of the stem -->
+  <g fill="#8fa66e">
+    <path d="M52 98 C40 96 30 88 30 76 C30 66 38 60 44 64 C48 67 46 73 41 72 C38 71 38 67 41 67 C37 66 35 71 37 76 C40 84 47 88 52 88 Z"/>
+    <path d="M52 76 C42 72 36 62 38 52 C40 44 48 42 51 47 C53 51 49 55 46 52 C44 50 46 47 48 48 C44 46 42 52 43 56 C45 64 49 68 52 70 Z"/>
+    <path d="M30 62 C24 56 23 46 28 40 C31 44 31 52 34 58 Z"/>
+    <path d="M68 98 C80 96 90 88 90 76 C90 66 82 60 76 64 C72 67 74 73 79 72 C82 71 82 67 79 67 C83 66 85 71 83 76 C80 84 73 88 68 88 Z"/>
+    <path d="M68 76 C78 72 84 62 82 52 C80 44 72 42 69 47 C67 51 71 55 74 52 C76 50 74 47 72 48 C76 46 78 52 77 56 C75 64 71 68 68 70 Z"/>
+    <path d="M90 62 C96 56 97 46 92 40 C89 44 89 52 86 58 Z"/>
+  </g>
+  <g fill="#b9cf93" opacity=".8">
+    <path d="M44 84 C38 80 36 74 39 70 C41 75 43 79 47 82 Z"/><path d="M76 84 C82 80 84 74 81 70 C79 75 77 79 73 82 Z"/>
+  </g>
+  <!-- the T -->
+  <path fill="#173D24" d="M24 22 H96 L98 42 H94 C92 32 88 29 78 29 H66 V92 C66 97 69 99 75 99 V102 H45 V99 C51 99 54 97 54 92 V29 H42 C32 29 28 32 26 42 H22 Z"/>
+  <path fill="#B9A57E" d="M28 24 H92 V26 H28 Z" opacity=".55"/>
+</svg>

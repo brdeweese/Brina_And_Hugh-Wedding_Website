@@ -1081,6 +1081,616 @@ footer .foot-place { color: #d9b3af; }
   .hero h1 { font-size: 2.2rem; line-height: 1.05; white-space: nowrap; }
   .hero-btn { min-height: 44px; }
 }
+
+/* ---------- The Love Story: an open storybook ---------- */
+[data-current="story"] .sched-bg { opacity: 1; visibility: visible; }
+.story { position: relative; min-height: calc(100svh - var(--nav-h)); box-sizing: border-box; display: flex; align-items: center; justify-content: center; padding-block: clamp(1.4rem, 4vh, 2.6rem); }
+.story.band { background: linear-gradient(180deg, rgba(243,235,221,.18), rgba(243,235,221,.06) 50%, rgba(243,235,221,.2)); backdrop-filter: none; -webkit-backdrop-filter: none; }
+.book-wrap { display: flex; flex-direction: column; align-items: center; gap: 1.3rem; width: 100%; }
+.book { --bw: min(1000px, 90vw, calc((100svh - var(--nav-h) - 8.5rem) * 1.5)); position: relative; width: var(--bw); aspect-ratio: 3 / 2; perspective: 2600px; cursor: pointer; transition: opacity .5s ease; }
+.book.fading { opacity: 0; }
+/* the cover: forest green cloth with a gilt line, peeking out around the pages */
+.book::before { content: ""; position: absolute; inset: -14px -18px -16px; border-radius: 12px;
+  background: radial-gradient(120% 90% at 50% 40%, #2c4a33, #1a2f20 70%, #142519);
+  box-shadow: inset 0 0 0 5px #1a2f20, inset 0 0 0 6px rgba(201,168,108,.75), 0 30px 60px rgba(20,30,24,.45), 0 8px 18px rgba(20,30,24,.3); }
+/* the spine */
+.book::after { content: ""; position: absolute; top: -6px; bottom: -8px; left: 50%; width: 10px; translate: -50% 0; z-index: 3; pointer-events: none;
+  background: linear-gradient(90deg, rgba(60,40,25,0), rgba(60,40,25,.28) 45%, rgba(60,40,25,.28) 55%, rgba(60,40,25,0)); }
+.bpage { position: absolute; top: 0; bottom: 0; width: 50%; overflow: hidden; container-type: size; box-sizing: border-box;
+  background: #fbf3e4 url("img/paper.jpg") center / 460px auto; color: #3b2a22; }
+.bpage.left { left: 0; border-radius: 6px 2px 2px 6px; box-shadow: inset -34px 0 46px -30px rgba(90,60,35,.45), inset 1px 0 0 rgba(255,255,255,.6); }
+.bpage.right { right: 0; border-radius: 2px 6px 6px 2px; box-shadow: inset 34px 0 46px -30px rgba(90,60,35,.45), inset -1px 0 0 rgba(255,255,255,.6); }
+.bpage.measure { visibility: hidden; pointer-events: none; z-index: -1; }
+/* a fine rose frame with little corner flourishes on every page */
+.page-frame { position: absolute; inset: 4.2cqh 6cqw; border: 1px solid rgba(137,155,131,.5); pointer-events: none; }
+.page-frame::before { content: ""; position: absolute; inset: 3px; border: 1px solid rgba(137,155,131,.22); }
+.page-frame i { position: absolute; width: 2.6cqw; height: 2.6cqw; background: #899B83; transform: rotate(45deg); }
+.page-frame i:nth-child(1) { top: -1.3cqw; left: -1.3cqw; } .page-frame i:nth-child(2) { top: -1.3cqw; right: -1.3cqw; }
+.page-frame i:nth-child(3) { bottom: -1.3cqw; left: -1.3cqw; } .page-frame i:nth-child(4) { bottom: -1.3cqw; right: -1.3cqw; }
+.page-body { position: absolute; inset: 9cqh 12cqw 12cqh; overflow: hidden;
+  font-family: "Petit Formal Script", "Pinyon Script", cursive; font-size: 3.15cqw; line-height: 1.85; color: #3b2a22; hyphens: none; }
+.page-body p { margin: 0 0 .35em; text-indent: 1.6em; text-align: left; }
+.page-body p.cont { text-indent: 0; }
+.page-body p.drop { text-indent: 0; }
+.page-body p.drop::first-letter { float: left; font-family: "Pinyon Script", cursive; font-size: 3.6em; line-height: .78; padding: .12em .14em 0 0; color: #56694F; }
+.page-num { position: absolute; bottom: 6cqh; left: 0; right: 0; text-align: center; font: 600 2.6cqw "Cormorant SC", Georgia, serif; letter-spacing: .2em; color: #56694F; }
+/* title and closing pages */
+.page-title { position: absolute; inset: 9cqh 10cqw 10cqh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 2.4cqh; }
+.page-title .pt-small { font: 600 3cqw "Cormorant SC", Georgia, serif; letter-spacing: .32em; color: #56694F; }
+.page-title .pt-big { font-family: "Pinyon Script", cursive; font-size: 11cqw; line-height: 1.05; color: #173D24; }
+.page-title .pt-names { font-family: "Petit Formal Script", cursive; font-size: 4.4cqw; color: #3b2a22; }
+.page-title img { width: 15cqw; height: auto; }
+.page-title .pt-rule { width: 46cqw; height: 1px; background: linear-gradient(90deg, transparent, #899B83, transparent); }
+/* the turning leaf */
+.leaf { position: absolute; top: 0; bottom: 0; right: 0; width: 50%; z-index: 6; transform-style: preserve-3d; transform-origin: left center; transition: transform 1.15s cubic-bezier(.42,.08,.28,1); }
+.leaf .face { position: absolute; inset: 0; width: 100%; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.leaf .face.b { transform: rotateY(180deg); }
+.leaf.turning .face.f::after, .leaf.turning .face.b::after { content: ""; position: absolute; inset: 0; pointer-events: none; animation: leafShade 1.15s ease; }
+@keyframes leafShade { 0%, 100% { background: rgba(60,40,25,0); } 50% { background: rgba(60,40,25,.16); } }
+/* controls under the book */
+.book-nav { display: flex; align-items: center; gap: 1rem; }
+.book-btn { width: 40px; height: 40px; border-radius: 999px; border: 1px solid rgba(220,196,159,.7); background: rgba(23,61,36,.55); color: #F3EBDD; font: 400 1.6rem/1 Georgia, serif; cursor: pointer; padding: 0 0 3px; backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); }
+.book-btn:hover { background: rgba(23,61,36,.8); }
+.book-hint { margin: 0; font: italic 500 1.08rem var(--f-body); color: #F3EBDD; text-shadow: 0 1px 3px rgba(0,0,0,.7), 0 0 12px rgba(0,0,0,.5); }
+/* phones: one page at a time */
+@media (max-width: 700px) {
+  .book { --bw: min(86vw, calc((100svh - var(--nav-h) - 8rem) * .7)); aspect-ratio: 7 / 10; }
+  .book::after, .bpage.left:not(.face) { display: none; }
+  .bpage.right, .leaf { width: 100%; }
+  .bpage.right { border-radius: 4px 8px 8px 4px; box-shadow: inset 18px 0 30px -22px rgba(90,60,35,.45); }
+  .page-body { font-size: 4.6cqw; inset: 8cqh 11cqw 11cqh; }
+  .page-num { font-size: 3.6cqw; }
+  .page-title .pt-big { font-size: 15cqw; } .page-title .pt-small { font-size: 4.2cqw; } .page-title .pt-names { font-size: 6cqw; } .page-title img { width: 22cqw; }
+  .page-frame i { width: 3.6cqw; height: 3.6cqw; }
+}
+
+/* ---------- the big storybook ---------- */
+.book { --bw: min(1180px, 92vw, calc((100svh - var(--nav-h) - 8.5rem) * 1.5)); margin-top: 1.1rem; }
+.book::before { inset: -22px -30px -30px; border-radius: 16px;
+  background:
+    repeating-linear-gradient(115deg, rgba(255,255,255,.025) 0 2px, transparent 2px 6px),
+    radial-gradient(120% 90% at 50% 35%, #31533a, #1d3424 65%, #142519);
+  box-shadow: inset 0 0 0 7px #1b3122, inset 0 0 0 8px rgba(214,182,118,.85), inset 0 0 0 12px #1b3122, inset 0 0 0 13px rgba(214,182,118,.45),
+              0 40px 80px rgba(15,25,18,.55), 0 12px 24px rgba(15,25,18,.35); }
+.book::after { width: 18px; top: -10px; bottom: -14px; background: linear-gradient(90deg, rgba(50,32,20,0), rgba(50,32,20,.38) 40%, rgba(50,32,20,.45) 50%, rgba(50,32,20,.38) 60%, rgba(50,32,20,0)); }
+/* the thick block of pages under each side */
+.stack { position: absolute; top: 3px; bottom: -9px; width: 50%; z-index: 0; border-radius: 6px; pointer-events: none;
+  background: repeating-linear-gradient(180deg, #efe4cf 0 2px, #d9c9ab 2px 3px); }
+.stack.l { left: -9px; box-shadow: -2px 3px 6px rgba(20,30,24,.35); }
+.stack.r { right: -9px; box-shadow: 2px 3px 6px rgba(20,30,24,.35); }
+.bpage { z-index: 1; }
+/* gilt corner protectors on the cover */
+.gilt { position: absolute; width: 46px; height: 46px; z-index: 0; pointer-events: none;
+  background: linear-gradient(135deg, #f0d79c, #b98d45 55%, #8a6428); }
+.gilt.tl { top: -22px; left: -30px; clip-path: polygon(0 0, 100% 0, 0 100%); border-top-left-radius: 16px; }
+.gilt.tr { top: -22px; right: -30px; clip-path: polygon(0 0, 100% 0, 100% 100%); border-top-right-radius: 16px; }
+.gilt.bl { bottom: -30px; left: -30px; clip-path: polygon(0 0, 100% 100%, 0 100%); border-bottom-left-radius: 16px; }
+.gilt.br { bottom: -30px; right: -30px; clip-path: polygon(100% 0, 100% 100%, 0 100%); border-bottom-right-radius: 16px; }
+/* a rose ribbon bookmark hanging from the spine */
+.ribbon { position: absolute; left: calc(50% + 14px); bottom: -64px; width: 18px; height: 92px; z-index: 0; pointer-events: none;
+  background: linear-gradient(90deg, #56694F, #b8797a 45%, #56694F); clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 82%, 0 100%); box-shadow: 0 4px 8px rgba(0,0,0,.3); }
+/* larger, clearer storybook writing */
+.page-body { inset: 8cqh 11cqw 11cqh; font-family: "IM Fell English", "EB Garamond", Georgia, serif; font-size: 4.25cqw; line-height: 1.62; color: #2e211a; letter-spacing: .005em; }
+.page-body p { margin: 0 0 .45em; text-indent: 1.4em; }
+.page-body p.drop::first-letter { font-size: 3.3em; line-height: .8; padding: .1em .12em 0 0; }
+.page-num { font-size: 2.8cqw; bottom: 5.5cqh; }
+.page-title .pt-names { font-family: "IM Fell English", Georgia, serif; font-style: italic; font-size: 5.2cqw; }
+.page-title .pt-small { font-size: 3.2cqw; }
+.book-wrap { gap: 2.4rem; }
+.book-nav { margin-top: .6rem; }
+@media (max-width: 700px) {
+  .book { --bw: min(80vw, calc((100svh - var(--nav-h) - 8rem) * .7)); }
+  .book::before { inset: -14px -18px -18px; }
+  .stack.l, .ribbon { display: none; }
+  .stack.r { width: 100%; right: -6px; bottom: -6px; }
+  .gilt { width: 30px; height: 30px; }
+  .gilt.tl { top: -14px; left: -18px; } .gilt.tr { top: -14px; right: -18px; } .gilt.bl { bottom: -18px; left: -18px; } .gilt.br { bottom: -18px; right: -18px; }
+  .page-body { font-size: 5.7cqw; line-height: 1.55; inset: 7cqh 10cqw 10cqh; }
+  .page-num { font-size: 3.8cqw; }
+}
+
+/* full-page pictures in the storybook */
+.pic-wrap { position: absolute; inset: 6.5cqh 7cqw 7cqh; margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2.4cqh; }
+.pic-wrap img { display: block; max-width: 100%; max-height: 84%; width: auto; height: auto; object-fit: contain; border-radius: 3px; box-shadow: 0 3px 10px rgba(70,45,25,.28); }
+.pic-cap { font-family: "Pinyon Script", cursive; font-size: 6.4cqw; line-height: 1.1; color: #173D24; text-align: center; }
+.page-title img { width: 18cqw; }
+@media (max-width: 700px) { .pic-cap { font-size: 8cqw; } .pic-wrap img { max-height: 82%; } }
+
+/* ---------- storybook themed like the illustrations: honeyed parchment, gilded scrollwork, roses and leaves ---------- */
+.story.band { background: linear-gradient(180deg, rgba(255,196,120,.16), rgba(120,70,30,.14) 55%, rgba(70,40,20,.32)); }
+/* deep green cover, tooled in gold */
+.book::before {
+  background:
+    radial-gradient(100% 80% at 50% 0%, rgba(255,214,140,.16), rgba(0,0,0,0) 60%),
+    repeating-linear-gradient(115deg, rgba(255,255,255,.02) 0 2px, transparent 2px 6px),
+    radial-gradient(120% 90% at 50% 35%, #2f4f35, #1c3322 65%, #13241a);
+  box-shadow: inset 0 0 0 6px #1b3122, inset 0 0 0 8px #d9b25e, inset 0 0 0 11px #1b3122, inset 0 0 0 12px rgba(233,198,122,.6),
+              0 0 60px rgba(255,190,110,.18), 0 40px 80px rgba(15,25,18,.55), 0 12px 24px rgba(15,25,18,.35); }
+/* gilded page edges */
+.stack { background: repeating-linear-gradient(180deg, #f1d58e 0 2px, #c99a45 2px 3px); }
+.gilt { background: linear-gradient(135deg, #fbe7ad, #d6a64c 50%, #9c6b25); }
+.ribbon { background: linear-gradient(90deg, #b5545c, #e08f93 45%, #b5545c); }
+/* warm honeyed parchment, darker toward the edges like the paintings */
+.bpage { color: #4a2f1c;
+  background:
+    radial-gradient(115% 105% at 50% 50%, rgba(255,240,205,0) 52%, rgba(196,132,58,.34) 100%),
+    url("img/paper.jpg") center / 460px auto, #f5dfb2;
+  background-blend-mode: normal, multiply, normal; }
+.bpage.left { box-shadow: inset -40px 0 52px -34px rgba(110,62,22,.55), inset 1px 0 0 rgba(255,245,220,.6); }
+.bpage.right { box-shadow: inset 40px 0 52px -34px rgba(110,62,22,.55), inset -1px 0 0 rgba(255,245,220,.6); }
+/* a gilded double frame with roses and leafy scrollwork in each corner */
+.page-frame { inset: 5cqh 6.5cqw; border: 2px solid transparent; border-image: linear-gradient(135deg, #f3d98e, #c08a35 30%, #f6e2a4 55%, #b07a2c 80%, #e8c574) 1; }
+.page-frame::before { inset: 5px; border: 1px solid rgba(176,122,44,.55); }
+.page-frame::after { content: ""; position: absolute; top: -2.6cqw; left: 50%; width: 30cqw; height: 5.6cqw; translate: -50% 0; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 30'%3E %3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='0'%3E%3Cstop offset='0' stop-color='%23c9973f'/%3E%3Cstop offset='.5' stop-color='%23f3d98e'/%3E%3Cstop offset='1' stop-color='%23c9973f'/%3E%3C/linearGradient%3E%3C/defs%3E %3Cg fill='none' stroke='url(%23g)' stroke-width='2.6' stroke-linecap='round'%3E %3Cpath d='M80 15 C70 3 56 3 52 11 C49 18 58 22 62 16'/%3E%3Cpath d='M80 15 C90 3 104 3 108 11 C111 18 102 22 98 16'/%3E %3Cpath d='M80 15 C70 27 50 27 30 18 C20 14 10 15 4 15'/%3E%3Cpath d='M80 15 C90 27 110 27 130 18 C140 14 150 15 156 15'/%3E%3C/g%3E %3Cpath d='M80 7 L85 15 L80 23 L75 15Z' fill='%23e2b75c' stroke='%23a7742a' stroke-width='1'/%3E %3C/svg%3E") center / contain no-repeat; }
+.page-frame i { width: 15cqw; height: 15cqw; transform: none; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E %3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23f6dd94'/%3E%3Cstop offset='.5' stop-color='%23c9973f'/%3E%3Cstop offset='1' stop-color='%23a7742a'/%3E%3C/linearGradient%3E%3C/defs%3E %3Cg fill='none' stroke='url(%23g)' stroke-width='3.2' stroke-linecap='round'%3E %3Cpath d='M30 112 C30 80 22 62 12 52 C4 44 10 32 20 38 C28 43 22 52 16 48'/%3E %3Cpath d='M112 30 C80 30 62 22 52 12 C44 4 32 10 38 20 C43 28 52 22 48 16'/%3E %3Cpath d='M40 104 C46 86 58 80 70 84'/%3E%3Cpath d='M104 40 C86 46 80 58 84 70'/%3E%3C/g%3E %3Cg fill='%237f9a52'%3E%3Cpath d='M58 70 c6 -12 20 -12 20 -12 c-4 10 -12 16 -20 12z'/%3E%3Cpath d='M70 58 c-12 6 -12 20 -12 20 c10 -4 16 -12 12 -20z'/%3E %3Cpath d='M18 74 c-8 -8 -4 -20 -4 -20 c8 4 10 14 4 20z'/%3E%3Cpath d='M74 18 c-8 -8 -20 -4 -20 -4 c4 8 14 10 20 4z'/%3E %3Cpath d='M36 92 c10 -2 16 6 16 6 c-9 4 -15 1 -16 -6z'/%3E%3Cpath d='M92 36 c-2 10 6 16 6 16 c4 -9 1 -15 -6 -16z'/%3E%3C/g%3E %3Cg fill='%23a6b874' opacity='.9'%3E%3Cpath d='M62 76 c8 -6 14 -4 14 -4 c-5 6 -10 7 -14 4z'/%3E%3Cpath d='M76 62 c-6 8 -4 14 -4 14 c6 -5 7 -10 4 -14z'/%3E%3C/g%3E %3C/svg%3E") center / contain no-repeat; }
+.page-frame i::after { content: none; position: absolute; left: -12%; top: -12%; width: 62%; height: 62%; background: url("img/story-01.webp") center / contain no-repeat; filter: saturate(1.35) hue-rotate(-6deg) drop-shadow(0 1px 1.5px rgba(90,40,20,.35)); }
+.page-frame i:nth-child(1) { top: -4cqw; left: -4cqw; }
+.page-frame i:nth-child(2) { top: -4cqw; right: -4cqw; left: auto; transform: scaleX(-1); }
+.page-frame i:nth-child(3) { bottom: -4cqw; left: -4cqw; top: auto; transform: scaleY(-1); }
+.page-frame i:nth-child(4) { bottom: -4cqw; right: -4cqw; top: auto; left: auto; transform: scale(-1, -1); }
+/* writing in warm sepia; illuminated rose-and-gold first letter */
+.page-body { color: #4a2f1c; inset: 10cqh 12cqw 12cqh; }
+.page-body p.drop::first-letter { color: #b5545c; text-shadow: 1px 1px 0 #e9c46f, 2px 2px 0 rgba(160,110,40,.35); }
+.page-num { color: #a7742a; font-weight: 600; bottom: 7.6cqh; }
+.page-title .pt-small { color: #a7742a; }
+.page-title .pt-big { color: #2c4a2e; text-shadow: 1px 1px 0 rgba(233,196,111,.6); }
+.page-title .pt-names { color: #4a2f1c; }
+.page-title .pt-rule { height: 2px; background: linear-gradient(90deg, transparent, #c99a45, #f3d98e, #c99a45, transparent); }
+/* full-page pictures sit in the parchment, wrapped in a thin gold line */
+.pic-wrap img { padding: 4px; background: linear-gradient(135deg, #f3d98e, #b07a2c 50%, #f0d38a); box-shadow: 0 6px 18px rgba(90,50,20,.35); }
+.pic-cap { color: #2c4a2e; text-shadow: 1px 1px 0 rgba(233,196,111,.55); }
+/* controls in gold and green */
+.book-btn { background: rgba(28,51,34,.75); border-color: #d9b25e; color: #f6dd94; }
+.book-btn:hover { background: rgba(28,51,34,.95); }
+@media (max-width: 700px) {
+  .page-frame i { width: 18cqw; height: 18cqw; }
+  .page-frame::after { width: 40cqw; height: 7.5cqw; top: -3.6cqw; }
+  .page-body { inset: 9cqh 11cqw 11cqh; }
+}
+
+/* ---------- the closed cover and endpapers ---------- */
+.book { transition: opacity .5s ease, transform 1.4s cubic-bezier(.45,.05,.25,1); }
+.book::before { transition: left 1.4s cubic-bezier(.45,.05,.25,1); }
+.book.closed { transform: translateX(-25%); }
+.book.closed::before { left: calc(50% - 6px); }
+.book > .stack.l, #pgLeft, .gilt.tl, .gilt.bl, .ribbon, .book::after { transition: opacity .5s ease .9s; }
+.book.closed > .stack.l, .book.closed #pgLeft, .book.closed .gilt.tl, .book.closed .gilt.bl, .book.closed .ribbon, .book.closed::after { opacity: 0; transition: opacity .2s ease; }
+.cover { position: absolute; top: -22px; bottom: -30px; left: 50%; right: -30px; z-index: 8; cursor: pointer; transform-style: preserve-3d; transform-origin: left center; transition: transform 1.5s cubic-bezier(.45,.05,.25,1); }
+.cover-face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 4px 16px 16px 4px; overflow: hidden; container-type: size; }
+.cover-face.front {
+  background:
+    radial-gradient(90% 70% at 50% 30%, rgba(255,214,140,.18), rgba(0,0,0,0) 65%),
+    repeating-linear-gradient(115deg, rgba(255,255,255,.025) 0 2px, transparent 2px 6px),
+    radial-gradient(120% 90% at 50% 35%, #31533a, #1d3424 65%, #13241a);
+  box-shadow: inset 10px 0 18px -8px rgba(0,0,0,.55), inset 0 0 0 9px #1b3122, inset 0 0 0 11px #d9b25e, inset 0 0 0 15px #1b3122, inset 0 0 0 16px rgba(233,198,122,.6), 0 30px 60px rgba(15,25,18,.5); }
+.cover-face.back { transform: rotateY(180deg); border-radius: 16px 4px 4px 16px; background: #1d3424; }
+.cv-corner { position: absolute; width: 22cqw; height: 22cqw; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E %3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23f6dd94'/%3E%3Cstop offset='.5' stop-color='%23c9973f'/%3E%3Cstop offset='1' stop-color='%23a7742a'/%3E%3C/linearGradient%3E%3C/defs%3E %3Cg fill='none' stroke='url(%23g)' stroke-width='3.2' stroke-linecap='round'%3E %3Cpath d='M30 112 C30 80 22 62 12 52 C4 44 10 32 20 38 C28 43 22 52 16 48'/%3E %3Cpath d='M112 30 C80 30 62 22 52 12 C44 4 32 10 38 20 C43 28 52 22 48 16'/%3E %3Cpath d='M40 104 C46 86 58 80 70 84'/%3E%3Cpath d='M104 40 C86 46 80 58 84 70'/%3E%3C/g%3E %3Cg fill='%237f9a52'%3E%3Cpath d='M58 70 c6 -12 20 -12 20 -12 c-4 10 -12 16 -20 12z'/%3E%3Cpath d='M70 58 c-12 6 -12 20 -12 20 c10 -4 16 -12 12 -20z'/%3E %3Cpath d='M18 74 c-8 -8 -4 -20 -4 -20 c8 4 10 14 4 20z'/%3E%3Cpath d='M74 18 c-8 -8 -20 -4 -20 -4 c4 8 14 10 20 4z'/%3E %3Cpath d='M36 92 c10 -2 16 6 16 6 c-9 4 -15 1 -16 -6z'/%3E%3Cpath d='M92 36 c-2 10 6 16 6 16 c4 -9 1 -15 -6 -16z'/%3E%3C/g%3E %3Cg fill='%23a6b874' opacity='.9'%3E%3Cpath d='M62 76 c8 -6 14 -4 14 -4 c-5 6 -10 7 -14 4z'/%3E%3Cpath d='M76 62 c-6 8 -4 14 -4 14 c6 -5 7 -10 4 -14z'/%3E%3C/g%3E %3C/svg%3E") center / contain no-repeat; filter: drop-shadow(0 1px 1px rgba(0,0,0,.4)); }
+.cv-corner.c1 { top: 4cqw; left: 4cqw; } .cv-corner.c2 { top: 4cqw; right: 4cqw; transform: scaleX(-1); }
+.cv-corner.c3 { bottom: 4cqw; left: 4cqw; transform: scaleY(-1); } .cv-corner.c4 { bottom: 4cqw; right: 4cqw; transform: scale(-1,-1); }
+.cv-inner { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3cqh; text-align: center; }
+.cv-title { margin: 0; font-family: "Pinyon Script", "Snell Roundhand", cursive; font-size: 13cqw; line-height: 1.12;
+  background: linear-gradient(180deg, #fbe7ad 0%, #e2b85f 45%, #b8862f 75%, #f0d48c 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,.5)); padding: 0 .2em; }
+.cv-scroll { display: block; width: 46cqw; height: 8.6cqw; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 30'%3E %3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='0'%3E%3Cstop offset='0' stop-color='%23c9973f'/%3E%3Cstop offset='.5' stop-color='%23f3d98e'/%3E%3Cstop offset='1' stop-color='%23c9973f'/%3E%3C/linearGradient%3E%3C/defs%3E %3Cg fill='none' stroke='url(%23g)' stroke-width='2.6' stroke-linecap='round'%3E %3Cpath d='M80 15 C70 3 56 3 52 11 C49 18 58 22 62 16'/%3E%3Cpath d='M80 15 C90 3 104 3 108 11 C111 18 102 22 98 16'/%3E %3Cpath d='M80 15 C70 27 50 27 30 18 C20 14 10 15 4 15'/%3E%3Cpath d='M80 15 C90 27 110 27 130 18 C140 14 150 15 156 15'/%3E%3C/g%3E %3Cpath d='M80 7 L85 15 L80 23 L75 15Z' fill='%23e2b75c' stroke='%23a7742a' stroke-width='1'/%3E %3C/svg%3E") center / contain no-repeat; }
+.cv-scroll.down { transform: scaleY(-1); }
+.cv-sub { margin: 0; font: 600 4.2cqw "Cormorant SC", Georgia, serif; letter-spacing: .3em; color: #e2c47c; text-shadow: 0 1px 2px rgba(0,0,0,.5); }
+.cover:hover .cover-face.front { filter: brightness(1.05); }
+.cover:focus-visible { outline: 2px solid #f0d48c; outline-offset: 4px; }
+/* endpapers: the inside of the covers, deep green patterned in gold */
+.endpaper { position: absolute; inset: 0;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(226,184,95,.55) 0 1.2px, transparent 1.8px) 0 0 / 22px 22px,
+    radial-gradient(circle at 50% 50%, rgba(226,184,95,.28) 0 .9px, transparent 1.4px) 11px 11px / 22px 22px,
+    radial-gradient(110% 90% at 50% 50%, #2c4c33, #1a2f20); }
+.endpaper::after { content: ""; position: absolute; inset: 5cqh 6.5cqw; border: 1px solid rgba(226,184,95,.6); outline: 1px solid rgba(226,184,95,.3); outline-offset: 5px; }
+.bpage:has(> .endpaper) { box-shadow: inset -30px 0 40px -26px rgba(0,0,0,.6); }
+@media (max-width: 700px) {
+  .book.closed { transform: none; }
+  .book.closed::before { left: -18px; }
+  .cover { top: -14px; bottom: -18px; left: -18px; right: -18px; }
+  .cv-title { font-size: 15cqw; }
+}
+
+/* ---------- a realistic cover opening ---------- */
+.book { perspective: 2200px; perspective-origin: 50% 40%; transition: opacity .5s ease, transform 2.1s cubic-bezier(.5,0,.2,1); }
+.book::before { transition: left 2.1s cubic-bezier(.5,0,.2,1); }
+.cover { transition: none; }
+.cover.opening { animation: coverOpen 2.2s cubic-bezier(.45,.02,.3,1) forwards; }
+@keyframes coverOpen {
+  0%   { transform: rotateY(0deg); }
+  14%  { transform: rotateY(-14deg); }   /* a thumb lifts the edge */
+  22%  { transform: rotateY(-11deg); }   /* it settles for a breath */
+  70%  { transform: rotateY(-150deg); }
+  88%  { transform: rotateY(-183deg); }  /* it falls open and rocks gently */
+  100% { transform: rotateY(-180deg); }
+}
+/* the board's thickness, seen as it swings */
+.cover-edge { position: absolute; top: 0; bottom: 0; right: 0; width: 9px; transform-origin: right center; transform: rotateY(90deg);
+  background: linear-gradient(90deg, #12231a, #2a4632 50%, #12231a); border-radius: 0 3px 3px 0; }
+/* light on the cloth darkens as the cover turns away, and lifts as the inside lands */
+.cover-face::before { content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none; opacity: 0; }
+.cover-face.front::before { background: linear-gradient(270deg, rgba(0,0,0,.55), rgba(0,0,0,.15)); }
+.cover-face.back::before { background: linear-gradient(90deg, rgba(0,0,0,.6), rgba(0,0,0,.2)); }
+.cover.opening .cover-face.front::before { animation: shadeFront 2.2s ease forwards; }
+.cover.opening .cover-face.back::before { animation: shadeBack 2.2s ease forwards; }
+@keyframes shadeFront { 0%,14% { opacity: 0; } 22% { opacity: .1; } 60% { opacity: .85; } 100% { opacity: .85; } }
+@keyframes shadeBack { 0%,55% { opacity: .9; } 85% { opacity: .25; } 100% { opacity: 0; } }
+/* the cover's shadow sweeps off the first page as it opens */
+.cover-shadow { position: absolute; top: 0; bottom: 0; left: 50%; width: 50%; z-index: 7; pointer-events: none; opacity: 0;
+  background: linear-gradient(90deg, rgba(30,18,8,.7), rgba(30,18,8,.35) 55%, rgba(30,18,8,.1)); transform-origin: left center; }
+.book.cover-opening .cover-shadow { animation: coverShadow 2.2s ease forwards; }
+@keyframes coverShadow { 0% { opacity: .85; transform: scaleX(1); } 18% { opacity: .75; transform: scaleX(1); } 70% { opacity: .3; transform: scaleX(.35); } 100% { opacity: 0; transform: scaleX(.05); } }
+.book.closed .cover-shadow { opacity: 0; }
+@media (max-width: 700px) {
+  .cover-shadow { left: 0; width: 100%; }
+  .cover.opening { animation-name: coverOpenPhone; }
+  @keyframes coverOpenPhone { 0% { transform: rotateY(0deg); } 14% { transform: rotateY(-14deg); } 22% { transform: rotateY(-11deg); } 100% { transform: rotateY(-120deg); opacity: 0; } }
+}
+@media (prefers-reduced-motion: reduce) { .cover.opening { animation: none; transform: rotateY(-180deg); } }
+
+/* ---------- The End ---------- */
+.fin-wrap { position: absolute; inset: 10cqh 10cqw; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3cqh; }
+.fin-text { margin: 0; font-family: "Pinyon Script", "Snell Roundhand", cursive; font-size: 17cqw; line-height: 1.1; color: #2c4a2e; text-shadow: 1px 1px 0 rgba(233,196,111,.6); }
+.fin-wrap .cv-scroll { width: 50cqw; height: 9.4cqw; }
+
+/* ================= watercolour storybook ================= */
+/* open: the painted open book, with the story written onto its pages */
+.book { --bw: min(1120px, 94vw, calc((100svh - var(--nav-h) - 8rem) * 1.5386)); aspect-ratio: 877 / 570; perspective: 2400px; margin-top: .6rem; }
+.book::before { inset: 0; border-radius: 0; box-shadow: none; background: url("img/story-02.webp") center / 100% 100% no-repeat;
+  filter: drop-shadow(0 26px 30px rgba(20,12,6,.45)) drop-shadow(0 6px 8px rgba(20,12,6,.25)); transition: opacity 1.1s ease .6s; left: 0; }
+.book::after, .book > .stack, .book > .gilt, .book > .ribbon, .book-edges, .cover-shadow { display: none !important; }
+#pgLeft, #pgRight, #pgMeasure { top: 2.98%; height: 87.19%; bottom: auto; right: auto; width: 38.54%; background: none; box-shadow: none; border-radius: 0; }
+#pgLeft { left: 11.86%; }
+#pgRight, #pgMeasure { left: 50.40%; }
+.leaf { left: 50.40%; right: auto; top: 2.98%; bottom: auto; height: 87.19%; width: 38.54%; }
+.leaf .face.f { background: url("img/story-03.webp") center / 100% 100% no-repeat; box-shadow: none; border-radius: 0; }
+.leaf .face.b { background: url("img/story-04.webp") center / 100% 100% no-repeat; box-shadow: none; border-radius: 0; }
+.page-frame { display: none; }
+.page-body { inset: 9cqh 12cqw 15cqh 12cqw; color: #4b3526; }
+.page-body p.drop::first-letter { color: #56694F; text-shadow: none; }
+.page-num { bottom: 10cqh; color: #8a6a4a; font-weight: 600; }
+.endpaper { background: url("img/story-05.svg") center 46% / 16cqw auto no-repeat; opacity: .5; }
+.endpaper::after { display: none; }
+.bpage:has(> .endpaper) { box-shadow: none; }
+.fin-text { color: #173D24; text-shadow: none; }
+.fin-wrap .cv-scroll { width: 40cqw; height: 2px; background: linear-gradient(90deg, transparent, #899B83, transparent); transform: none; }
+.fin-wrap::after { content: ""; width: 14cqw; height: 12cqw; background: url("img/story-05.svg") center / contain no-repeat; opacity: .8; }
+#pgLeft, #pgRight { transition: opacity .9s ease 1.3s; }
+
+@media (max-width: 700px) {
+  .book { --bw: min(84vw, calc((100svh - var(--nav-h) - 8rem) * .68)); aspect-ratio: 338 / 497; }
+  .book::before { background-image: url("img/story-03.webp"); }
+  #pgRight, #pgMeasure, .leaf { left: 0; top: 0; width: 100%; height: 100%; }
+  .page-body { inset: 9cqh 11cqw 15cqh 11cqw; }
+}
+
+/* ---------- realistic opening and page turning ---------- */
+/* the cover: front of the pink book, flattened to sit on the pages; its inside lands as the left half of the open book */
+.cover { animation: none !important; left: 50.40%; top: 0; width: 49.14%; height: 100%; right: auto; bottom: auto;
+  transform-origin: left center; transform-style: preserve-3d; transition: none; cursor: pointer; filter: none; }
+.cover-face { border-radius: 0 !important; overflow: hidden; }
+.book .cover .cover-face.front { display: block !important; background: url("img/story-06.jpg") center / 100% 100% no-repeat; box-shadow: none; filter: none;
+  border-radius: 2px 6px 6px 2px !important; }
+.book .cover .cover-face.back { display: block !important; background: url("img/story-07.webp") center / 100% 100% no-repeat; transform: rotateY(180deg); }
+.book .cover .cover-face.back .endpaper { display: none; }
+.book .cover .cover-face::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: #3a2414; }
+.book .cover .cover-face.front::after { opacity: var(--shF, 0); border-radius: inherit; }
+.book .cover .cover-face.back::after { opacity: var(--shB, 0); background: linear-gradient(90deg, rgba(58,36,20,.4), #3a2414 85%); }
+.book .cover .cover-edge { display: block !important; width: 7px; background: linear-gradient(90deg, #a8655f, #d79a92 50%, #a8655f); border-radius: 0 3px 3px 0; }
+.cover:hover .cover-face.front { filter: brightness(1.03); }
+/* the shadow of the closed book on the table */
+.book.halfshow .cover-face.front { box-shadow: 4px 6px 0 -1px #efe1c2, 7px 10px 0 -2px #e2cfa8, 9px 13px 0 -2px #c99b8f, 0 26px 34px rgba(20,12,6,.35) !important; }
+/* closed: only the right half of the book is there, centred */
+.book { transition: opacity .5s ease, transform 2s cubic-bezier(.45,0,.25,1); }
+.book.closed { transform: translateX(-25%); }
+.book.closed::before { left: 0; }
+.book .cover .cover-face.front > * { display: none !important; }
+.book::before { transition: none; opacity: 1 !important; }
+.book.halfshow::before { clip-path: inset(0 0 0 50.4%); }
+.book.halfshow #pgLeft { opacity: 0; }
+#pgLeft { transition: none; }
+.book.closed #pgRight { opacity: 1; }
+/* shadows cast onto the pages underneath */
+.cast { position: absolute; top: 2.98%; height: 87.19%; width: 38.54%; z-index: 5; pointer-events: none; opacity: 0; }
+.cast-r { left: 50.40%; background: linear-gradient(90deg, rgba(50,30,14,.55), rgba(50,30,14,.18) 45%, rgba(50,30,14,0) 85%); }
+.cast-l { left: 11.86%; background: linear-gradient(270deg, rgba(50,30,14,.55), rgba(50,30,14,.18) 45%, rgba(50,30,14,0) 85%); }
+/* the turning sheet, made of hinged strips so it curls */
+.leaf { transition: none !important; transform-style: preserve-3d; z-index: 6; }
+.leaf.turning .face::after { display: none; }
+.fstrip { position: absolute; top: 0; height: 100%; transform-style: preserve-3d; transform-origin: left center; }
+.fseg { position: absolute; inset: 0; overflow: hidden; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.fseg.b { transform: rotateY(180deg); }
+.flipface { position: absolute; top: 0; container-type: size; background-size: 100% 100%; background-repeat: no-repeat; color: #4b3526; }
+.fshade { position: absolute; inset: 0; background: #3a2414; opacity: 0; pointer-events: none; }
+@media (max-width: 700px) {
+  .book.closed { transform: none; }
+  .book.halfshow::before { clip-path: none; }
+  .cover { left: 0; width: 100%; }
+  .book .cover .cover-face.front { border-radius: 2px 8px 8px 2px !important; }
+  .cast { left: 0; top: 0; width: 100%; height: 100%; }
+}
+
+/* ---------- smooth, still, shadow-light motion ---------- */
+.book, .book.closed { transition: opacity .5s ease !important; transform: none; }
+.cast, .fshade { display: none !important; }
+.book .cover .cover-face::after { display: none !important; }
+.book.halfshow .cover-face.front { box-shadow: 3px 4px 0 -1px #efe1c2, 5px 7px 0 -2px #e2cfa8 !important; }
+.book .cover .cover-edge { display: none !important; }
+.cover { will-change: transform; }
+.fstrip { will-change: transform; }
+
+/* the spine of the closed book, on the left of the cover at the hinge */
+.spine { position: absolute; top: -.6%; height: 101.2%; left: calc(50.40% - 6.2%); width: 6.6%; z-index: 7; pointer-events: none;
+  background: url("img/story-08.webp") center / 100% 100% no-repeat; transform-origin: right center; }
+.book:not(.halfshow) .spine { display: none; }
+.leaf { transform: none; }
+#leaf { transition: none !important; }
+@media (max-width: 700px) { .spine { left: -8%; width: 9%; } }
+
+/* a deeper, gentler perspective so the moving cover and pages don't stretch */
+.book { perspective: 3400px !important; perspective-origin: 50% 55% !important; }
+.leaf { transform-style: preserve-3d; }
+.fstrip, .fseg, .flipface { -webkit-font-smoothing: antialiased; }
+.fseg { outline: 1px solid transparent; }
+
+/* opening without stray shadows: one soft shadow on the table, page edges that stay put */
+.book::before { filter: none !important; }
+.book.halfshow .cover-face.front { box-shadow: none !important; }
+.bk-shadow { position: absolute; bottom: 2%; height: 9%; z-index: 0; pointer-events: none; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(20,12,6,.32), rgba(20,12,6,0)); filter: blur(6px); }
+.bk-shadow.r { left: 48%; width: 50%; }
+.bk-shadow.l { left: 4%; width: 48%; opacity: 0; }
+.book:not(.halfshow) .bk-shadow.l { opacity: 1 !important; }
+.page-block { position: absolute; left: 50.4%; width: 49.14%; top: 0; height: 100%; z-index: 6; pointer-events: none;
+  box-shadow: 3px 4px 0 -1px #efe1c2, 5px 7px 0 -2px #e2cfa8; border-radius: 2px 6px 6px 2px; }
+.book:not(.halfshow) .page-block { display: none; }
+.book .cover .cover-face.back { box-shadow: none !important; }
+@media (max-width: 700px) { .page-block { left: 0; width: 100%; } .bk-shadow.r { left: 5%; width: 90%; } .bk-shadow.l { display: none; } }
+
+/* larger writing on the pages */
+.page-body { font-size: 5.05cqw !important; line-height: 1.55 !important; }
+.page-body p { margin-bottom: .4em; }
+@media (max-width: 700px) { .page-body { font-size: 6.4cqw !important; line-height: 1.5 !important; } }
+
+/* no outlines while things move */
+.cover:focus, .cover:focus-visible:not(:hover) { outline: none; }
+.cover:focus-visible { outline: none; box-shadow: none; }
+.leaf, .fstrip, .fseg, .cover, .cover-face, .spine { outline: 0 !important; border: 0 !important; }
+.fseg { outline: none !important; }
+.bk-shadow.l { transition: none; }
+
+/* the bee is already printed on the inside of the cover, in the same place as on the left page */
+.back-bee { position: absolute; left: 21.57%; width: 78.43%; top: 2.98%; height: 87.19%; pointer-events: none;
+  background: url("img/story-05.svg") center 46% / 16% auto no-repeat; opacity: .5; }
+@media (max-width: 700px) { .back-bee { display: none; } }
+
+/* home: the names sit where the invitation line was, with "are getting married" beneath */
+.hero-invite { display: none; }
+.hero-text { transform: none; top: calc(31svh - var(--nav-h) - 17.7px - .55 * clamp(3.6rem, 12.5vw, 7.8rem)); gap: 0; }
+.hero-sub { margin: -.05em 0 0; font-family: var(--f-script); font-size: calc(.75 * clamp(3.6rem, 12.5vw, 7.8rem)); line-height: 1.05;
+  color: #f3ece2; text-shadow: 0 4px 30px rgba(0,0,0,.55); padding: 0 .25em .1em;
+  opacity: 0; transform: translateY(10px); transition: opacity 1.6s ease, transform 1.6s ease; }
+.hero-sub.show { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { .hero-sub { transition: none; transform: none; } }
+
+/* "are getting married" in the style of the old invitation line, at 0.3 of the names */
+.hero-sub { font-family: var(--f-body); font-style: italic; font-weight: 400; font-size: calc(.3 * clamp(3.6rem, 12.5vw, 7.8rem));
+  line-height: 1.3; color: #DCC49F; text-shadow: 0 2px 12px rgba(0,0,0,.6); margin-top: .1em; padding: 0; }
+
+/* "are getting married" tucked up close under the names; no bee under "The End" */
+.hero-sub { margin-top: -.4em; }
+.fin-wrap::after { content: none !important; display: none !important; }
+
+.hero-sub { margin-top: -.6em; }
+@media (max-width: 560px) { .hero-sub { margin-top: -.15em; } }
+@media (max-width: 760px) { .tab-mono { font-size: 1.35rem; } }
+
+/* "are getting married": centred, tucked close under the names, drawn on top of them where they meet */
+.hero-sub { position: relative; z-index: 2; align-self: center; margin-top: -.85em; }
+.hero h1 { position: relative; z-index: 1; }
+@media (max-width: 560px) { .hero h1 { font-size: 13vw; white-space: nowrap; } .hero-sub { font-size: calc(.3 * 13vw); margin-top: -.75em; } }
+
+.fin-text { font-size: 9.5cqw !important; line-height: 1.25 !important; text-align: center; padding: 0 2cqw; }
+@media (max-width: 700px) { .fin-text { font-size: 11cqw !important; } }
+
+/* a clearer script capital to open the story */
+.page-body p.drop::first-letter { font-family: "Parisienne", "Pinyon Script", cursive !important; font-size: 3.5em !important; line-height: .9 !important; padding: .06em .3em 0 .04em !important; color: #173D24 !important; }
+/* the closing line: storybook italic, easy to read */
+.fin-text { font-family: "IM Fell English", "EB Garamond", Georgia, serif !important; font-style: italic; font-size: 8.4cqw !important; line-height: 1.35 !important; color: #173D24 !important; letter-spacing: .01em; }
+.fin-text::first-letter { font-family: "Parisienne", cursive; font-style: normal; font-size: 1.5em; color: #173D24; }
+@media (max-width: 700px) { .fin-text { font-size: 10cqw !important; } }
+
+/* painted initial T, in the storybook's pinks and greens */
+.page-body p.drop::first-letter { float: none !important; font-family: inherit !important; font-size: inherit !important; line-height: inherit !important; padding: 0 !important; margin: 0 !important; color: inherit !important; text-shadow: none !important; }
+.page-body .ini-art { float: left; width: 4.4em; height: 4.4em; margin: .2em .45em 0 -.15em; background: url("img/story-09.svg") center / contain no-repeat; }
+
+.page-body p.tight { letter-spacing: -.005em; word-spacing: -.035em; }
+
+/* preview ribbon */
+.preview-flag { position: fixed; z-index: 60; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); left: calc(16px + env(safe-area-inset-left, 0px)); padding: .25rem .8rem; border-radius: 999px; background: var(--rose); color: var(--forest); font: 500 .75rem var(--f-caps); letter-spacing: .18em; pointer-events: none; }
+
+/* ================= Wedding palette =================
+   Dark forest green #173D24 leads. Eucalyptus #899B83, champagne #DCC49F and ivory #F3EBDD replace the pale pinks.
+   Only greens, champagne and ivory are used. */
+:root {
+  --night: #F3EBDD; --panel: rgba(243,235,221,.9);
+  --forest: #173D24; --moss: #2B5A38; --sage: #899B83;
+  --rose: #899B83; --rose-deep: #173D24; --blush: #56694F;
+  --ivory: #173D24; --brass: #899B83; --brass-hi: #56694F; --brass-deep: #56694F;
+  --muted: #3f5646; --petal: #E9DCC4; --paper-hi: #FAF6EE; --pink-name: #F3EBDD;
+  --fog: 243, 235, 221;
+  --eucalyptus: #899B83; --eucalyptus-deep: #56694F; --champagne: #DCC49F;
+}
+/* home: ivory names, "are getting married" in champagne, buttons in champagne and forest */
+.hero h1 { color: #F3EBDD; }
+.hero-sub { color: #F3EBDD; }
+.hero-btn.primary { background: linear-gradient(180deg, rgba(220,196,159,.34), rgba(220,196,159,.22)); color: #FAF6EE; border-color: rgba(220,196,159,.85); outline-color: rgba(220,196,159,.4); }
+.hero-btn.primary:hover { background: linear-gradient(180deg, rgba(220,196,159,.5), rgba(220,196,159,.36)); }
+.hero-btn:not(.primary) { background: rgba(23,61,36,.42); border-color: rgba(137,155,131,.85); outline-color: rgba(137,155,131,.4); }
+.hero-btn:not(.primary):hover { background: rgba(23,61,36,.62); border-color: #899B83; }
+/* tabs: eucalyptus underline for the page you're on */
+.tab[aria-current="page"] { border-bottom-color: #899B83; }
+/* schedule: a small coloured bud beside each time */
+.schedule .phase:nth-child(1) li { --bud: var(--champagne); }
+.schedule .phase:nth-child(2) li { --bud: var(--eucalyptus); }
+.schedule .phase:nth-child(3) li { --bud: var(--forest); }
+.schedule .phase time::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--bud); box-shadow: 0 0 0 1px rgba(23,61,36,.35); margin-right: .55em; vertical-align: .16em; }
+.schedule .phases { box-shadow: 0 10px 30px rgba(23,61,36,.14); }
+/* venue: the details in a forest panel, hotel cards topped in the palette */
+.details { background: #173D24; border-color: #173D24; color: #F3EBDD; }
+.details dt { color: #DCC49F; }
+.details a { color: #DCC49F; }
+.details a:hover { color: #FAF6EE; }
+.stay-card { border-top: 4px solid var(--eucalyptus); }
+.stay-card:nth-child(2) { border-top-color: var(--champagne); }
+.stay-card:nth-child(3) { border-top-color: var(--forest); }
+.stay-card:nth-child(4) { border-top-color: var(--champagne); }
+/* rsvp: ticked dietary choices in eucalyptus */
+.rsvp-card .diet label:has(input:checked) { background: rgba(137,155,131,.28); border-color: #899B83; }
+/* footer */
+footer.band { background: #173D24; color: #F3EBDD; }
+footer .sig { color: #F3EBDD; }
+footer .foot-date { color: #FAF6EE; }
+footer .foot-place { color: #DCC49F; }
+/* storybook controls */
+.book-btn { background: rgba(23,61,36,.8); border-color: #DCC49F; color: #F3EBDD; }
+.book-btn:hover { background: #173D24; }
+/* heading flourish: an eucalyptus rule with a eucalyptus sprig and a champagne bud, in place of the pink rose */
+.view-head .h2::after {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 34'%3E%3Cg fill='none' stroke='%23899B83' stroke-width='1' stroke-linecap='round'%3E%3Cpath d='M8 17h66M126 17h66'/%3E%3C/g%3E%3Cpath d='M76 17 C86 17 92 17 124 17' stroke='%23173D24' stroke-opacity='.6' stroke-width='1.1' fill='none'/%3E%3Cg fill='%23899B83'%3E%3Cellipse cx='86' cy='11.5' rx='5.2' ry='4.2'/%3E%3Cellipse cx='86' cy='22.5' rx='5.2' ry='4.2'/%3E%3Cellipse cx='114' cy='11.5' rx='5.2' ry='4.2'/%3E%3Cellipse cx='114' cy='22.5' rx='5.2' ry='4.2'/%3E%3C/g%3E%3Cg fill='%237A8C74'%3E%3Cellipse cx='76.5' cy='14' rx='3.6' ry='3'/%3E%3Cellipse cx='76.5' cy='20' rx='3.6' ry='3'/%3E%3Cellipse cx='123.5' cy='14' rx='3.6' ry='3'/%3E%3Cellipse cx='123.5' cy='20' rx='3.6' ry='3'/%3E%3C/g%3E%3Cpath d='M100 8 L107 17 L100 26 L93 17Z' fill='%23DCC49F' stroke='%23899B83' stroke-width='1'/%3E%3C/svg%3E") center / 200px auto no-repeat;
+}
+/* the map's label: no pink rose on top */
+.venue-map g > image[x="97"] { display: none; }
+.schedule .phase { border-color: rgba(137,155,131,.7); }
+
+/* accent text in a deeper eucalyptus; badges and confirm buttons in forest */
+.badge.new, .rm.confirm { background: #173D24; border-color: #173D24; color: #FAF6EE; }
+.badge.changed { border-color: #899B83; color: #56694F; }
+
+/* ================= wildflowers ================= */
+/* heading flourish: a small painted posy of wildflowers between two eucalyptus rules */
+.view-head .h2::after {
+  width: 320px; height: 64px; margin-top: .4rem;
+  background:
+    url("img/story-10.webp") center / auto 62px no-repeat,
+    linear-gradient(#899B83, #899B83) left 75% / 88px 1px no-repeat,
+    linear-gradient(#899B83, #899B83) right 75% / 88px 1px no-repeat;
+}
+/* schedule: wildflowers growing up the edges of the panel, clear of the words */
+.schedule .phase time::before, .schedule .phase h3::before { content: none; }
+.schedule .phases { position: relative; overflow: visible; }
+.schedule .phases::before, .schedule .phases::after { content: ""; position: absolute; z-index: 2; pointer-events: none; background: center bottom / contain no-repeat; filter: drop-shadow(0 2px 3px rgba(23,61,36,.12)); }
+.schedule .phases::before { left: -86px; bottom: -34px; width: 150px; height: 196px; background-image: url("img/story-11.webp"); }
+.schedule .phases::after { right: -80px; bottom: -30px; width: 126px; height: 180px; background-image: url("img/story-12.webp"); }
+@media (max-width: 1240px) {
+  .schedule .phases::before { left: -56px; width: 112px; height: 146px; }
+  .schedule .phases::after { right: -50px; width: 96px; height: 138px; }
+}
+/* phones: the flowers lean in at the top corners, either side of "Afternoon" */
+@media (max-width: 900px) {
+  .schedule .phases::before { left: -14px; top: -40px; bottom: auto; width: 66px; height: 88px; }
+  .schedule .phases::after { right: -12px; top: -38px; bottom: auto; width: 58px; height: 84px; }
+}
+/* footer: the posy above the names */
+footer .sig::before { content: ""; display: block; width: 260px; height: 80px; margin: 0 auto .3rem; background: url("img/story-10.webp") center / contain no-repeat; }
+/* the invitation in the envelope: the wildflower card, the password typed on its line */
+.card { aspect-ratio: 1748 / 1240; background: #f2ead8; }
+.pw-form { left: 32%; right: 32%; top: 52.9%; }
+.pw-form input { color: #56694F; caret-color: #173D24; letter-spacing: .35em; text-indent: .35em; }
+.pw-form input::selection { background: rgba(137,155,131,.3); color: #173D24; }
+.pw-msg { color: #173D24; margin-top: 2.4cqw; }
+/* storybook writing and trimmings in forest green and eucalyptus */
+.page-body, .flipface { color: #2c3a2c; }
+.page-num, .page-title .pt-small { color: #56694F; }
+.page-title .pt-big, .pic-cap, .page-title .pt-names { color: #173D24; }
+.fin-text, .fin-text::first-letter { color: #173D24 !important; }
+.fin-wrap .cv-scroll { background: linear-gradient(90deg, transparent, #899B83, transparent); }
+.page-title .pt-rule { background: linear-gradient(90deg, transparent, #899B83, #DCC49F, #899B83, transparent); }
+/* map label: pink campion on top */
+.venue-map g > image[x="97"] { display: inline; }
+
+/* ================= little bees, resting quietly around the site ================= */
+.stay-card:first-child { position: relative; }
+.stay-card:first-child::after {
+  content: ""; position: absolute; z-index: 3; pointer-events: none; aspect-ratio: 84 / 80;
+  background: center / contain no-repeat;
+}
+/* where the bride and groom are staying: one on the card's corner */
+.stay-card:first-child::after { width: 26px; right: 10px; top: -15px; background-image: url("img/story-13.png"); }
+/* footer: the posy with a bee among the flowers on the right */
+footer .sig::before { background-image: url("img/story-14.webp"); }
+/* envelope: lined in forest-green paper, so the card comes out against green */
+.env-flap::after { content: ""; position: absolute; inset: -2px 0 0 0; background: url("img/story-15.webp") center / 100% 100% no-repeat; opacity: 0; }
+
+.env-flap, .card { will-change: transform; }
+.envelope.s2 .env-flap { animation: flapOpen 1.15s cubic-bezier(.42,0,.22,1) forwards; }
+.envelope.s2 .env-flap::after { animation: flapLining 1.15s cubic-bezier(.42,0,.22,1) forwards; }
+@keyframes flapLining { 0%, 42% { opacity: 0; } 58%, 100% { opacity: 1; } }
+/* the card glides right out of the pocket before it comes forward, so it never jumps in front of the envelope */
+.envelope.s3 .card { transform: translateY(-100%); transition: transform 1.6s cubic-bezier(.3,0,.15,1), box-shadow 1.2s ease; }
+.envelope.s4 .card { transform: translateY(-28%); transition: transform 1.25s cubic-bezier(.45,0,.2,1), box-shadow 1.25s ease; }
+.envelope { transition: transform 1.5s cubic-bezier(.4,0,.2,1); }
+/* once the flap has turned over, its outer shadow no longer falls across the green lining */
+.envelope.s2 .env-flap { filter: none; }
+/* the open flap is drawn with the clean green inside only, so no cream shows at its edges */
+.envelope.s3 .env-flap img { opacity: 0; transition: opacity .2s ease; }
+/* the sealed envelope: the card stays hidden until the flap lifts, so none of it peeks through the seams */
+.envelope:not(.s2) .card { visibility: hidden; }
+
+/* ---------- a more lifelike opening ---------- */
+.envelope { perspective: 1500px; perspective-origin: 50% 30%; }
+/* the seal lets go first */
+.envelope.s1 .seal { transition: opacity .35s ease, transform .45s cubic-bezier(.3,0,.2,1), filter .35s ease; transform: scale(.9) rotate(-8deg) translateY(-4px); }
+/* the flap peels up off the seal, swings over and settles back with a little give */
+.envelope.s2 .env-flap { animation: flapReal 1.35s linear forwards; }
+@keyframes flapReal {
+  0%   { transform: rotateX(0deg); z-index: 3; animation-timing-function: cubic-bezier(.25,.1,.3,1); }
+  12%  { transform: rotateX(12deg); z-index: 3; animation-timing-function: cubic-bezier(.45,0,.3,1); }
+  50.5%{ z-index: 3; }
+  51%  { z-index: 0; }
+  90%  { transform: rotateX(185deg); z-index: 0; animation-timing-function: cubic-bezier(.4,0,.4,1); }
+  100% { transform: rotateX(180deg); z-index: 0; }
+}
+.envelope.s2 .env-flap::after { animation: flapLining 1.35s linear forwards; }
+@keyframes flapLining { 0%, 48% { opacity: 0; } 54%, 100% { opacity: 1; } }
+/* light on the flap: it dims as it tips away and brightens as the green inside settles towards you */
+.env-flap::before { content: ""; position: absolute; inset: -2px 0 0 0; z-index: 2; pointer-events: none; background: #0b1a10; opacity: 0;
+  -webkit-mask: url("img/story-15.webp") center / 100% 100% no-repeat; mask: url("img/story-15.webp") center / 100% 100% no-repeat; }
+.envelope.s2 .env-flap::before { animation: flapLight 1.35s linear forwards; }
+@keyframes flapLight { 0% { opacity: 0; } 12% { opacity: .04; } 46% { opacity: .3; } 51% { opacity: .42; } 56% { opacity: .3; } 85% { opacity: .04; } 100% { opacity: 0; } }
+/* the card is drawn up with a slight tilt, then laid down in front */
+.envelope.s3 .card { transform: translateY(-100%) rotate(-.8deg); transition: transform 1.7s cubic-bezier(.32,0,.16,1), box-shadow 1.4s ease; box-shadow: 0 10px 26px rgba(23,61,36,.18); }
+.envelope.s4 .card { transform: translateY(-28%) rotate(0deg); transition: transform 1.35s cubic-bezier(.42,0,.18,1), box-shadow 1.35s ease; box-shadow: 0 18px 40px rgba(0,0,0,.35); }
+.envelope { transition: transform 1.7s cubic-bezier(.36,0,.18,1); }
+
+/* ---------- footer: date and time on the left, names, flowers and place in the centre, countdown on the right ---------- */
+footer.band { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); grid-template-areas: "date sig count" "date place count"; align-items: center; column-gap: clamp(1.2rem, 4vw, 3.5rem); }
+footer .sig { grid-area: sig; }
+footer .foot-place { grid-area: place; }
+footer .foot-date { grid-area: date; justify-self: end; text-align: center; margin: 0; display: flex; flex-direction: column; gap: .1rem; letter-spacing: .2em; font-size: clamp(1rem, 1.8vw, 1.25rem); color: #F3EBDD; }
+footer .foot-date .fd-big { font-family: var(--f-body); font-size: clamp(2rem, 4vw, 2.8rem); letter-spacing: .04em; line-height: 1.1; text-transform: none; }
+footer .foot-date .fd-small { font-family: var(--f-caps); text-transform: uppercase; font-size: .95rem; letter-spacing: .24em; color: #DCC49F; }
+footer .foot-count { grid-area: count; justify-self: start; margin: 0; text-align: center; font-family: var(--f-caps); letter-spacing: .24em; text-transform: uppercase; font-size: .95rem; color: #DCC49F; }
+footer .foot-count .cd-num { display: block; font-family: var(--f-body); font-size: clamp(2.4rem, 4.6vw, 3.2rem); letter-spacing: .04em; line-height: 1.1; color: #F3EBDD; }
+@media (max-width: 760px) {
+  footer.band { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "sig sig" "place place" "date count"; row-gap: 1.4rem; }
+  footer .foot-date, footer .foot-count { justify-self: center; }
+  footer .foot-date .fd-big { font-size: clamp(1.6rem, 7vw, 2.2rem); white-space: nowrap; }
+}
+/* ---------- footer: half the size, in the header's colours (ivory paper, forest ink, eucalyptus lines) ---------- */
+footer.band { background: rgba(243,235,221,.95); color: #173D24; border-top: 1px solid rgba(137,155,131,.45); padding-block: 1rem 1.3rem; row-gap: 0; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+footer .sig { font-size: 1.6rem; color: #173D24; line-height: 1.15; }
+footer .sig::before { width: 130px; height: 40px; margin-bottom: .15rem; }
+footer .foot-place { font-size: .95rem; color: #56694F; margin-top: .1rem; }
+footer .foot-date { color: #173D24; }
+footer .foot-date .fd-big { font-size: 1.45rem; color: #173D24; }
+footer .foot-date .fd-small, footer .foot-count { font-size: .72rem; letter-spacing: .2em; color: #56694F; }
+footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
+@media (max-width: 760px) {
+  footer.band { row-gap: .7rem; }
+  footer .foot-date .fd-big { font-size: 1.25rem; }
+}
+
 </style>
 <script src="config.js"></script>
 </head>
@@ -1155,6 +1765,7 @@ footer .foot-place { color: #d9b3af; }
         <a class="tab" href="#schedule" data-tab="schedule">Schedule of the Day</a>
         <a class="tab" href="#venue" data-tab="venue">Venue &amp; Where to Stay</a>
         <a class="tab" href="#rsvp" data-tab="rsvp">RSVP</a>
+<a class="tab" href="#story" data-tab="story">Our Story</a>
       </div>
     </div>
   </nav>
@@ -1166,10 +1777,54 @@ footer .foot-place { color: #d9b3af; }
         <div class="hero-text">
           <p class="hero-invite">You are warmly invited to the wedding of</p>
           <h1 id="top" tabindex="-1">Brina <span class="amp-alt">&amp;</span> Hugh</h1>
+<p class="hero-sub" id="heroSub">are getting married</p>
         </div>
         <div class="hero-links">
           <a class="hero-btn primary" href="#rsvp">RSVP</a>
           <a class="hero-btn" href="#schedule">Schedule of the Day</a>
+        </div>
+      </div>
+    </section>
+<!-- The love story: an open storybook -->
+<section class="view story band wrap" data-view="story" aria-labelledby="story-h" hidden>
+      <h2 class="sr-only" id="story-h">Our Story</h2>
+      <div class="book-wrap">
+        <div class="book" id="book" role="group" aria-roledescription="storybook" aria-label="The App that Leads to You, the story of Brina and Hugh">
+          <div class="stack l" aria-hidden="true"></div>
+          <div class="stack r" aria-hidden="true"></div>
+          <span class="gilt tl" aria-hidden="true"></span><span class="gilt tr" aria-hidden="true"></span><span class="gilt bl" aria-hidden="true"></span><span class="gilt br" aria-hidden="true"></span>
+          <span class="ribbon" aria-hidden="true"></span>
+          <div class="bpage left" id="pgLeft"></div>
+          <div class="bpage right" id="pgRight"></div>
+          <div class="bk-shadow r" aria-hidden="true"></div><div class="bk-shadow l" id="shadowL" aria-hidden="true"></div>
+          <div class="page-block" id="pageBlock" aria-hidden="true"></div>
+          <div class="spine" id="bookSpine" aria-hidden="true"></div>
+          <div class="cover" id="bookCover" role="button" tabindex="0" aria-label="Open the book">
+            <div class="cover-face front">
+              <span class="cv-corner c1"></span><span class="cv-corner c2"></span><span class="cv-corner c3"></span><span class="cv-corner c4"></span>
+              <div class="cv-inner">
+                <span class="cv-scroll"></span>
+                <p class="cv-title">The App<br>that Leads<br>to You</p>
+                <span class="cv-scroll down"></span>
+                <p class="cv-sub">Brina &amp; Hugh</p>
+              </div>
+            </div>
+            <div class="cover-face back"><div class="endpaper"></div><span class="back-bee"></span></div>
+            <div class="cover-edge" aria-hidden="true"></div>
+          </div>
+          <div class="cover-shadow" aria-hidden="true"></div>
+          <div class="cast cast-l" id="castL" aria-hidden="true"></div>
+          <div class="cast cast-r" id="castR" aria-hidden="true"></div>
+          <div class="leaf" id="leaf" hidden>
+            <div class="face bpage right f" id="leafFront"></div>
+            <div class="face bpage left b" id="leafBack"></div>
+          </div>
+          <div class="bpage right measure" id="pgMeasure" aria-hidden="true"></div>
+        </div>
+        <div class="book-nav">
+          <button type="button" class="book-btn" id="bookPrev" aria-label="Previous page">&#8249;</button>
+          <p class="book-hint">Tap a page to turn it</p>
+          <button type="button" class="book-btn" id="bookNext" aria-label="Next page">&#8250;</button>
         </div>
       </div>
     </section>
@@ -1497,9 +2152,28 @@ footer .foot-place { color: #d9b3af; }
   </main>
 
   <footer class="band wrap">
-    <p class="sig">Brina <span class="amp-alt">&amp;</span> Hugh</p>
-    <p class="foot-date"><span class="nw">Saturday · 31 July 2027</span> · <span class="nw">2:30 pm</span></p>
+    <p class="sig">Brina <span class="amp-alt">&amp;</span> Hugh’s Wedding</p>
+    <p class="foot-date"><span class="fd-small">Saturday</span><span class="fd-big">31 July 2027</span><span class="fd-small">2:30 pm</span></p>
     <p class="foot-place">Wrights Anglers Rest · Strawberry Beds · Dublin</p>
+    <p class="foot-count" id="countdown" hidden><span class="cd-num" id="cdNum"></span><span id="cdLabel">Days until the Wedding</span></p>
+    <script>
+    (function () {
+      // whole days until Saturday 31 July 2027, counted on the calendar in Dublin
+      var el = document.getElementById('countdown'), n = document.getElementById('cdNum'), lab = document.getElementById('cdLabel');
+      function today() {
+        try { var p = new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/Dublin' }).split('-'); return Date.UTC(+p[0], +p[1] - 1, +p[2]); }
+        catch (e) { var d = new Date(); return Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()); }
+      }
+      function draw() {
+        var days = Math.round((Date.UTC(2027, 6, 31) - today()) / 864e5);
+        if (days < 0) { el.hidden = true; return; }
+        el.hidden = false;
+        if (days === 0) { n.textContent = 'Today'; lab.textContent = 'is the Wedding Day'; }
+        else { n.textContent = days.toLocaleString('en-IE'); lab.textContent = days === 1 ? 'Day until the Wedding' : 'Days until the Wedding'; }
+      }
+      draw(); setInterval(draw, 60 * 60 * 1000);
+    })();
+    </script>
   </footer>
 </div>
 
@@ -1523,7 +2197,7 @@ footer .foot-place { color: #d9b3af; }
 
 
   /* ---------- Tabs (hash views) ---------- */
-  var VIEWS = ['home', 'schedule', 'venue', 'rsvp'];
+  var VIEWS = ['home', 'story', 'schedule', 'venue', 'rsvp'];
   function showView() {
     var h = (location.hash || '').replace('#', '');
     var v = VIEWS.indexOf(h) >= 0 ? h : 'home';
@@ -2366,6 +3040,303 @@ footer .foot-place { color: #d9b3af; }
       location.href = location.pathname + location.hash;
     });
   }
+
+/* ---------- The Love Story storybook ---------- */
+  (function () {
+    var STORY = ["This love story, like many modern tales, began on an app. Hugh had been scouring Dublin for a nice Irish girl to settle down with when he decided to give Bumble a try. Just two days after downloading the app, Hugh and Brina matched. He had found his nice Irish girl, or so he thought.", "A few days after matching and messaging, with the banter bantering, Hugh sent Brina a voice note. Brina sent one back, her accent on full display. Hugh had been questioning why an Irish woman knew so much about American football, and he now had his answer. His nice Irish girl was actually a Kansan.", "Luckily for Hugh, he loves most things about America — the food, the sports, and most of all, the ladies. So, Brina and Hugh continued to hit it off.", "Finally, Hugh asked Brina on a date. As the day approached, he cancelled, saying he had “forgotten that day was actually his birthday”. Although slightly confused by how someone could forget their own birthday, Brina gave him the benefit of the doubt and suggested rescheduling for the next day.", "“That’s actually my sister’s birthday,” Hugh explained.", "At this point, Brina thought Hugh was blowing her off, but then he suggested that they reschedule for Friday that week.", "“I’m hosting a Friendsgiving at my house on Friday,” Brina replied, “but I suppose you can come over early and we can get a coffee beforehand.”", "The day finally arrived, and Hugh made his way to Brina’s house in Ranelagh, although not before accidentally knocking on the wrong door. Once he found the right house, he bought Brina a coffee, only to be promptly put to work as she handed him a recipe for apple pie.", "The two spent the afternoon baking pie and getting to know one another as Brina’s housemates and friends filtered in and out of the house and kitchen, with everyone preparing for Friendsgiving. By the time the event rolled around, Hugh had met practically everyone, so he stayed for dinner.", "They sat at a long table in Brina’s living room, eating American Thanksgiving classics. During the meal, Brina FaceTimed her family, introducing her mom and dad to her ‘date’ for Friendsgiving. Hugh took it all in stride as the group teased him about meeting the parents.", "Then, as is tradition, each person at the table was asked to share one thing they were thankful for. Some were thankful for new job opportunities, others for family and friends.", "When it was Hugh’s turn, he looked around and said, “I’m thankful that you could all be here for my first date with Brina.”", "Now, five years later, we’re both thankful that you can all be there for our wedding day."];
+    var book = document.getElementById('book');
+    if (!book) return;
+    var pgL = document.getElementById('pgLeft'), pgR = document.getElementById('pgRight');
+    var leaf = document.getElementById('leaf'), leafF = document.getElementById('leafFront'), leafB = document.getElementById('leafBack');
+    var meas = document.getElementById('pgMeasure');
+    var single = window.matchMedia('(max-width: 700px)');
+    var pages = [], view = 0, busy = false, timer = null, built = false;
+    var AUTO_MS = 16000, TURN_MS = 1150;
+
+    function frame() { var f = document.createElement('div'); f.className = 'page-frame'; for (var i = 0; i < 4; i++) f.appendChild(document.createElement('i')); return f; }
+    function el(tag, cls, text) { var n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; }
+
+    // fill one page element with a page's content
+    // the opening paragraph starts with a painted initial
+    function setP(p, text, drop) {
+      if (!drop || !text) { p.textContent = text; return; }
+      p.textContent = '';
+      var ini = el('span', 'ini-art'); ini.setAttribute('aria-hidden', 'true'); p.appendChild(ini);
+      var sr = el('span', 'sr-only', text.charAt(0)); p.appendChild(sr);
+      p.appendChild(document.createTextNode(text.slice(1)));
+    }
+    function draw(target, pg) {
+      target.textContent = '';
+      if (!pg) return;
+      if (pg.type === 'inside') { target.appendChild(el('div', 'endpaper')); return; }
+      if (pg.type === 'pic') {
+        var pw = el('figure', 'pic-wrap');
+        var pim = document.createElement('img'); pim.src = pg.src; pim.alt = pg.alt; pim.decoding = 'async';
+        pw.appendChild(pim);
+        pw.appendChild(el('figcaption', 'pic-cap', pg.cap));
+        target.appendChild(pw);
+        return;
+      }
+      target.appendChild(frame());
+      if (pg.type === 'fin') {
+        var fw = el('div', 'fin-wrap');
+        fw.appendChild(el('span', 'cv-scroll'));
+        fw.appendChild(el('p', 'fin-text', 'And so, their happily ever after begins…'));
+        fw.appendChild(el('span', 'cv-scroll down'));
+        target.appendChild(fw);
+        return;
+      }
+      if (pg.type === 'rose') {
+        var rw = el('div', 'page-title');
+        var rim = document.createElement('img'); rim.src = 'img/story-01.webp'; rim.alt = ''; rw.appendChild(rim);
+        target.appendChild(rw);
+        return;
+      }
+      if (pg.type === 'title' || pg.type === 'end') {
+        var t = el('div', 'page-title');
+        if (pg.type === 'title') {
+          t.appendChild(el('p', 'pt-small', 'Once upon a time'));
+          t.appendChild(el('p', 'pt-big', 'The Love Story'));
+          t.appendChild(el('div', 'pt-rule'));
+          t.appendChild(el('p', 'pt-names', 'of Brina & Hugh'));
+          var im = document.createElement('img'); im.src = 'img/story-01.webp'; im.alt = ''; t.appendChild(im);
+        } else {
+          var im2 = document.createElement('img'); im2.src = 'img/story-01.webp'; im2.alt = ''; t.appendChild(im2);
+          t.appendChild(el('p', 'pt-names', 'Brina & Hugh'));
+          t.appendChild(el('div', 'pt-rule'));
+          t.appendChild(el('p', 'pt-small', '31 July 2027'));
+        }
+        target.appendChild(t);
+        return;
+      }
+      if (pg.type === 'text') {
+        var body = el('div', 'page-body');
+        pg.paras.forEach(function (q) { var pp = el('p', (q.drop ? 'drop' : (q.cont ? 'cont' : '')) + (q.tight ? ' tight' : '')); setP(pp, q.text, q.drop); body.appendChild(pp); });
+        target.appendChild(body);
+        target.appendChild(el('p', 'page-num', '~ ' + pg.num + ' ~'));
+      }
+    }
+
+    // split the story into pages that fit, word by word
+    function paginate() {
+      meas.textContent = '';
+      meas.appendChild(frame());
+      var body = el('div', 'page-body'); meas.appendChild(body);
+      var out = single.matches ? [] : [{ type: 'inside' }], cur = [], num = 1;
+      function flush() { if (cur.length) { out.push({ type: 'text', paras: cur, num: num++ }); cur = []; } body.textContent = ''; }
+      STORY.forEach(function (para, pi) {
+        var words = para.split(/\s+/), p = el('p', pi === 0 ? 'drop' : ''), data = { text: '', drop: pi === 0, cont: false };
+        body.appendChild(p); cur.push(data);
+        if (pi === STORY.length - 1) {
+          setP(p, para, data.drop);
+          if (body.scrollHeight > body.clientHeight + 1) { body.removeChild(p); cur.pop(); flush(); body.appendChild(p); cur.push(data); }
+          data.text = para;
+          return;
+        }
+        for (var i = 0; i < words.length; i++) {
+          var before = data.text;
+          data.text = before ? before + ' ' + words[i] : words[i];
+          setP(p, data.text, data.drop);
+          if (body.scrollHeight > body.clientHeight + 1) {
+            var rest = words.slice(i), carry = words[i];
+            // never leave a sentence's last few words alone at the top of the next page
+            if (before && rest.length <= 4) {
+              var whole = before + ' ' + rest.join(' ');
+              p.classList.add('tight'); setP(p, whole, data.drop);
+              if (body.scrollHeight <= body.clientHeight + 1) { data.text = whole; data.tight = true; break; }
+              p.classList.remove('tight');
+              // it won't squeeze in: carry the whole sentence over instead
+              var m = before.match(/^(.*[.!?][\u201d\u2019"']?)\s+(.+)$/);
+              if (m) { before = m[1]; carry = m[2] + ' ' + words[i]; }
+            }
+            data.text = before; setP(p, before, data.drop);
+            if (!before) { cur.pop(); }
+            flush();
+            p = el('p', 'cont'); data = { text: carry, drop: false, cont: true };
+            setP(p, data.text, data.drop); body.appendChild(p); cur.push(data);
+          }
+        }
+      });
+      flush();
+      out.push({ type: 'fin' });
+      if (!single.matches && out.length % 2) out.push({ type: 'inside' });
+      pages = out;
+    }
+
+    function per() { return single.matches ? 1 : 2; }
+    function lastView() { return Math.ceil(pages.length / per()) - 1; }
+    function show() {
+      if (per() === 2) { draw(pgL, pages[2 * view]); draw(pgR, pages[2 * view + 1]); }
+      else { pgL.textContent = ''; draw(pgR, pages[view]); }
+    }
+    function blankPaper(t) { t.textContent = ''; t.appendChild(frame()); }
+
+    var STRIPS = 16, castL = document.getElementById('castL'), castR = document.getElementById('castR');
+    function ease(q) { return -(Math.cos(Math.PI * q) - 1) / 2; }
+    function buildSheet(frontPg, backPg) {
+      var Wp = pgR.offsetWidth, Hp = pgR.offsetHeight, sw = Wp / STRIPS, parent = leaf, strips = [];
+      leaf.textContent = ''; leaf.hidden = false;
+      for (var i = 0; i < STRIPS; i++) {
+        var st = el('div', 'fstrip'); st.style.width = (sw + .8) + 'px'; st.style.left = (i ? sw : 0) + 'px';
+        var shades = [];
+        [['f', frontPg, 'img/story-03.webp', -i * sw], ['b', backPg, 'img/story-04.webp', -(Wp - (i + 1) * sw)]].forEach(function (f) {
+          var face = el('div', 'fseg ' + f[0]), inner = el('div', 'flipface');
+          inner.style.width = Wp + 'px'; inner.style.height = Hp + 'px'; inner.style.left = f[3] + 'px';
+          inner.style.backgroundImage = 'url("' + f[2] + '")';
+          if (f[1]) draw(inner, f[1]);
+          face.appendChild(inner);
+          var sh = el('div', 'fshade'); face.appendChild(sh); shades.push(sh);
+          st.appendChild(face);
+        });
+        st._sh = shades;
+        parent.appendChild(st); strips.push(st); parent = st;
+      }
+      return strips;
+    }
+    // cubic-bezier easing, like CSS: x1,y1,x2,y2
+    function bez(x1, y1, x2, y2) {
+      function cx(t) { return 3 * x1 * t * (1 - t) * (1 - t) + 3 * x2 * t * t * (1 - t) + t * t * t; }
+      function cy(t) { return 3 * y1 * t * (1 - t) * (1 - t) + 3 * y2 * t * t * (1 - t) + t * t * t; }
+      return function (x) { var lo = 0, hi = 1, t = x; for (var k = 0; k < 24; k++) { t = (lo + hi) / 2; if (cx(t) < x) lo = t; else hi = t; } return cy(t); };
+    }
+    var turnEase = bez(.38, .02, .24, 1), openEase = bez(.42, .0, .2, 1);
+    var W = []; (function () { var sum = 0, i; for (i = 1; i < 16; i++) { W[i] = Math.pow(i, 1.3); sum += W[i]; } for (i = 1; i < 16; i++) W[i] /= sum; })();
+    function animateSheet(dir, strips, single, done) {
+      var T = reduce ? 1 : 1150 * (window.__slow || 1), t0 = null, CURL = 58;
+      function frame(ts) {
+        if (t0 === null) t0 = ts;
+        var q = Math.min(1, (ts - t0) / T), e = turnEase(q), pr = dir > 0 ? e : 1 - e;
+        var theta = -180 * pr;
+        // the free edge leads as the page is lifted, then relaxes so the sheet lands flat
+        var lead = Math.sin(Math.PI * pr) * (1.15 - .55 * pr);
+        var total = (dir > 0 ? -1 : 1) * CURL * lead;
+        var lift = Math.sin(Math.PI * pr);
+        leaf.style.transform = 'translateZ(' + (lift * (single ? 30 : 46)).toFixed(2) + 'px)';
+        for (var i = 0; i < strips.length; i++) {
+          var ang = i === 0 ? theta : total * W[i];
+          strips[i].style.transform = 'rotateY(' + ang.toFixed(3) + 'deg)';
+        }
+        leaf.style.opacity = single ? Math.max(0, Math.min(1, (180 + theta - 25) / 55)).toFixed(3) : 1;
+        if (q < 1) requestAnimationFrame(frame);
+        else { leaf.style.opacity = 1; leaf.style.transform = ''; done(); }
+      }
+      requestAnimationFrame(frame);
+    }
+    function turn(dir) {
+      if (closed) { if (dir > 0) openBook(); return; }
+      if (busy || !pages.length) return;
+      var next = view + dir;
+      if (next < 0) return;
+      if (next > lastView()) { restart(); return; }
+      busy = true;
+      var two = per() === 2, fp, bp;
+      if (dir > 0) {
+        if (two) { fp = pages[2 * view + 1]; bp = pages[2 * next]; draw(pgR, pages[2 * next + 1]); }
+        else { fp = pages[view]; bp = null; draw(pgR, pages[next]); }
+      } else {
+        if (two) { fp = pages[2 * next + 1]; bp = pages[2 * view]; draw(pgL, pages[2 * next]); }
+        else { fp = pages[next]; bp = null; }
+      }
+      var strips = buildSheet(fp, bp);
+      animateSheet(dir, strips, !two, function () {
+        view = next; show(); leaf.hidden = true; leaf.textContent = ''; busy = false;
+      });
+    }
+    function restart() {
+      busy = true; book.classList.add('fading');
+      setTimeout(function () { view = 0; show(); closeBook(); book.classList.remove('fading'); busy = false; openSoon(); }, reduce ? 0 : 550);
+    }
+    /* the cover: the book waits closed, then the board swings open onto the first page */
+    var cover = document.getElementById('bookCover'), closed = true, openTimer = null, coverRaf = null;
+    function setCover(deg, single) {
+      cover.style.transform = 'rotateY(' + deg + 'deg)';
+      cover.style.opacity = single ? Math.max(0, Math.min(1, (180 + deg - 30) / 50)).toFixed(3) : 1;
+    }
+    function placeBook(f) {   // f = 0 closed (resting to the right), 1 open (centred)
+      book.style.transform = per() === 1 ? 'none' : 'translateX(' + (-25 * (1 - f)).toFixed(3) + '%)';
+    }
+    var spine = document.getElementById('bookSpine');
+    var shadowL = document.getElementById('shadowL'), pageBlock = document.getElementById('pageBlock');
+    function setSpine(e) {
+      shadowL.style.opacity = Math.max(0, (e - .45) / .55).toFixed(3);
+      pageBlock.style.display = e > 0 ? 'none' : '';
+      var k = Math.min(1, Math.max(0, (e - .3) / .18));
+      spine.style.transform = 'none';
+      spine.style.opacity = (1 - k).toFixed(3);
+    }
+    function closeBook() {
+      clearTimeout(openTimer); cancelAnimationFrame(coverRaf); closed = true; setSpine(0);
+      cover.hidden = false; setCover(0, per() === 1);
+      book.classList.add('closed', 'halfshow'); placeBook(0);
+    }
+    function openBook() {
+      if (!closed || busy) return;
+      clearTimeout(openTimer); busy = true;
+      var single = per() === 1, T = reduce ? 1 : 1800 * (window.__slow || 1), t0 = null;
+      book.classList.remove('closed');
+      function frame(ts) {
+        if (t0 === null) t0 = ts;
+        var q = Math.min(1, (ts - t0) / T), e = openEase(q);
+        // the board lifts toward the viewer a touch as it swings, then lies down on the table
+        cover.style.transform = 'translateZ(' + (Math.sin(Math.PI * e) * 26).toFixed(2) + 'px) rotateY(' + (-180 * e).toFixed(3) + 'deg)';
+        if (single) cover.style.opacity = Math.max(0, Math.min(1, (180 - 180 * e - 25) / 55)).toFixed(3);
+        placeBook(openEase(Math.min(1, q * 1.08))); setSpine(e);
+        if (q < 1) coverRaf = requestAnimationFrame(frame);
+        else { book.classList.remove('halfshow'); cover.hidden = true; closed = false; busy = false; schedule(); }
+      }
+      coverRaf = requestAnimationFrame(frame);
+    }
+    function openSoon() { clearTimeout(openTimer); if (!reduce) openTimer = setTimeout(function () { if (active() && !document.hidden) openBook(); }, 2600); }
+    cover.addEventListener('click', function (e) { e.stopPropagation(); openBook(); });
+    cover.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openBook(); } });
+
+    function active() { return root.getAttribute('data-current') === 'story'; }
+    function schedule() {
+      clearTimeout(timer);
+      if (reduce || !active()) return;
+      // pages only turn when a guest taps or clicks
+    }
+    // wait for the storybook fonts, so the pages are measured in the same letters they are shown in
+    function fontsReady() {
+      if (!document.fonts || !document.fonts.load) return Promise.resolve();
+      return Promise.all([
+        document.fonts.load('20px "IM Fell English"', 'Our love story'),
+        document.fonts.load('60px "Parisienne"', 'T'),
+        document.fonts.load('italic 20px "IM Fell English"', 'And so'),
+        document.fonts.load('40px "Pinyon Script"', 'O'),
+        document.fonts.load('600 14px "Cormorant SC"', '1')
+      ]).catch(function () {});
+    }
+    var building = false;
+    function build() {
+      if (!active() || building) return;
+      building = true;
+      fontsReady().then(function () {
+        building = false;
+        if (!active()) return;
+        paginate(); view = 0; show(); built = true; closeBook(); openSoon();
+      });
+    }
+
+    book.addEventListener('click', function (e) {
+      var r = book.getBoundingClientRect(), x = (e.clientX - r.left) / r.width;
+      turn(per() === 2 ? (x < .5 ? -1 : 1) : (x < .35 ? -1 : 1));
+      schedule();
+    });
+    document.getElementById('bookPrev').addEventListener('click', function () { turn(-1); schedule(); });
+    document.getElementById('bookNext').addEventListener('click', function () { turn(1); schedule(); });
+    document.addEventListener('keydown', function (e) {
+      if (!active() || e.target.closest('input, textarea, select')) return;
+      if (e.key === 'ArrowRight') { turn(1); schedule(); } else if (e.key === 'ArrowLeft') { turn(-1); schedule(); }
+    });
+    window.addEventListener('hashchange', function () { if (active()) { if (!built) build(); else schedule(); } else clearTimeout(timer); });
+    var rt = null;
+    window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(function () { if (active()) { view = 0; build(); } else built = false; }, 200); });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { built = false; if (active()) build(); });
+    if (active()) build();
+  })();
+
+  
 })();
 </script>
 
