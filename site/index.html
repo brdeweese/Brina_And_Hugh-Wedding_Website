@@ -1637,10 +1637,11 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
    wildflower border stay on screen. These rules sit last on purpose: they undo
    the single-page overrides scattered through the sections above. */
 @media (max-width: 700px) {
-  /* The book is drawn wider than the screen and .book-wrap clips it, so what
-     shows is the spine and the right-hand page rather than the whole spread.
-     188.68% is the figure that makes 53% of the book fill the width. */
-  .book { --bw: min(188.68%, calc((100svh - var(--nav-h) - 5rem) * 1.5386)); aspect-ratio: 877 / 570; }
+  /* The book is drawn wider than the screen and .book-wrap clips it. The window
+     now starts at the gutter, 50.4% across, so the left-hand page falls entirely
+     off the screen instead of being cut through a little before the spine.
+     201.6% is the figure that makes that remaining 49.6% fill the width. */
+  .book { --bw: min(201.6%, calc((100svh - var(--nav-h) - 5rem) * 1.5386)); aspect-ratio: 877 / 570; }
   .book-wrap { overflow: hidden; }
   .book::before { background-image: url("img/story-02.webp"); inset: 0; }
   /* while the book is shut the painted spread must stay hidden behind the cover.
@@ -1662,7 +1663,7 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
      relative to the page than it is on a desktop */
   /* the page is far larger now, so the type is a smaller share of it and a good
      deal more of the story fits before the page turns */
-  .page-body { inset: 7cqh 9cqw 13cqh 9cqw; font-size: 6cqw !important; line-height: 1.55 !important; }
+  .page-body { inset: 7cqh 9cqw 13cqh 9cqw; font-size: 5.2cqw !important; line-height: 1.55 !important; }
   .page-num { font-size: 4.2cqw; bottom: 9cqh; }
 }
 
@@ -1736,12 +1737,11 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
   filter: drop-shadow(0 2px 3px rgba(23,61,36,.12));
 }
 @media (max-width: 700px) {
-  /* a phone breaks the page into four panels instead: the heading and dress
-     code, then the afternoon, the evening and the night. One panel down a
-     screen that narrow is a very long wash of cream. */
-  .schedule .inner::before { display: none; }
-  .schedule .view-head::before, .schedule .phase::before {
-    display: block;
+  /* One continuous panel, as on a desktop. The fill stays at 52%; only the fade
+     differs, pinned to a fixed margin rather than a share of the panel, because
+     a percentage of a panel this tall would wash out a great deal of the text. */
+  .schedule .view-head::before, .schedule .phase::before { display: none; }
+  .schedule .inner::before {
     /* the panel reaches exactly this far past its text on each side */
     inset: -1.3rem -.8rem;
     /* Fixed stops rather than percentages, so the fade occupies precisely that
@@ -1755,16 +1755,6 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
       linear-gradient(to bottom, rgba(0,0,0,0) 0, #000 1.3rem, #000 calc(100% - 1.3rem), rgba(0,0,0,0) 100%),
       linear-gradient(to right, rgba(0,0,0,0) 0, #000 .8rem, #000 calc(100% - .8rem), rgba(0,0,0,0) 100%);
   }
-  /* With the fade pinned to the margin rather than a share of the panel, the
-     panels can sit close and still part cleanly. The two gaps are equal so all
-     four panels are spaced alike: each clears its neighbour by the gap less the
-     two 1.3rem margins. */
-  .schedule .inner { gap: 3.1rem; }
-  .schedule .phases { row-gap: 3.1rem; }
-  /* The columns kept the vertical padding of the panel they used to sit in,
-     which pushed the afternoon further from the heading than the other three
-     were from each other. */
-  .schedule .phases { padding-block: 0; }
   /* The rule above each part of the day was dropped on the first one, so the
      afternoon was introduced differently from the evening and the night. It
      takes the border colour from .schedule .phase, like the others. */
@@ -2593,9 +2583,11 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
       cover.style.opacity = single ? Math.max(0, Math.min(1, (180 + deg - 30) / 50)).toFixed(3) : 1;
     }
     // Where the book sits when open. Centred on a desktop. On a phone the book is
-    // drawn about 1.9 times the width of the screen, and the view has to land on
-    // its right-hand page and spine, which is 23.5% left of centre.
-    function openShift() { return recto.matches ? -23.5 : 0; }
+    // drawn about twice the width of the screen and the view lands on its
+    // right-hand page alone, which is 25.2% left of centre. That is all but
+    // identical to the closed position, because the cover and the right page
+    // occupy the same half of the book: the cover simply swings off the page.
+    function openShift() { return recto.matches ? -25.2 : 0; }
     function placeBook(f) {   // f = 0 closed (the cover centred), 1 open
       if (per() === 1) { book.style.transform = 'none'; return; }
       // Closed is always -25%: the cover is the book's right half, so centring it
