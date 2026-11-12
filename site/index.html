@@ -3338,177 +3338,104 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
     chars.forEach(function (c) { x.fillText(c, px, y); px += x.measureText(c).width + spacing; });
     x.textAlign = 'center';
   }
-  var SCHEDULE = [
-    ['2:30 pm', 'Guests arrive'], ['3:00 pm', 'Ceremony'], ['4:00 pm', 'Drinks reception'],
-    ['5:30 pm', 'Speeches'], ['6:00 pm', 'Dinner, until 8 pm'], ['8:00 pm', 'Trad session'],
-    ['9:00 pm', 'First dance'], ['10:00 pm', 'Line dancing'], ['Until 1 am', 'Late-night drinks & dancing']
-  ];
   function drawRsvpCard(r) {
     var fonts = document.fonts ? Promise.all([
-      document.fonts.load('100px "Pinyon Script"', 'Brina Hugh'), document.fonts.load('100px "Great Vibes"', '&'),
-      document.fonts.load('italic 500 40px "EB Garamond"'), document.fonts.load('40px "EB Garamond"'),
-      document.fonts.load('500 40px "Cormorant SC"')
+      document.fonts.load('500 40px "Cormorant SC"'),
+      document.fonts.load('40px "EB Garamond"'),
+      document.fonts.load('italic 500 40px "EB Garamond"')
     ]) : Promise.resolve();
-    return Promise.all([fonts, loadImg('img/rose-left.png'), loadImg('img/rose-right.png'), loadImg('img/paper.jpg')]).then(function (res) {
-      var roseL = res[1], roseR = res[2], paperImg = res[3], W = 1600, H = 2240;
-      var RED = '#93554f', GREEN = '#55663f', INK = '#5d544b', cx = 800;
-      // the reply sits in the clear centre, between the corner rose and the upright branch
-      var MAXW = 540;
+    return Promise.all([fonts, loadImg('img/card-base.webp')]).then(function (res) {
+      var base = res[1], W = base.naturalWidth, H = base.naturalHeight;
+      var GREEN = '#3f5133', INK = '#5d544b', SOFT = '#9aa487';
+      // The stationery already carries the names at the top right, flowers down
+      // the left and across the foot. Everything written here stays inside the
+      // clear column they leave, so nothing lands on the artwork.
+      var cx = 540, HALF = 292, TOP = 512, BOTTOM = 1398;
+
       var c = document.createElement('canvas'); c.width = W; c.height = H;
       var x = c.getContext('2d');
-      x.fillStyle = '#f3ecdb'; x.fillRect(0, 0, W, H);
-      x.fillStyle = x.createPattern(paperImg, 'repeat'); x.fillRect(0, 0, W, H);
-      var LW = Math.round(W * 0.27), LH = Math.round(roseL.height * LW / roseL.width);
-      var RW = Math.round(W * 0.26), RHh = Math.round(roseR.height * RW / roseR.width);
-      var RH = Math.max(LH, RHh);
-      var rc = document.createElement('canvas'); rc.width = W; rc.height = RH;
-      var rcx = rc.getContext('2d');
-      rcx.drawImage(roseL, 0, 0, LW, LH);
-      rcx.drawImage(roseR, W - RW, 0, RW, RHh);
-      x.drawImage(rc, 0, 0);
-      var RA = rcx.getImageData(0, 0, W, RH).data;
-      function solid(px, py) { return py >= 0 && py < RH && px >= 0 && px < W && RA[(py * W + px) * 4 + 3] > 20; }
-      // how far text centred on the card can reach either side without touching a rose, for a band of rows
-      function maxHalf(y0, y1) {
-        var best = cx;
-        for (var yy = Math.max(0, Math.floor(y0)); yy <= Math.min(RH - 1, Math.ceil(y1)); yy += 2) {
-          var d = 0;
-          while (d < best && !solid(cx + d, yy) && !solid(cx - d, yy)) d++;
-          best = Math.min(best, d);
-        }
-        return best - 30;
-      }
-      // the first rose pixel to the right of fromX within a band of rows
-      function freeRight(y0, y1, fromX) {
-        var edge = W;
-        for (var yy = Math.max(0, Math.floor(y0)); yy <= Math.min(RH - 1, Math.ceil(y1)); yy += 2) {
-          for (var xx = fromX; xx < edge; xx++) if (solid(xx, yy)) { edge = xx; break; }
-        }
-        return edge;
-      }
-
+      x.drawImage(base, 0, 0, W, H);
       x.textAlign = 'center'; x.textBaseline = 'alphabetic';
+
       function rule(y, half) {
-        x.strokeStyle = RED; x.lineWidth = 3; x.beginPath(); x.moveTo(cx - half, y); x.lineTo(cx + half, y); x.stroke();
-        [cx - half, cx + half].forEach(function (dx) { x.save(); x.translate(dx, y); x.rotate(Math.PI / 4); x.fillStyle = RED; x.fillRect(-7, -7, 14, 14); x.restore(); });
+        x.strokeStyle = SOFT; x.lineWidth = 2;
+        x.beginPath(); x.moveTo(cx - half, y); x.lineTo(cx + half, y); x.stroke();
+        [cx - half, cx + half].forEach(function (dx) {
+          x.save(); x.translate(dx, y); x.rotate(Math.PI / 4);
+          x.fillStyle = SOFT; x.fillRect(-4, -4, 8, 8); x.restore();
+        });
       }
-      function caps(text, size, color, spacing, y, fontFace) {
-        var face = fontFace || ('500 ' + size + 'px "Cormorant SC", Georgia, serif');
-        var sz = size;
+      // letterspaced small caps, shrunk if it would reach past the column
+      function caps(draw, text, size, color, spacing, y, face) {
+        var f = face || '500 {s}px "Cormorant SC", Georgia, serif', sz = size;
         for (;;) {
-          x.font = face.replace(/\d+px/, sz + 'px');
+          x.font = f.replace('{s}', sz);
           var w = 0; String(text).split('').forEach(function (ch) { w += x.measureText(ch).width + spacing; });
-          if (w / 2 <= maxHalf(y - sz, y + sz * 0.35) || sz <= 16) break;
+          if (w - spacing <= HALF * 2 || sz <= 14) break;
           sz -= 1;
         }
-        x.fillStyle = color;
-        spaced(x, text, cx, y, spacing);
+        if (draw) { x.fillStyle = color; spaced(x, text, cx, y, spacing); }
+      }
+      function para(draw, text, size, color, y, italic, maxLines) {
+        var f = (italic ? 'italic ' : '') + size + 'px "EB Garamond", Georgia, serif';
+        x.font = f;
+        var ls = wrap(x, text, HALF * 2);
+        if (maxLines) ls = ls.slice(0, maxLines);
+        ls.forEach(function (l) {
+          y += Math.round(size * 1.3);
+          if (draw) { x.fillStyle = color; x.font = f; x.fillText(l, cx, y); }
+        });
+        return y;
       }
 
-      // --- the reply ---
-      var y = 128;
-      caps('KINDLY REPLIED', 30, RED, 4, y, 'italic 500 30px "EB Garamond", Georgia, serif');
-      caps('TO THE WEDDING OF', 30, RED, 4, y + 42, 'italic 500 30px "EB Garamond", Georgia, serif');
-
-      // the names on one level line, in the invitation's script, sized to fit between the roses
-      var nameSize = 104, bw, aw, hw;
-      for (;;) {
-        x.font = nameSize + 'px "Pinyon Script", cursive'; bw = x.measureText('Brina ').width; hw = x.measureText(' Hugh').width;
-        x.font = (nameSize * .92) + 'px "Great Vibes", "Pinyon Script", cursive'; aw = x.measureText('&').width;
-        if ((bw + aw + hw) / 2 <= maxHalf(300 - nameSize * 0.85, 300 + nameSize * 0.35) || nameSize <= 60) break;
-        nameSize -= 4;
-      }
-      var nx = cx - (bw + aw + hw) / 2, ny = 300;
-      x.textAlign = 'left';
-      [['#fffaf0', 2], [GREEN, 0]].forEach(function (pass) {
-        x.fillStyle = pass[0];
-        x.font = nameSize + 'px "Pinyon Script", cursive'; x.fillText('Brina ', nx + pass[1], ny + pass[1]);
-        x.font = (nameSize * .92) + 'px "Great Vibes", "Pinyon Script", cursive'; x.fillText('&', nx + bw + pass[1], ny + pass[1]);
-        x.font = nameSize + 'px "Pinyon Script", cursive'; x.fillText(' Hugh', nx + bw + aw + pass[1], ny + pass[1]);
-      });
-      x.textAlign = 'center';
-
-      y = 470;
-      caps('SATURDAY, JULY 31ST 2027', 30, RED, 4, y, 'italic 500 30px "EB Garamond", Georgia, serif');
-      rule(y + 22, 270);
-      var bandTop = y + 22;
-
-      // guests and their choices, centred between the date rule and the details rule
       var ppl = Array.isArray(r.people) ? r.people : [];
-      function replyBlock(draw, y0) {
-        var yy = y0;
-        ppl.forEach(function (p, idx) {
-          if (idx) yy += 56;
-          yy += 38; if (draw) caps(String(p.name).toUpperCase(), 38, GREEN, 5, yy);
-          yy += 42; if (draw) caps(p.attending ? 'JOYFULLY ACCEPTS' : 'REGRETFULLY DECLINES', 26, RED, 6, yy);
-          if (p.attending) {
-            var d = (Array.isArray(p.dietary) ? p.dietary : []).filter(function (q) { return q !== 'Other'; });
-            if (p.dietaryOther) d.push(p.dietaryOther);
-            x.font = 'italic 30px "EB Garamond", Georgia, serif';
-            wrap(x, 'Dietary: ' + (d.length ? d.join(', ') : 'none given'), Math.min(MAXW, 2 * maxHalf(yy, yy + 40))).slice(0, 2).forEach(function (l) {
-              yy += 38; if (draw) { x.fillStyle = INK; x.font = 'italic 30px "EB Garamond", Georgia, serif'; x.fillText(l, cx, yy); }
-            });
+
+      // measured first with draw = false, so the whole block can be centred in
+      // the clear column rather than running off the bottom of the flowers
+      function compose(draw, y0) {
+        var y = y0;
+        y += 30; caps(draw, 'KINDLY REPLIED', 26, SOFT, 6, y, 'italic 500 {s}px "EB Garamond", Georgia, serif');
+
+        ppl.forEach(function (person, i) {
+          y += i ? 54 : 46;
+          y += 34; caps(draw, String(person.name).toUpperCase(), 34, GREEN, 5, y);
+          y += 36; caps(draw, person.attending ? 'JOYFULLY ACCEPTS' : 'REGRETFULLY DECLINES', 22, INK, 5, y,
+            'italic 500 {s}px "EB Garamond", Georgia, serif');
+          if (person.attending) {
+            var diet = (Array.isArray(person.dietary) ? person.dietary : []).filter(function (q) { return q !== 'Other'; });
+            if (person.dietaryOther) diet.push(person.dietaryOther);
+            if (diet.length) y = para(draw, diet.join(', '), 26, INK, y + 4, true, 2);
           }
         });
+
         if (r.songs) {
-          yy += 64; if (draw) caps('SONGS TO GET US DANCING', 26, RED, 6, yy);
-          x.font = 'italic 30px "EB Garamond", Georgia, serif';
-          wrap(x, r.songs.replace(/\s*\n\s*/g, ' · '), Math.min(MAXW, 2 * maxHalf(yy, yy + 120))).slice(0, 3).forEach(function (l) {
-            yy += 38; if (draw) { x.fillStyle = INK; x.font = 'italic 30px "EB Garamond", Georgia, serif'; x.fillText(l, cx, yy); }
-          });
+          y += 52; caps(draw, 'SONGS TO GET US DANCING', 22, SOFT, 5, y);
+          var songLine = String(r.songs).split(String.fromCharCode(10))
+            .map(function (s) { return s.trim(); }).filter(Boolean).join(' · ');
+          y = para(draw, songLine, 26, INK, y + 2, true, 3);
         }
-        return yy + 10 - y0;
+
+        y += 54; if (draw) rule(y, 150);
+        y += 50; caps(draw, 'THE DAY ITSELF', 24, GREEN, 7, y);
+
+        // every one of these is taken from the site, not written for the card
+        [
+          ['WHEN', ['Saturday 31 July 2027', 'Guests arrive 2:30 pm, ceremony at 3 pm']],
+          ['WHERE', ['Wrights Anglers Rest', 'Knockmaroon Hill, Strawberry Beds,', 'Chapelizod, Dublin 20, D20 AH96']],
+          ['DRESS CODE', ['Garden party semi-formal attire']]
+        ].forEach(function (d) {
+          y += 42; caps(draw, d[0], 20, SOFT, 4, y);
+          d[1].forEach(function (l) { y = para(draw, l, 26, INK, y - 4, false, 1); });
+        });
+        return y - y0;
       }
-      var blockH = replyBlock(false, 0);
-      var detailsRule = Math.max(1000, bandTop + blockH + 120);
-      replyBlock(true, bandTop + (detailsRule - bandTop - blockH) / 2);
-      y = detailsRule;
 
-      // --- the details ---
-      rule(y, 520);
-      y += 80;
-      caps('THE DETAILS', 34, RED, 8, y, 'italic 500 34px "EB Garamond", Georgia, serif');
-      y += 80;
-      var colL = 220, colR = 900, top = y;
+      var h = compose(false, 0);
+      compose(true, TOP + Math.max(0, (BOTTOM - TOP - h) / 2));
 
-      x.textAlign = 'left';
-      function heading(text, cxL, yy) {
-        x.fillStyle = GREEN; x.font = '500 32px "Cormorant SC", Georgia, serif';
-        var px2 = cxL;
-        String(text).split('').forEach(function (ch) { x.fillText(ch, px2, yy); px2 += x.measureText(ch).width + 5; });
-      }
-      // schedule (left column)
-      heading('SCHEDULE OF THE DAY', colL, y);
-      var sy = y + 58;
-      SCHEDULE.forEach(function (it) {
-        x.fillStyle = RED; x.font = '500 28px "Cormorant SC", Georgia, serif';
-        x.fillText(it[0].toUpperCase(), colL, sy);
-        x.fillStyle = INK; x.font = '32px "EB Garamond", Georgia, serif';
-        x.fillText(it[1], colL + 205, sy);
-        sy += 50;
-      });
-      // venue and dress code (right column)
-      var ry = top;
-      function block(title, lines) {
-        heading(title, colR, ry);
-        ry += 52;
-        x.fillStyle = INK; x.font = '32px "EB Garamond", Georgia, serif';
-        lines.forEach(function (l) { var ww = Math.min(440, freeRight(ry - 34, ry + 52, colR) - colR - 24); wrap(x, l, ww).forEach(function (w) { x.fillText(w, colR, ry); ry += 42; }); });
-        ry += 40;
-      }
-      block('VENUE', ['Wrights Anglers Rest', 'Knockmaroon Hill,', 'Strawberry Beds, Chapelizod,', 'Dublin 20, D20 AH96']);
-      block('DRESS CODE', ['Garden party semi-formal attire']);
-      x.textAlign = 'center';
-
-      // footer
-      var fy = Math.max(sy, ry) + 40;
-      rule(fy, 300);
-      caps('Wrights Anglers Rest, Dublin Ireland', 34, GREEN, 4, fy + 72, 'italic 500 34px "EB Garamond", Georgia, serif');
-
-      var outH = Math.min(H, fy + 130);
-      var out = document.createElement('canvas'); out.width = W; out.height = outH;
-      out.getContext('2d').drawImage(c, 0, 0);
-      return new Promise(function (ok) { out.toBlob(ok, 'image/png'); });
+      // JPEG, not PNG: the base is a watercolour wash, so PNG spends 3 MB on
+      // texture a phone will never see. This lands near 400 KB.
+      return new Promise(function (ok) { c.toBlob(ok, 'image/jpeg', 0.92); });
     });
   }
   document.getElementById('dlRsvp').addEventListener('click', function () {
@@ -3518,7 +3445,7 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
     drawRsvpCard(myReply).then(function (blob) {
       if (!blob) throw { code: 'bad_request' };
       var who = current.party.filter(function (p) { return p.fixed; }).map(function (p) { return first(p.name); }).join('-');
-      saveBlob(blob, 'RSVP-' + (who || 'guest') + '-Brina-and-Hugh.png');
+      saveBlob(blob, 'RSVP-' + (who || 'guest') + '-Brina-and-Hugh.jpg');
       m.textContent = 'Your RSVP card is in your downloads.';
     }).catch(function () {
       m.textContent = 'Your RSVP card couldn’t be made in this browser.';
