@@ -1678,10 +1678,13 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
    included, so nothing needs outlining. */
 .schedule { --glow: none; }
 .schedule .inner { position: relative; z-index: 1; }
-.schedule .inner::before {
+/* One panel on a desktop, four on a phone. The look is shared here; further
+   down, the width decides which elements wear it. */
+.schedule .view-head, .schedule .phase { position: relative; }
+.schedule .inner::before,
+.schedule .view-head::before,
+.schedule .phase::before {
   content: ""; position: absolute; z-index: -1;
-  /* roomier than the text it backs, so the fade has somewhere to happen */
-  inset: -3rem -2.2rem;
   background: rgba(243,235,221,.52);
   /* no backdrop blur. A blurred backdrop is clipped to the element box, and
      Safari does not reliably carry the mask below through to that layer, so the
@@ -1700,7 +1703,11 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
     linear-gradient(to right, rgba(0,0,0,0) 0, #000 8%, #000 92%, rgba(0,0,0,0) 100%);
   mask-composite: intersect;
 }
-/* the panel moved up to .inner, so the inner box loses its own */
+/* a desktop keeps the single long panel behind the lot. Roomier than the text
+   it backs, so the fade has somewhere to happen. */
+.schedule .inner::before { inset: -3rem -2.2rem; }
+.schedule .view-head::before, .schedule .phase::before { display: none; }
+/* the columns carry no panel of their own */
 .schedule .phases {
   background: none; border: 0; box-shadow: none;
   backdrop-filter: none; -webkit-backdrop-filter: none;
@@ -1712,15 +1719,26 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
   content: ""; position: absolute; z-index: 2; pointer-events: none;
   inset: 0 -2.6rem;
   background:
-    url("img/story-11.webp") left center / auto 26% no-repeat,
-    url("img/story-12.webp") right center / auto 23% no-repeat;
+    url("img/story-11.webp") left center / auto 15% no-repeat,
+    url("img/story-12.webp") right center / auto 13% no-repeat;
   filter: drop-shadow(0 2px 3px rgba(23,61,36,.12));
 }
 @media (max-width: 700px) {
-  .schedule .inner::before { inset: -1.6rem -1rem; }
+  /* a phone breaks the page into four panels instead: the heading and dress
+     code, then the afternoon, the evening and the night. One panel down a
+     screen that narrow is a very long wash of cream. */
+  .schedule .inner::before { display: none; }
+  .schedule .view-head::before, .schedule .phase::before {
+    display: block; inset: -1.2rem -.7rem;
+  }
+  /* Room between them, or neighbouring fades meet and it is one box again.
+     Each panel fades over roughly 9% of its height at each end, so the clear
+     space has to beat that, not just be visible. */
+  .schedule .inner { gap: 4.6rem; }
+  .schedule .phases { row-gap: 6rem; }
   .schedule .inner::after {
     inset: 0 -1.1rem;
-    background-size: auto 13%, auto 11%;
+    background-size: auto 7%, auto 6%;
   }
 }
 
