@@ -3533,6 +3533,107 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
     });
   }
 
+  // Who the invitation is addressed to. A couple gets both names, a guest with
+  // a plus one gets their name and the guest, anyone else gets their name alone.
+  function inviteNames(g) {
+    var who = [String((g && g.name) || '').trim()];
+    if (g && g.type === 'couple' && g.partner) who.push(String(g.partner).trim());
+    if (g && g.type === 'plus_one') who.push('& Guest');
+    return who.filter(Boolean);
+  }
+
+  // The invitation is the finished sheet with one thing changed: the names at the
+  // top. Everything else is printed, so the sheet is drawn whole and only that
+  // band is lifted off and reset.
+  function drawInviteCard(g) {
+    var fonts = document.fonts
+      ? document.fonts.load('500 60px "Cormorant SC"')
+      : Promise.resolve();
+    return Promise.all([fonts, loadImg('img/invite-base.webp')]).then(function (res) {
+      var base = res[1], W = 1080, H = 1920;
+      var c = document.createElement('canvas'); c.width = W; c.height = H;
+      var x = c.getContext('2d');
+      x.imageSmoothingQuality = 'high';
+      x.drawImage(base, 0, 0, W, H);
+
+      // Measured off the sheet rather than guessed: the printed names sit at
+      // y 191-235 and y 278-321, both centred on x 540, set in Cormorant SC at
+      // 60px tracked 4.5, inked #364a39. Solving the two known line widths for
+      // size and tracking together lands within a pixel of both.
+      //
+      // The band around them is bare paper, and the paper to their right is clean
+      // from x 800, so the band is reset by copying that strip across it row for
+      // row. Copying rather than flooding with one colour keeps the sheet's own
+      // shading, which runs down the page.
+      var T = 178, B = 336, L = 286, R = 802, SX = 802, SW = 130;
+      for (var dx = L; dx < R; dx += SW) {
+        var w = Math.min(SW, R - dx);
+        x.drawImage(c, SX, T, w, B - T, dx, T, w, B - T);
+      }
+
+      var names = inviteNames(g);
+      var SIZE = 60, SP = 4.5, INK = '#364a39', cx = 540, MAXW = 540;
+      x.textAlign = 'left'; x.textBaseline = 'alphabetic';
+      function line(text, baseline) {
+        var sz = SIZE, sp = SP, w;
+        for (;;) {
+          x.font = '500 ' + sz + 'px "Cormorant SC", Georgia, serif';
+          w = 0;
+          String(text).split('').forEach(function (ch) { w += x.measureText(ch).width + sp; });
+          w -= sp;
+          // a long name is set smaller rather than allowed off the band
+          if (w <= MAXW || sz <= 26) break;
+          sz -= 1; sp = SP * sz / SIZE;
+        }
+        x.fillStyle = INK;
+        var px = cx - w / 2;
+        String(text).split('').forEach(function (ch) {
+          x.fillText(ch, px, baseline);
+          px += x.measureText(ch).width + sp;
+        });
+      }
+      // one name sits between the two printed baselines; two keep to them
+      if (names.length === 1) line(names[0], 277);
+      else if (names.length) { line(names[0], 234); line(names[1], 320); }
+
+      return new Promise(function (ok) { c.toBlob(ok, 'image/jpeg', 0.92); });
+    });
+  }
+  // A name is going into a filename, so the characters a filesystem reserves are
+  // turned into spaces. Built by hand rather than with a regex: the set includes
+  // a backslash, and escaping that through every layer invites a mistake.
+  function inviteFileName(g) {
+    var bad = ':*?"<>|/' + String.fromCharCode(92);
+    // the card says '& Guest'; a filename reads better as 'plus guest'
+    var parts = [String((g && g.name) || '').trim()];
+    if (g && g.type === 'couple' && g.partner) parts.push(String(g.partner).trim());
+    var who = parts.filter(Boolean).join(' and ');
+    if (g && g.type === 'plus_one') who += ' plus guest';
+    var out = '';
+    for (var i = 0; i < who.length; i++) out += bad.indexOf(who.charAt(i)) >= 0 ? ' ' : who.charAt(i);
+    out = out.replace(/\s+/g, ' ').trim();
+    return 'Invitation - ' + (out || 'guest') + '.jpg';
+  }
+  function blobToBase64(blob) {
+    return new Promise(function (ok, no) {
+      var fr = new FileReader();
+      fr.onload = function () { ok(String(fr.result).split(',')[1] || ''); };
+      fr.onerror = function () { no({ message: 'the picture couldn\u2019t be read' }); };
+      fr.readAsDataURL(blob);
+    });
+  }
+  // Draws the invitation and files it in Drive. It is drawn here rather than in
+  // the script because this is where the fonts and the stationery are; the script
+  // only receives the finished picture.
+  function saveInvite(g) {
+    if (!window.HTMLCanvasElement) return Promise.reject({ message: 'this browser can\u2019t make the picture' });
+    return drawInviteCard(g)
+      .then(function (blob) { if (!blob) throw { message: 'the picture came out empty' }; return blobToBase64(blob); })
+      .then(function (b64) {
+        return api('adminSaveInvite', { token: adminToken, id: g.id, filename: inviteFileName(g), image: b64 });
+      });
+  }
+
   document.getElementById('dlRsvp').addEventListener('click', function () {
     var m = document.getElementById('dlRsvpMsg');
     if (!myReply) return;
@@ -3585,7 +3686,15 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
           .catch(function () { btn.disabled = false; btn.textContent = 'Couldn’t remove'; });
       });
       btn.addEventListener('blur', function () { if (!btn.disabled) { btn.classList.remove('confirm'); btn.textContent = 'Remove'; } });
-      tb.appendChild(el('tr', null, [el('td', { text: g.name }), el('td', { text: typeLabel(g) }), el('td', null, [btn])]));
+      var inv = el('button', { type: 'button', cls: 'rm', text: 'Invitation' });
+      inv.addEventListener('click', function () {
+        inv.disabled = true; inv.textContent = 'Making\u2026';
+        drawInviteCard(g)
+          .then(function (blob) { saveBlob(blob, inviteFileName(g)); })
+          .then(function () { inv.disabled = false; inv.textContent = 'Invitation'; })
+          .catch(function () { inv.disabled = false; inv.textContent = 'Couldn\u2019t make it'; });
+      });
+      tb.appendChild(el('tr', null, [el('td', { text: g.name }), el('td', { text: typeLabel(g) }), el('td', null, [inv, btn])]));
     });
   }
   var lastSeen = '';
@@ -3631,9 +3740,15 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
       api('adminAddGuest', { token: adminToken, name: name, type: type, partner: type === 'couple' ? partner : '' })
         .then(function (g) {
           guests.push(g); renderGuests();
-          gm.textContent = 'Added ' + name + '.';
           document.getElementById('gName').value = ''; document.getElementById('gPartner').value = '';
           document.getElementById('gName').focus();
+          gm.textContent = 'Added ' + name + '. Making the invitation\u2026';
+          return saveInvite(g)
+            .then(function () { gm.textContent = 'Added ' + name + '. The invitation is in your Drive.'; })
+            .catch(function (err) {
+              gm.textContent = 'Added ' + name + ', but the invitation wasn\u2019t saved: '
+                + ((err && err.message) || 'use the Invitation button in the list to get it.');
+            });
         })
         .catch(function (err) { gm.textContent = (err && err.code === 'duplicate') ? err.message : 'Couldn’t add that guest. Please try again.'; });
     });

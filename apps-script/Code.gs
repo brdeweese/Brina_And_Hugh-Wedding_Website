@@ -14,12 +14,22 @@
  * Script properties (Project Settings > Script Properties):
  *   ADMIN_TOKEN   required. The passcode that opens the guest list on the site.
  *   NOTIFY_EMAIL  optional. You get an email every time somebody replies.
+ *
+ * Adding a guest also files their invitation in a Drive folder called
+ * "Wedding Website Invites". That needs permission to see and create files in
+ * your Drive, which Apps Script will ask for the first time you deploy this
+ * version. The script only ever makes that one folder and writes invitations
+ * into it.
  */
 
 var TAB_GUESTS = 'Guests';
+
+// The Drive folder the invitations are filed in. It is made the first time one
+// is saved, in the root of the same Google account the script runs as.
+var INVITE_FOLDER = 'Wedding Website Invites';
 var TAB_REPLIES = 'Replies';
 
-var GUEST_HEADERS = ['id', 'name', 'type', 'partner', 'added_at'];
+var GUEST_HEADERS = ['id', 'name', 'type', 'partner', 'added_at', 'invite_url'];
 var REPLY_HEADERS = [
   'invite_id',
   'invited_as',
@@ -67,6 +77,10 @@ function doPost(e) {
     if (action === 'adminRemoveGuest') {
       requireAdmin(body.token);
       return json({ ok: true, data: adminRemoveGuest(body.id) });
+    }
+    if (action === 'adminSaveInvite') {
+      requireAdmin(body.token);
+      return json({ ok: true, data: adminSaveInvite(body) });
     }
 
     return json({ ok: false, error: 'Unknown action.' });
@@ -283,6 +297,52 @@ function adminAddGuest(body) {
   } finally {
     lock.releaseLock();
   }
+}
+
+/**
+ * Files an invitation in Drive. The picture is drawn in the browser, where the
+ * fonts and the stationery already are, and arrives here as base64.
+ */
+function adminSaveInvite(body) {
+  var id = clean(body.id, 40);
+  var filename = clean(body.filename, 120) || 'Invitation.jpg';
+  var b64 = String(body.image || '');
+  if (!id) fail('Missing the invitation this belongs to.', 'bad_request');
+  if (!b64) fail('No invitation was sent.', 'bad_request');
+
+  var folder = inviteFolder();
+  // One file per invitation. Saving again replaces the old one rather than
+  // leaving two copies with the same name.
+  var old = folder.getFilesByName(filename);
+  while (old.hasNext()) old.next().setTrashed(true);
+
+  var blob = Utilities.newBlob(Utilities.base64Decode(b64), 'image/jpeg', filename);
+  var file = folder.createFile(blob);
+  var url = file.getUrl();
+
+  // Keep the link on the guest's row, if the sheet has a column for it. An
+  // older sheet without one still works; it just has nowhere to note it.
+  var lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    var tab = readTab(TAB_GUESTS);
+    if (tab.headers.indexOf('invite_url') >= 0) {
+      tab.rows.forEach(function (r) {
+        if (String(r.id) !== id) return;
+        r.invite_url = url;
+        writeRow(tab, r._row, r);
+      });
+    }
+  } finally {
+    lock.releaseLock();
+  }
+
+  return { url: url, folder: folder.getUrl() };
+}
+
+function inviteFolder() {
+  var it = DriveApp.getFoldersByName(INVITE_FOLDER);
+  return it.hasNext() ? it.next() : DriveApp.createFolder(INVITE_FOLDER);
 }
 
 function adminRemoveGuest(id) {
