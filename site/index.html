@@ -3396,7 +3396,7 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
       var S = 1.18;
       piece(TL, -30, -40, S, 'rb', 170);
       piece(BL, -20, H - Math.round(BL[3] * S) + 30, S, 'rt', 170);
-      piece(BR, W - Math.round(BR[2] * S) + 40, H - Math.round(BR[3] * S) + 30, S, 'lt', 170);
+      piece(BR, W - Math.round(BR[2] * S) + 90, H - Math.round(BR[3] * S) + 30, S, 'lt', 170);
       // the names, smaller than the sheet has them
       var NS = 0.72;
       // flush into the corner: inset by even 20px and its top and right edges,
@@ -3406,7 +3406,7 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
       x.textAlign = 'center'; x.textBaseline = 'alphabetic';
 
       // the writing lives in the lane the flowers leave down the middle
-      var cx = 700, HALF = 450, TOP = 430, FOOT = 1850;
+      var cx = 750, HALF = 450, TOP = 380, FOOT = 1850;
 
       function halo(on) {
         x.shadowColor = on ? 'rgba(255,252,244,0.96)' : 'transparent';
@@ -3456,6 +3456,8 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
         ['WHERE', ['Wrights Anglers Rest', 'Knockmaroon Hill, Strawberry Beds,', 'Chapelizod, Dublin 20, D20 AH96']],
         ['DRESS CODE', ['Garden party semi-formal attire']]
       ];
+      var songLine = r.songs ? String(r.songs).split(String.fromCharCode(10))
+        .map(function (s) { return s.trim(); }).filter(Boolean).join(' · ') : '';
 
       // k scales every size and gap together, so the writing can be grown to fill
       // the card instead of sitting in a band across its middle. A short reply
@@ -3479,8 +3481,6 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
 
         if (r.songs) {
           y += z(70); caps(draw, 'SONGS TO GET US DANCING', z(34), SOFT, z(7), y);
-          var songLine = String(r.songs).split(String.fromCharCode(10))
-            .map(function (s) { return s.trim(); }).filter(Boolean).join(' · ');
           y = para(draw, songLine, z(38), INK, y + z(4), true, 3);
         }
 
@@ -3494,18 +3494,25 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
         return y - y0;
       }
 
-      // the lane between the flowers caps k as well as the band does: a detail
-      // line one pixel too wide wraps and leaves an orphan word below it.
-      x.font = '40px "EB Garamond", Georgia, serif';
-      var widest = 0;
-      DETAILS.forEach(function (d) {
-        d[1].forEach(function (l) { widest = Math.max(widest, x.measureText(l).width); });
-      });
-      var kWide = widest ? (HALF * 2 - 8) / widest : 9;
+      // the lane between the flowers caps k as well as the band does: a line
+      // one pixel too wide wraps and leaves an orphan word stranded below it.
+      // The floor of 1 below means a genuinely long list still wraps rather
+      // than shrinking the whole card to keep itself on one line.
+      var LANE = HALF * 2 - 8, kWide = 9;
+      var BODY = '{s}px "EB Garamond", Georgia, serif';
+      var BODYI = 'italic {s}px "EB Garamond", Georgia, serif';
+      function fits(text, size, font) {
+        if (!text) return;
+        x.font = font.replace('{s}', size);
+        var w = x.measureText(text).width;
+        if (w) kWide = Math.min(kWide, LANE / w);
+      }
+      DETAILS.forEach(function (d) { d[1].forEach(function (l) { fits(l, 40, BODY); }); });
+      fits(songLine, 38, BODYI);
       var band = FOOT - TOP;
       var k = Math.max(1, Math.min(1.45, kWide, band / compose(false, 0, 1)));
       var h = compose(false, 0, k);
-      compose(true, TOP + Math.max(0, (band - h) / 2), k);
+      compose(true, TOP, k);
 
       // JPEG, not PNG: the base is a watercolour wash, so PNG spends megabytes
       // on texture a phone will never see.
