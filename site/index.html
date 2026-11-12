@@ -1637,7 +1637,11 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
    wildflower border stay on screen. These rules sit last on purpose: they undo
    the single-page overrides scattered through the sections above. */
 @media (max-width: 700px) {
-  .book { --bw: min(92vw, calc((100svh - var(--nav-h) - 7rem) * 1.5386)); aspect-ratio: 877 / 570; }
+  /* The book is drawn wider than the screen and .book-wrap clips it, so what
+     shows is the spine and the right-hand page rather than the whole spread.
+     188.68% is the figure that makes 53% of the book fill the width. */
+  .book { --bw: min(188.68%, calc((100svh - var(--nav-h) - 5rem) * 1.5386)); aspect-ratio: 877 / 570; }
+  .book-wrap { overflow: hidden; }
   .book::before { background-image: url("img/story-02.webp"); inset: 0; }
   /* while the book is shut the painted spread must stay hidden behind the cover.
      The design clips it to the right half for that; the old phone rule dropped the
@@ -1656,7 +1660,9 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
   .back-bee { display: block; }
   /* the pages are half as wide here, so the type is set a little larger
      relative to the page than it is on a desktop */
-  .page-body { inset: 7cqh 9cqw 13cqh 9cqw; font-size: 8.8cqw !important; line-height: 1.5 !important; }
+  /* the page is far larger now, so the type is a smaller share of it and a good
+     deal more of the story fits before the page turns */
+  .page-body { inset: 7cqh 9cqw 13cqh 9cqw; font-size: 6cqw !important; line-height: 1.55 !important; }
   .page-num { font-size: 4.2cqw; bottom: 9cqh; }
 }
 
@@ -2370,6 +2376,11 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
     // a phone, so the one-page-at-a-time mode never engages. A query that cannot
     // match leaves the surrounding code and its listeners untouched.
     var single = window.matchMedia('(max-width: 0px)');
+    // A phone draws the book wider than the screen and sits the view on its
+    // right-hand page, so the story is printed on the rectos only and the versos
+    // are blank. A blank verso is never seen at rest, only as the back of the
+    // sheet while it turns, which is how a book printed one side up behaves.
+    var recto = window.matchMedia('(max-width: 700px)');
     var pages = [], view = 0, busy = false, timer = null, built = false;
     var AUTO_MS = 16000, TURN_MS = 950;
 
@@ -2480,6 +2491,15 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
       flush();
       out.push({ type: 'fin' });
       if (!single.matches && out.length % 2) out.push({ type: 'inside' });
+      if (recto.matches) {
+        // every spread becomes a blank facing a page of story. The first verso
+        // keeps the endpaper, as the inside of the cover; the rest are null,
+        // which draw() renders as an empty page.
+        var spread = [];
+        out.filter(function (pg) { return pg.type !== 'inside'; })
+          .forEach(function (pg, i) { spread.push(i === 0 ? { type: 'inside' } : null); spread.push(pg); });
+        out = spread;
+      }
       pages = out;
     }
 
@@ -2572,8 +2592,16 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
       cover.style.transform = 'rotateY(' + deg + 'deg)';
       cover.style.opacity = single ? Math.max(0, Math.min(1, (180 + deg - 30) / 50)).toFixed(3) : 1;
     }
-    function placeBook(f) {   // f = 0 closed (resting to the right), 1 open (centred)
-      book.style.transform = per() === 1 ? 'none' : 'translateX(' + (-25 * (1 - f)).toFixed(3) + '%)';
+    // Where the book sits when open. Centred on a desktop. On a phone the book is
+    // drawn about 1.9 times the width of the screen, and the view has to land on
+    // its right-hand page and spine, which is 23.5% left of centre.
+    function openShift() { return recto.matches ? -23.5 : 0; }
+    function placeBook(f) {   // f = 0 closed (the cover centred), 1 open
+      if (per() === 1) { book.style.transform = 'none'; return; }
+      // Closed is always -25%: the cover is the book's right half, so centring it
+      // means shifting left by a quarter of the book whatever its size.
+      var x = -25 + (25 + openShift()) * f;
+      book.style.transform = 'translateX(' + x.toFixed(3) + '%)';
     }
     var spine = document.getElementById('bookSpine');
     var shadowL = document.getElementById('shadowL'), pageBlock = document.getElementById('pageBlock');
