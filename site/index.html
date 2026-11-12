@@ -3424,10 +3424,14 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
       var x = ST.x, cx = ST.cx, HALF = ST.HALF;
       var rule = ST.rule, caps = ST.caps, para = ST.para;
 
-      // The band reaches as high and as low as the artwork allows: the first
-      // line is short enough for the narrow lane beside the top-left buttercup,
-      // and the last clears the campion along the foot.
-      var TOP = 480, FOOT = 1500;
+      // Measured against the strong colour only, since the pale cow parsley and
+      // grasses read through the halo behind each line. What is left is the
+      // couple's names in the top right, the buttercup that reaches into the lane
+      // between y 340 and y 510, the second buttercup around y 1130-1300, and the
+      // campion at y 1570-1630. The first line is short enough to pass the first
+      // buttercup, so the writing can start well above it and run almost to the
+      // foot of the frame.
+      var TOP = 450, FOOT = 1760;
 
       var ppl = Array.isArray(r.people) ? r.people : [];
       var DETAILS = [
@@ -3438,15 +3442,19 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
       var songLine = r.songs ? String(r.songs).split(String.fromCharCode(10))
         .map(function (s) { return s.trim(); }).filter(Boolean).join(' · ') : '';
 
-      // k scales every size and gap together, so a one-person reply and a family
-      // of three both fill the same lane.
-      function compose(draw, y0, k) {
+      // k is the type scale and g stretches the gaps between blocks. Splitting
+      // them is what lets the writing be both as large as the lane allows and as
+      // tall as the frame: scaling everything together, the two fight each other.
+      function compose(draw, y0, k, g) {
         var z = function (n) { return Math.round(n * k); };
+        // gz is a gap between one block and the next; z is the leading inside a
+        // block, which has to stay tied to the size of the type.
+        var gz = function (n) { return Math.round(n * k * g); };
         var y = y0;
-        y += z(32); caps(draw, 'KINDLY REPLIED', z(27), SOFT, z(7), y, 'italic 500 {s}px "EB Garamond", Georgia, serif');
+        y += gz(32); caps(draw, 'KINDLY REPLIED', z(27), SOFT, z(7), y, 'italic 500 {s}px "EB Garamond", Georgia, serif');
 
         ppl.forEach(function (person, i) {
-          y += z(i ? 62 : 44);
+          y += gz(i ? 62 : 44);
           y += z(42); caps(draw, String(person.name).toUpperCase(), z(44), GREEN, z(5), y);
           y += z(40); caps(draw, person.attending ? 'JOYFULLY ACCEPTS' : 'REGRETFULLY DECLINES', z(27), INK, z(4), y,
             'italic 500 {s}px "EB Garamond", Georgia, serif');
@@ -3458,15 +3466,15 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
         });
 
         if (songLine) {
-          y += z(68); caps(draw, 'SONGS TO GET US DANCING', z(24), SOFT, z(5), y);
+          y += gz(68); caps(draw, 'SONGS TO GET US DANCING', z(24), SOFT, z(5), y);
           y = para(draw, songLine, z(27), INK, y + z(3), true, 3);
         }
 
-        y += z(74); if (draw) rule(y, z(165));
-        y += z(62); caps(draw, 'THE DAY ITSELF', z(29), GREEN, z(8), y);
+        y += gz(74); if (draw) rule(y, z(165));
+        y += gz(62); caps(draw, 'THE DAY ITSELF', z(29), GREEN, z(8), y);
 
         DETAILS.forEach(function (d) {
-          y += z(52); caps(draw, d[0], z(21), SOFT, z(5), y);
+          y += gz(52); caps(draw, d[0], z(21), SOFT, z(5), y);
           d[1].forEach(function (l) { y = para(draw, l, z(29), INK, y - z(3), false); });
         });
         return y - y0;
@@ -3474,7 +3482,7 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
 
       // The lane caps k as well as the band does: a line one pixel too wide wraps
       // and leaves an orphan word stranded below it.
-      var LANE = HALF * 2 - 6, kWide = 9;
+      var LANE = HALF * 2 - 18, kWide = 9;
       var BODY = '{s}px "EB Garamond", Georgia, serif';
       var BODYI = 'italic {s}px "EB Garamond", Georgia, serif';
       function fits(text, size, font) {
@@ -3486,9 +3494,16 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
       DETAILS.forEach(function (d) { d[1].forEach(function (l) { fits(l, 29, BODY); }); });
       fits(songLine, 27, BODYI);
       var band = FOOT - TOP;
-      var k = Math.max(0.74, Math.min(1.32, kWide, band / compose(false, 0, 1)));
-      var h = compose(false, 0, k);
-      compose(true, TOP + Math.max(0, (band - h) / 2), k);
+      // first the type: as large as the lane allows, and never so large that it
+      // overflows the band even with the gaps at their tightest
+      var k = Math.max(0.8, Math.min(1.5, kWide, band / compose(false, 0, 1, 1)));
+      // then the gaps: height is hk1 + (g - 1) * B, so solve for the g that fills
+      // the band. A short reply is held at 2.4 so it stays a card, not a list.
+      var hk1 = compose(false, 0, k, 1);
+      var B = compose(false, 0, k, 2) - hk1;
+      var g = B > 0 ? Math.max(1, Math.min(2.4, 1 + (band - hk1) / B)) : 1;
+      var h = compose(false, 0, k, g);
+      compose(true, TOP + Math.max(0, (band - h) / 2), k, g);
       return ST.jpeg();
     });
   }
