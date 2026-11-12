@@ -1680,14 +1680,25 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
 .schedule .inner { position: relative; z-index: 1; }
 .schedule .inner::before {
   content: ""; position: absolute; z-index: -1;
-  inset: -1.9rem -1.4rem;
-  border-radius: 30px;
-  background: rgba(243,235,221,.74);
-  backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
-  /* no border: the panel fades out instead, so it settles into the lake behind
-     it rather than being cut out of it */
-  -webkit-mask-image: radial-gradient(116% 110% at 50% 50%, #000 56%, rgba(0,0,0,0) 100%);
-  mask-image: radial-gradient(116% 110% at 50% 50%, #000 56%, rgba(0,0,0,0) 100%);
+  /* roomier than the text it backs, so the fade has somewhere to happen */
+  inset: -3rem -2.2rem;
+  background: rgba(243,235,221,.52);
+  /* no backdrop blur. A blurred backdrop is clipped to the element box, and
+     Safari does not reliably carry the mask below through to that layer, so the
+     blur would keep a crisp edge of its own on exactly the phone where this was
+     reported. Dropping it also makes the panel read as lighter. */
+  /* Two gradients crossed, rather than one oval. The oval was still a third
+     opaque where it met the panel edge, so it ended on a visible line. These
+     reach nothing at all four edges, so there is no edge left to see, and the
+     middle stays even behind the text. */
+  -webkit-mask-image:
+    linear-gradient(to bottom, rgba(0,0,0,0) 0, #000 9%, #000 91%, rgba(0,0,0,0) 100%),
+    linear-gradient(to right, rgba(0,0,0,0) 0, #000 8%, #000 92%, rgba(0,0,0,0) 100%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to bottom, rgba(0,0,0,0) 0, #000 9%, #000 91%, rgba(0,0,0,0) 100%),
+    linear-gradient(to right, rgba(0,0,0,0) 0, #000 8%, #000 92%, rgba(0,0,0,0) 100%);
+  mask-composite: intersect;
 }
 /* the panel moved up to .inner, so the inner box loses its own */
 .schedule .phases {
@@ -1706,7 +1717,7 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
   filter: drop-shadow(0 2px 3px rgba(23,61,36,.12));
 }
 @media (max-width: 700px) {
-  .schedule .inner::before { inset: -1.1rem -.7rem; border-radius: 22px; }
+  .schedule .inner::before { inset: -1.6rem -1rem; }
   .schedule .inner::after {
     inset: 0 -1.1rem;
     background-size: auto 13%, auto 11%;
