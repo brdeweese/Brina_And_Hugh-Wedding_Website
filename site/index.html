@@ -1713,6 +1713,29 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
   }
 }
 
+/* ---------- the replay button on a phone ---------- */
+@media (max-width: 700px) {
+  /* the symbol on its own, small and see-through so the video reads behind it,
+     sitting top right clear of the menu button above it */
+  .replay {
+    top: calc(var(--nav-h) + 10px + env(safe-area-inset-top, 0px));
+    right: calc(12px + env(safe-area-inset-right, 0px));
+    bottom: auto; left: auto;
+    width: 38px; height: 38px; min-height: 0;
+    padding: 0; gap: 0; border-radius: 999px;
+    justify-content: center;
+    /* drops the word without taking it from a screen reader, which still
+       announces the button as Replay */
+    font-size: 0; letter-spacing: 0;
+    color: #173D24;
+    background: rgba(250,246,238,.26);
+    border-color: rgba(250,246,238,.5);
+    backdrop-filter: blur(1.5px); -webkit-backdrop-filter: blur(1.5px);
+  }
+  .replay svg { width: 17px; height: 17px; }
+  .replay.ended { box-shadow: 0 0 0 3px rgba(250,246,238,.22); }
+}
+
 </style>
 <script src="config.js"></script>
 </head>
@@ -2575,6 +2598,27 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
   var bg = document.getElementById('bg');
   var vid = document.getElementById('bgVideo');
   var replay = document.getElementById('replay');
+
+  // A phone refuses a play() that is not inside the touch that led to it, and
+  // draws its own play button over the poster instead. finish() calls
+  // playFromStart() from two nested timers, so it always looked uninvited.
+  // Playing the video once during the first real touch lifts the restriction
+  // for the rest of the visit; it is behind the envelope at that point, so
+  // nothing shows, and it is wound back for its proper start.
+  var videoUnlocked = false;
+  function unlockVideo() {
+    if (videoUnlocked) return;
+    videoUnlocked = true;
+    var q = vid.play();
+    if (q && q.then) q.then(function () {
+      if (root.classList.contains('sealed')) {
+        vid.pause();
+        try { vid.currentTime = 0; } catch (e) {}
+      }
+    }).catch(function () { videoUnlocked = false; });
+  }
+  document.addEventListener('pointerdown', unlockVideo, { passive: true });
+  document.addEventListener('keydown', unlockVideo, { passive: true });
   function playFromStart() {
     replay.classList.remove('ended');
     try { vid.currentTime = 0; } catch (e) {}
