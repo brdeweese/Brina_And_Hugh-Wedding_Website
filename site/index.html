@@ -1647,6 +1647,9 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
      margin came to 11px, which reads as edge to edge on a small phone. */
   .book { --bw: min(154.13%, calc((100svh - var(--nav-h) - 5rem) * 1.5386)); aspect-ratio: 877 / 570; }
   .book-wrap { overflow: hidden; width: 100vw; margin-inline: calc(50% - 50vw); }
+  /* the book is shifted and scaled throughout the opening, so it is handed to the
+     compositor rather than being repainted each frame */
+  .book { will-change: transform; }
   .book::before { background-image: url("img/story-02.webp"); inset: 0; }
   /* while the book is shut the painted spread must stay hidden behind the cover.
      The design clips it to the right half for that; the old phone rule dropped the
@@ -2602,15 +2605,16 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
     // than anywhere further in: the spine is a separate element that begins there,
     // so a frame starting later still has the spine running off the left edge.
     //
-    // Open: the right-hand page, 50.4% to 100%, with the gutter on the screen's
-    // left edge, taking 90% of the width. The left-hand page has gone off that
-    // side, while the book's outer edge stays on screen with background beyond it.
+    // Open: 44% to 100%, centred, taking 88% of the width. That is the right-hand
+    // page sitting to the right of the screen with the book's outer edge beside
+    // it, a last strip of the left-hand page showing at the left, and background
+    // down both sides. Most of the verso is still off the screen; only the few
+    // percent nearest the gutter remain.
     //
-    // Open is the narrower slice of the book, 49.6% against 55.8%, and it is given
-    // more of the screen, so the book grows by 1.1773 as the cover swings.
-    // placeBook eases shift and scale together, so the reframing happens as part
-    // of the opening.
-    var PH_SHUT = -22.1, PH_OPEN = -32.91, PH_GROW = 1.1773;
+    // The two slices are nearly the same width, 56% against 55.8%, and they are
+    // given nearly the same share of the screen, so the book hardly changes size as
+    // it opens: it grows by 1.0196. placeBook eases that with the cover's swing.
+    var PH_SHUT = -22.1, PH_OPEN = -22.43, PH_GROW = 1.0196;
     function placeBook(f) {
       if (per() === 1) { book.style.transform = 'none'; return; }
       if (!recto.matches) {
@@ -2641,7 +2645,12 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
     function openBook() {
       if (!closed || busy) return;
       clearTimeout(openTimer); busy = true;
-      var single = per() === 1, T = reduce ? 1 : 1200 * (window.__slow || 1), t0 = null;
+      // A phone takes the full 1800ms the design uses rather than the 1200 a
+      // desktop was quickened to. The cover is close to the full width of the
+      // screen there, so the swing is a large movement and wants the time to read
+      // as a board falling open rather than a flick.
+      var single = per() === 1, t0 = null;
+      var T = reduce ? 1 : (recto.matches ? 1800 : 1200) * (window.__slow || 1);
       book.classList.remove('closed');
       function frame(ts) {
         if (t0 === null) t0 = ts;
