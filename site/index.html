@@ -1286,7 +1286,7 @@ footer .foot-place { color: #899B83; }
 .fin-text { color: #173D24; text-shadow: none; }
 .fin-wrap .cv-scroll { width: 40cqw; height: 2px; background: linear-gradient(90deg, transparent, #899B83, transparent); transform: none; }
 .fin-wrap::after { content: ""; width: 14cqw; height: 12cqw; background: url("img/story-05.svg") center / contain no-repeat; opacity: .8; }
-#pgLeft, #pgRight { transition: opacity .9s ease 1.3s; }
+#pgLeft, #pgRight { transition: opacity .45s ease .3s; }
 
 @media (max-width: 700px) {
   .book { --bw: min(84vw, calc((100svh - var(--nav-h) - 8rem) * .68)); aspect-ratio: 338 / 497; }
@@ -2176,7 +2176,7 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
     var meas = document.getElementById('pgMeasure');
     var single = window.matchMedia('(max-width: 700px)');
     var pages = [], view = 0, busy = false, timer = null, built = false;
-    var AUTO_MS = 16000, TURN_MS = 1150;
+    var AUTO_MS = 16000, TURN_MS = 620;
 
     function frame() { var f = document.createElement('div'); f.className = 'page-frame'; for (var i = 0; i < 4; i++) f.appendChild(document.createElement('i')); return f; }
     function el(tag, cls, text) { var n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; }
@@ -2327,7 +2327,7 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
     var turnEase = bez(.38, .02, .24, 1), openEase = bez(.42, .0, .2, 1);
     var W = []; (function () { var sum = 0, i; for (i = 1; i < 16; i++) { W[i] = Math.pow(i, 1.3); sum += W[i]; } for (i = 1; i < 16; i++) W[i] /= sum; })();
     function animateSheet(dir, strips, single, done) {
-      var T = reduce ? 1 : 1150 * (window.__slow || 1), t0 = null, CURL = 58;
+      var T = reduce ? 1 : 620 * (window.__slow || 1), t0 = null, CURL = 58;
       function frame(ts) {
         if (t0 === null) t0 = ts;
         var q = Math.min(1, (ts - t0) / T), e = turnEase(q), pr = dir > 0 ? e : 1 - e;
@@ -2397,7 +2397,7 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
     function openBook() {
       if (!closed || busy) return;
       clearTimeout(openTimer); busy = true;
-      var single = per() === 1, T = reduce ? 1 : 1800 * (window.__slow || 1), t0 = null;
+      var single = per() === 1, T = reduce ? 1 : 980 * (window.__slow || 1), t0 = null;
       book.classList.remove('closed');
       function frame(ts) {
         if (t0 === null) t0 = ts;
@@ -2411,7 +2411,7 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
       }
       coverRaf = requestAnimationFrame(frame);
     }
-    function openSoon() { clearTimeout(openTimer); if (!reduce) openTimer = setTimeout(function () { if (active() && !document.hidden) openBook(); }, 2600); }
+    function openSoon() { clearTimeout(openTimer); if (!reduce) openTimer = setTimeout(function () { if (active() && !document.hidden) openBook(); }, 1100); }
     cover.addEventListener('click', function (e) { e.stopPropagation(); openBook(); });
     cover.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openBook(); } });
 
