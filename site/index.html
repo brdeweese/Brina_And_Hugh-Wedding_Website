@@ -1744,9 +1744,19 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
       linear-gradient(to right, rgba(0,0,0,0) 0, #000 .8rem, #000 calc(100% - .8rem), rgba(0,0,0,0) 100%);
   }
   /* With the fade pinned to the margin rather than a share of the panel, the
-     panels can sit close and still part cleanly. */
-  .schedule .inner { gap: 3.8rem; }
-  .schedule .phases { row-gap: 4.2rem; }
+     panels can sit close and still part cleanly. The two gaps are equal so all
+     four panels are spaced alike: each clears its neighbour by the gap less the
+     two 1.3rem margins. */
+  .schedule .inner { gap: 3.6rem; }
+  .schedule .phases { row-gap: 3.6rem; }
+  /* The columns kept the vertical padding of the panel they used to sit in,
+     which pushed the afternoon further from the heading than the other three
+     were from each other. */
+  .schedule .phases { padding-block: 0; }
+  /* The rule above each part of the day was dropped on the first one, so the
+     afternoon was introduced differently from the evening and the night. It
+     takes the border colour from .schedule .phase, like the others. */
+  .schedule .phase:first-child { border-top-width: 1px; border-top-style: solid; padding-top: 2.2rem; }
   .schedule .inner::after {
     inset: 0 -1.1rem;
     background-size: auto 7%, auto 6%;
