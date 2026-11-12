@@ -1027,7 +1027,6 @@ footer .foot-place { color: #899B83; }
 .story.band { background: linear-gradient(180deg, rgba(243,235,221,.18), rgba(243,235,221,.06) 50%, rgba(243,235,221,.2)); backdrop-filter: none; -webkit-backdrop-filter: none; }
 .book-wrap { display: flex; flex-direction: column; align-items: center; gap: 1.3rem; width: 100%; }
 .book { --bw: min(1000px, 90vw, calc((100svh - var(--nav-h) - 8.5rem) * 1.5)); position: relative; width: var(--bw); aspect-ratio: 3 / 2; perspective: 2600px; cursor: pointer; transition: opacity .5s ease; }
-.book.fading { opacity: 0; }
 /* the cover: forest green cloth with a gilt line, peeking out around the pages */
 .book::before { content: ""; position: absolute; inset: -14px -18px -16px; border-radius: 12px;
   background: radial-gradient(120% 90% at 50% 40%, #2c4a33, #1a2f20 70%, #142519);
@@ -2584,15 +2583,10 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
       });
     }
     function restart() {
-      // Turning past the last page shuts the book. A phone runs the opening
-      // backwards for it; the pages are only reset once the cover is down over
-      // them, so the story is never seen jumping back to its first page.
-      if (recto.matches) {
-        shutBook(function () { view = 0; show(); openSoon(); });
-        return;
-      }
-      busy = true; book.classList.add('fading');
-      setTimeout(function () { view = 0; show(); closeBook(); book.classList.remove('fading'); busy = false; openSoon(); }, reduce ? 0 : 550);
+      // Turning past the last page shuts the book by running the opening
+      // backwards. The pages are only reset once the cover is down over them, so
+      // the story is never seen jumping back to its first page.
+      shutBook(function () { view = 0; show(); openSoon(); });
     }
     /* the cover: the book waits closed, then the board swings open onto the first page */
     var cover = document.getElementById('bookCover'), closed = true, openTimer = null, coverRaf = null;
