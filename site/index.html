@@ -2584,6 +2584,13 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
       });
     }
     function restart() {
+      // Turning past the last page shuts the book. A phone runs the opening
+      // backwards for it; the pages are only reset once the cover is down over
+      // them, so the story is never seen jumping back to its first page.
+      if (recto.matches) {
+        shutBook(function () { view = 0; show(); openSoon(); });
+        return;
+      }
       busy = true; book.classList.add('fading');
       setTimeout(function () { view = 0; show(); closeBook(); book.classList.remove('fading'); busy = false; openSoon(); }, reduce ? 0 : 550);
     }
@@ -2661,6 +2668,30 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
         placeBook(openEase(Math.min(1, q * 1.08))); setSpine(e);
         if (q < 1) coverRaf = requestAnimationFrame(frame);
         else { book.classList.remove('halfshow'); cover.hidden = true; closed = false; busy = false; schedule(); }
+      }
+      coverRaf = requestAnimationFrame(frame);
+    }
+    // The closing is the opening run backwards: the same ease, the same lift on the
+    // board, the same reframing, with the progress reversed so the cover falls shut
+    // rather than swinging away. Only the easing is not literally reversed, since
+    // 1 - openEase(q) keeps the slow start and slow finish the right way round.
+    function shutBook(done) {
+      if (closed) { if (done) done(); return; }
+      clearTimeout(openTimer); cancelAnimationFrame(coverRaf);
+      busy = true;
+      var single = per() === 1, t0 = null;
+      var T = reduce ? 1 : (recto.matches ? 1800 : 1200) * (window.__slow || 1);
+      // the board has to be back in the document before it can swing
+      cover.hidden = false;
+      book.classList.add('halfshow');
+      function frame(ts) {
+        if (t0 === null) t0 = ts;
+        var q = Math.min(1, (ts - t0) / T), e = 1 - openEase(q);
+        cover.style.transform = 'translateZ(' + (Math.sin(Math.PI * e) * 26).toFixed(2) + 'px) rotateY(' + (-180 * e).toFixed(3) + 'deg)';
+        if (single) cover.style.opacity = Math.max(0, Math.min(1, (180 - 180 * e - 25) / 55)).toFixed(3);
+        placeBook(1 - openEase(Math.min(1, q * 1.08))); setSpine(e);
+        if (q < 1) coverRaf = requestAnimationFrame(frame);
+        else { book.classList.add('closed'); closed = true; busy = false; if (done) done(); }
       }
       coverRaf = requestAnimationFrame(frame);
     }
