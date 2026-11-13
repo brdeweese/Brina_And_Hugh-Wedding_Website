@@ -1,0 +1,19 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Brina and Hugh//Wedding Website//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:brina-and-hugh-wedding-31july2027@brdeweese.github.io
+DTSTAMP:20261113T000000Z
+DTSTART:20270731T133000Z
+DTEND:20270801T000000Z
+SUMMARY:Brina & Hugh's Wedding
+LOCATION:Wrights Anglers Rest\, Knockmaroon Hill\, Strawberry Beds\, Chap
+ elizod\, Dublin 20\, D20 AH96
+DESCRIPTION:Guests arrive 2:30 pm\, ceremony at 3 pm.\n\nDress code: Gard
+ en party semi-formal attire.\n\nhttps://brdeweese.github.io/Brina_And_Hu
+ gh-Wedding_Website/
+URL:https://brdeweese.github.io/Brina_And_Hugh-Wedding_Website/
+END:VEVENT
+END:VCALENDAR

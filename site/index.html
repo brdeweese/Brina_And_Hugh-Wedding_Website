@@ -2288,6 +2288,7 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
               <p class="inv-note" id="thanksNote"></p>
               <div class="card-actions">
                 <button class="send" id="dlRsvp" type="button" hidden>Download my RSVP card</button>
+                <button class="ghost-btn" id="addCal" type="button" hidden>Add to calendar</button>
                 <button class="ghost-btn" id="editRsvp" type="button" hidden>Change my reply</button>
               </div>
               <p class="demo-note" id="dlRsvpMsg" role="status" aria-live="polite"></p>
@@ -3246,6 +3247,8 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
       ? 'You can change your reply until 1 June 2027.'
       : 'Replies closed on 1 June 2027. To make a change, please contact Brina & Hugh.';
     document.getElementById('editRsvp').hidden = !open;
+    // nobody who has just sent their regrets wants to be asked to save the date
+    document.getElementById('addCal').hidden = !anyone;
     var dl = document.getElementById('dlRsvp');
     dl.hidden = !window.HTMLCanvasElement;
     dl.textContent = window.matchMedia('(max-width: 700px)').matches
@@ -3722,6 +3725,29 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
   document.getElementById('cardPopClose').addEventListener('click', closePop);
   pop.addEventListener('click', function (e) { if (e.target === pop) closePop(); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !pop.hidden) closePop(); });
+
+  // One button, two destinations. An Apple device gets the .ics file, which
+  // Safari hands straight to Calendar; everything else gets Google Calendar
+  // already filled in, which is a cleaner hand-off than downloading a file on
+  // Android. The .ics is also the fallback for anything not recognised, being
+  // the format every calendar understands.
+  //
+  // iPadOS reports itself as a Mac, which is no problem here: either way it is
+  // an Apple device and either way it wants the file.
+  var APPLE = /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent || '');
+  var WHEN = '20270731T133000Z/20270801T000000Z';
+  var WHERE = 'Wrights Anglers Rest, Knockmaroon Hill, Strawberry Beds, Chapelizod, Dublin 20, D20 AH96';
+  var WHAT = 'Guests arrive 2:30 pm, ceremony at 3 pm.' + String.fromCharCode(10, 10)
+    + 'Dress code: Garden party semi-formal attire.' + String.fromCharCode(10, 10)
+    + 'https://brdeweese.github.io/Brina_And_Hugh-Wedding_Website/';
+  document.getElementById('addCal').addEventListener('click', function () {
+    if (APPLE) { location.href = 'wedding.ics'; return; }
+    window.open('https://calendar.google.com/calendar/render?action=TEMPLATE'
+      + '&text=' + encodeURIComponent('Brina & Hugh\u2019s Wedding')
+      + '&dates=' + WHEN
+      + '&location=' + encodeURIComponent(WHERE)
+      + '&details=' + encodeURIComponent(WHAT), '_blank', 'noopener');
+  });
 
   document.getElementById('dlRsvp').addEventListener('click', function () {
     var m = document.getElementById('dlRsvpMsg');
