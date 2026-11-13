@@ -20,13 +20,20 @@
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Brina &amp; Hugh’s Wedding Invitation, written in script among watercolour wildflowers">
 <meta name="twitter:card" content="summary_large_image">
-<!-- A single bee on a transparent ground. A tab draws this at 16px, and at that
-     size a bundle of flowers turns to a smear, so one bold motif is the only
-     thing that survives. Cut from artwork of the bees on their own rather than
-     from the sprig, which left petal and stem behind it. Checked at 16, 32 and
-     64 rather than judged at full size, where anything looks fine. Of the two
-     bees it is the one facing right, so it flies into the tab title beside it. -->
-<link rel="icon" href="img/favicon.png" type="image/png" sizes="any">
+<!-- A single bee on a transparent ground, facing right so it flies into the tab
+     title beside it. A tab draws the icon at 16px, where a bundle of flowers is
+     only a smear, so one bold motif is all that survives.
+
+     Four files rather than one. Left to shrink a single large image the browser
+     uses its own resampler and the stripes run together; each of these is built
+     at the size it will be drawn, by halving in steps and then sharpening, which
+     keeps the black bands apart. The crop is the bee's exact ink bounds, so none
+     of those few pixels is spent on empty margin. The 180 is for a home screen,
+     and is left unsharpened, being large enough not to need it. -->
+<link rel="icon" href="img/favicon-16.png" type="image/png" sizes="16x16">
+<link rel="icon" href="img/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="img/favicon-48.png" type="image/png" sizes="48x48">
+<link rel="icon" href="img/favicon.png" type="image/png" sizes="180x180">
 <link rel="apple-touch-icon" href="img/favicon.png">
 <style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
 <title>Brina &amp; Hugh</title>
