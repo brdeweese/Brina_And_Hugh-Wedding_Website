@@ -13,7 +13,14 @@
  *
  * Script properties (Project Settings > Script Properties):
  *   ADMIN_TOKEN   required. The passcode that opens the guest list on the site.
- *   NOTIFY_EMAIL  optional. You get an email every time somebody replies.
+ *   NOTIFY_EMAIL  optional. You get an email every time somebody replies, for
+ *                 a first reply and for a change to one alike. Without it no
+ *                 alerts are sent and nothing else is affected.
+ *   NOTIFY_CC     optional. Copied on the same alert. Both take a comma
+ *                 separated list if more than one person should get them.
+ *
+ * The addresses live here rather than in the code because this repository is
+ * public. Anything written into the file is readable by anyone, and harvested.
  *
  * Adding a guest also files their invitation in a Drive folder called
  * "Wedding Website Invites". That needs permission to see and create files in
@@ -259,19 +266,42 @@ function summaryLine(p) {
 }
 
 function notify(record, changed) {
-  var to = PropertiesService.getScriptProperties().getProperty('NOTIFY_EMAIL');
+  var props = PropertiesService.getScriptProperties();
+  var to = props.getProperty('NOTIFY_EMAIL');
+  var cc = props.getProperty('NOTIFY_CC');
   if (!to) return;
   try {
-    MailApp.sendEmail({
+    var mail = {
       to: to,
       subject: (changed ? 'RSVP changed: ' : 'New RSVP: ') + record.invited_as,
       body: record.summary +
         (record.songs ? '\n\nSongs:\n' + record.songs : '') +
         (record.comments ? '\n\nNote:\n' + record.comments : ''),
-    });
+    };
+    if (cc) mail.cc = cc;
+    MailApp.sendEmail(mail);
   } catch (e) {
-    // a failed email must never lose the reply itself
+    // a failed email must never lose the reply itself, and the daily send quota
+    // is a real limit worth failing quietly against
   }
+}
+
+/**
+ * Run this from the editor to see whether the alerts are set up. It reports
+ * only whether each property has a value and how many addresses it holds,
+ * never the addresses themselves, so the log stays safe to show anyone.
+ */
+function checkNotify() {
+  var props = PropertiesService.getScriptProperties();
+  function count(name) {
+    var v = props.getProperty(name);
+    if (!v) return 'not set';
+    return 'set, ' + v.split(',').filter(function (x) { return x.trim(); }).length + ' address(es)';
+  }
+  Logger.log('NOTIFY_EMAIL: ' + count('NOTIFY_EMAIL'));
+  Logger.log('NOTIFY_CC:    ' + count('NOTIFY_CC'));
+  Logger.log('Alerts are sent on a first reply and on every change to one.');
+  Logger.log('Emails left to send today: ' + MailApp.getRemainingDailyQuota());
 }
 
 // ---------------------------------------------------------------------------
