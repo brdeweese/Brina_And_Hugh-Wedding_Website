@@ -646,6 +646,34 @@ footer .foot-place { font-style: italic; font-size: clamp(1.1rem, 2.6vw, 1.3rem)
 .rsvp-card .summary li { border-top-color: rgba(86,105,79,.25); }
 @media (max-width: 600px) { .rsvp-card { padding-top: 1.6rem; } }
 
+/* The finished card, held up full screen on a phone. The hint fades after a
+   moment so that a screenshot taken a second later is the card and little
+   else; the close button stays, being the only way back. */
+.card-pop {
+  position: fixed; inset: 0; z-index: 80; display: flex; align-items: center; justify-content: center;
+  padding: calc(8px + env(safe-area-inset-top, 0px)) 8px calc(8px + env(safe-area-inset-bottom, 0px));
+  background: rgba(18,26,20,.92); animation: popIn .25s ease-out both;
+}
+.card-pop[hidden] { display: none; }
+@keyframes popIn { from { opacity: 0; } to { opacity: 1; } }
+.card-pop img {
+  max-width: 100%; max-height: 100%; width: auto; height: auto;
+  object-fit: contain; border-radius: 2px; box-shadow: 0 18px 50px rgba(0,0,0,.5);
+}
+.card-pop-hint {
+  position: absolute; left: 50%; bottom: calc(14px + env(safe-area-inset-bottom, 0px)); translate: -50% 0;
+  margin: 0; width: min(30rem, calc(100% - 32px)); text-align: center;
+  font: 500 .95rem var(--f-body); line-height: 1.4; color: #F3EBDD;
+  background: rgba(18,26,20,.72); border-radius: 999px; padding: .5rem 1rem;
+  transition: opacity .8s ease;
+}
+.card-pop-hint.gone { opacity: 0; }
+.card-pop-close {
+  position: absolute; top: calc(10px + env(safe-area-inset-top, 0px)); right: calc(10px + env(safe-area-inset-right, 0px));
+  width: 40px; height: 40px; border-radius: 999px; border: 1px solid rgba(243,235,221,.45);
+  background: rgba(18,26,20,.55); color: #F3EBDD; font-size: 1.5rem; line-height: 1; cursor: pointer;
+}
+
 /* admin extras */
 .reply-meta { font-style: italic; color: var(--sage) !important; font-size: .95rem !important; }
 .badge { display: inline-block; margin-left: .5rem; padding: .05rem .55rem; border-radius: 999px; font: 500 .75rem var(--f-caps); letter-spacing: .14em; vertical-align: middle; }
@@ -2328,6 +2356,15 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
     </script>
   </footer>
 </div>
+<!-- On a phone the card is shown rather than downloaded: a file would land in
+     Files or Downloads, not the camera roll. Held up full screen it can be
+     screenshotted, or pressed and held to save straight to Photos. -->
+<div class="card-pop" id="cardPop" hidden role="dialog" aria-modal="true" aria-label="Your RSVP card">
+  <button class="card-pop-close" id="cardPopClose" type="button" aria-label="Close">&times;</button>
+  <img id="cardPopImg" alt="Your RSVP card">
+  <p class="card-pop-hint" id="cardPopHint">Press and hold the card to save it to your photos, or take a screenshot.</p>
+</div>
+
 <script>
 
 (function () {
@@ -3209,7 +3246,11 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
       ? 'You can change your reply until 1 June 2027.'
       : 'Replies closed on 1 June 2027. To make a change, please contact Brina & Hugh.';
     document.getElementById('editRsvp').hidden = !open;
-    document.getElementById('dlRsvp').hidden = !window.HTMLCanvasElement;
+    var dl = document.getElementById('dlRsvp');
+    dl.hidden = !window.HTMLCanvasElement;
+    dl.textContent = window.matchMedia('(max-width: 700px)').matches
+      ? 'Show my RSVP card'
+      : 'Download my RSVP card';
     document.getElementById('dlRsvpMsg').textContent = '';
     formWrap.hidden = true; thanks.hidden = false;
     fitCard();
@@ -3652,12 +3693,43 @@ footer .foot-count .cd-num { font-size: 1.7rem; color: #173D24; }
       });
   }
 
+  // A phone is shown the card instead of being sent a file. A download there
+  // goes to Files on iOS or Downloads on Android, neither of which is the
+  // camera roll, so the guest is left with a file they cannot easily find.
+  var phone = window.matchMedia('(max-width: 700px)');
+  var pop = document.getElementById('cardPop');
+  var popImg = document.getElementById('cardPopImg');
+  var popHint = document.getElementById('cardPopHint');
+  var popUrl = null, hintTimer = null;
+  function closePop() {
+    pop.hidden = true;
+    clearTimeout(hintTimer);
+    // the object URL is kept while the card is up, since the image is still
+    // using it, and only let go once it is down
+    if (popUrl) { URL.revokeObjectURL(popUrl); popUrl = null; }
+    document.documentElement.style.overflow = '';
+  }
+  function showPop(blob) {
+    if (popUrl) URL.revokeObjectURL(popUrl);
+    popUrl = URL.createObjectURL(blob);
+    popImg.src = popUrl;
+    popHint.classList.remove('gone');
+    pop.hidden = false;
+    document.documentElement.style.overflow = 'hidden';
+    clearTimeout(hintTimer);
+    hintTimer = setTimeout(function () { popHint.classList.add('gone'); }, 4500);
+  }
+  document.getElementById('cardPopClose').addEventListener('click', closePop);
+  pop.addEventListener('click', function (e) { if (e.target === pop) closePop(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !pop.hidden) closePop(); });
+
   document.getElementById('dlRsvp').addEventListener('click', function () {
     var m = document.getElementById('dlRsvpMsg');
     if (!myReply) return;
-    m.textContent = 'Preparing your RSVP card…';
+    m.textContent = phone.matches ? 'Making your card…' : 'Preparing your RSVP card…';
     drawRsvpCard(myReply).then(function (blob) {
       if (!blob) throw { code: 'bad_request' };
+      if (phone.matches) { showPop(blob); m.textContent = ''; return; }
       var who = current.party.filter(function (p) { return p.fixed; }).map(function (p) { return first(p.name); }).join('-');
       saveBlob(blob, 'RSVP-' + (who || 'guest') + '-Brina-and-Hugh.jpg');
       m.textContent = 'Your RSVP card is in your downloads.';
